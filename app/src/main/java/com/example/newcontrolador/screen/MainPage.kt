@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.BluetoothConnectionManager
-import com.example.newcontrolador.connection.WiFiConnection
 import com.example.newcontrolador.ui.theme.*
 
 @Composable
@@ -85,8 +84,7 @@ fun DeviceItem(
 fun TopBar(
     takePermission: ActivityResultLauncher<String>,
     bluetoothAdapter: BluetoothAdapter,
-    devicesChange: (Boolean) -> Unit,
-    ipChange: (String) -> Unit
+    devicesChange: (Boolean) -> Unit
 ) {
     var bluetooth by remember { mutableStateOf(true) }
     var ip by remember { mutableStateOf("") }
@@ -182,7 +180,7 @@ fun TopBar(
                             IconButton(
                                 onClick = {
                                     if (ip.isNotEmpty()) {
-                                        ipChange(ip)
+
                                     }
                                 }
                             ) {
@@ -293,12 +291,10 @@ fun Indicators(pressedButton: String) {
 
 @Composable
 fun GridButton(
-    manager: BluetoothConnectionManager,
-    ip: String
+    manager: BluetoothConnectionManager
 ) {
     var directionsPressed by remember { mutableStateOf(setOf<String>()) }
     val context = LocalContext.current
-    val connection = WiFiConnection(ip)
 
     Row(
         Modifier.fillMaxSize(),
@@ -328,29 +324,11 @@ fun GridButton(
                         },
                         context
                     )
-
-                    //enviar comando al dispositivo por Wifi
-                    connection.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
-
-                            else -> ' '
-                        }
-                    )
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
                     manager.sendChar('S', context)
-
-                    connection.sendChar('S')
                 }
             )
             Spacer(Modifier.padding(15.dp))
@@ -378,28 +356,12 @@ fun GridButton(
                         context
                     )
 
-                    //enviar comando al dispositivo por Wifi
-                    connection.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
-
-                            else -> ' '
-                        }
-                    )
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
                     manager.sendChar('S', context)
 
-                    connection.sendChar('S')
                 }
             )
         }
@@ -430,28 +392,12 @@ fun GridButton(
                         context
                     )
 
-                    //enviar comando al dispositivo por Wifi
-                    connection.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
-
-                            else -> ' '
-                        }
-                    )
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
                     manager.sendChar('S', context)
 
-                    connection.sendChar('S')
                 }
             )
             Spacer(Modifier.padding(15.dp))
@@ -478,29 +424,12 @@ fun GridButton(
                         },
                         context
                     )
-
-                    //enviar comando al dispositivo por Wifi
-                    connection.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
-
-                            else -> ' '
-                        }
-                    )
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
                     manager.sendChar('S', context)
 
-                    connection.sendChar('S')
                 }
             )
         }
@@ -513,7 +442,6 @@ fun MainScreen(
     bluetoothAdapter: BluetoothAdapter
 ) {
     var devices by remember { mutableStateOf(false) }
-    var ip by remember { mutableStateOf("") }
 
     val bluetoothConnectionManager = remember { BluetoothConnectionManager() }
     val context = LocalContext.current
@@ -523,8 +451,7 @@ fun MainScreen(
             TopBar(
                 takePermission,
                 bluetoothAdapter,
-                devicesChange = { devices = !devices },
-                ipChange = { ip = it }
+                devicesChange = { devices = !devices }
             )
         },
         containerColor = Black
@@ -565,8 +492,7 @@ fun MainScreen(
                 contentAlignment = Alignment.Center
             ) {
                 GridButton(
-                    manager = bluetoothConnectionManager,
-                    ip = ip
+                    manager = bluetoothConnectionManager
                 )
 
                 if (devices) {
@@ -574,12 +500,6 @@ fun MainScreen(
                         pairedDevices = bluetoothAdapter.bondedDevices,
                         onDeviceClick = onDeviceClick  // ✅ Ya no da "The expression is unused"
                     )
-                }
-
-                if (WiFiConnection(ip).isReachable()) {
-                    Toast.makeText(context, "Conectado a $ip", Toast.LENGTH_SHORT).show()
-                }else {
-                    Toast.makeText(context, "No se pudo conectar a $ip", Toast.LENGTH_SHORT).show()
                 }
             }
         }

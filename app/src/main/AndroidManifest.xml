@@ -19,9 +19,6 @@
     <!-- Declarar el uso de Bluetooth -->
     <uses-feature android:name="android.hardware.bluetooth" android:required="true"/>
 
-    <!-- Declarar el uso de Wifi -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
