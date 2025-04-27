@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.BluetoothConnectionManager
+import com.example.newcontrolador.connection.WiFiConnectionManager
 import com.example.newcontrolador.ui.theme.*
 
 @Composable
@@ -84,7 +85,8 @@ fun DeviceItem(
 fun TopBar(
     takePermission: ActivityResultLauncher<String>,
     bluetoothAdapter: BluetoothAdapter,
-    devicesChange: (Boolean) -> Unit
+    devicesChange: (Boolean) -> Unit,
+    wifiManager: WiFiConnectionManager
 ) {
     var bluetooth by remember { mutableStateOf(true) }
     var ip by remember { mutableStateOf("") }
@@ -179,8 +181,10 @@ fun TopBar(
                         trailingIcon = {
                             IconButton(
                                 onClick = {
-                                    if (ip.isNotEmpty()) {
-
+                                    if (wifiManager.connectToIp(ip, context)) {
+                                        Toast.makeText(context, "Conectado a $ip", Toast.LENGTH_SHORT).show()
+                                    }else {
+                                        Toast.makeText(context, "No se pudo conectar a $ip", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             ) {
@@ -193,7 +197,13 @@ fun TopBar(
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = DarkYellow,
-                            unfocusedContainerColor = DarkYellow
+                            unfocusedContainerColor = DarkYellow,
+                            focusedPlaceholderColor = Black,
+                            unfocusedPlaceholderColor = Black,
+                            focusedTrailingIconColor = Black,
+                            unfocusedTrailingIconColor = Black,
+                            focusedTextColor = Black,
+                            unfocusedTextColor = Black,
                         )
                     )
                 }
@@ -291,7 +301,8 @@ fun Indicators(pressedButton: String) {
 
 @Composable
 fun GridButton(
-    manager: BluetoothConnectionManager
+    managerBluetooth: BluetoothConnectionManager,
+    managerWiFi: WiFiConnectionManager
 ) {
     var directionsPressed by remember { mutableStateOf(setOf<String>()) }
     val context = LocalContext.current
@@ -309,7 +320,24 @@ fun GridButton(
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     //enviar comando al dispositivo por Bluetooth
-                    manager.sendChar(
+                    managerBluetooth.sendChar(
+                        when {
+                            directionsPressed.contains("up") -> 'F'
+                            directionsPressed.contains("down") -> 'B'
+                            directionsPressed.contains("left") -> 'L'
+                            directionsPressed.contains("right") -> 'R'
+                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
+                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
+                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
+                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
+
+                            else -> ' '
+                        },
+                        context
+                    )
+
+                    //enviar comando al dispositivo por WiFi
+                    managerWiFi.sendChar(
                         when {
                             directionsPressed.contains("up") -> 'F'
                             directionsPressed.contains("down") -> 'B'
@@ -328,7 +356,9 @@ fun GridButton(
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    manager.sendChar('S', context)
+                    managerBluetooth.sendChar('S', context)
+
+                    managerWiFi.sendChar('S', context)
                 }
             )
             Spacer(Modifier.padding(15.dp))
@@ -340,7 +370,7 @@ fun GridButton(
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     //enviar comando al dispositivo por Bluetooth
-                    manager.sendChar(
+                    managerBluetooth.sendChar(
                         when {
                             directionsPressed.contains("up") -> 'F'
                             directionsPressed.contains("down") -> 'B'
@@ -356,12 +386,29 @@ fun GridButton(
                         context
                     )
 
+                    //enviar comando al dispositivo por WiFi
+                    managerWiFi.sendChar(
+                        when {
+                            directionsPressed.contains("up") -> 'F'
+                            directionsPressed.contains("down") -> 'B'
+                            directionsPressed.contains("left") -> 'L'
+                            directionsPressed.contains("right") -> 'R'
+                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
+                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
+                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
+                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
+
+                            else -> ' '
+                        },
+                        context
+                    )
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    manager.sendChar('S', context)
+                    managerBluetooth.sendChar('S', context)
 
+                    managerWiFi.sendChar('S', context)
                 }
             )
         }
@@ -376,7 +423,7 @@ fun GridButton(
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     //enviar comando al dispositivo por Bluetooth
-                    manager.sendChar(
+                    managerBluetooth.sendChar(
                         when {
                             directionsPressed.contains("up") -> 'F'
                             directionsPressed.contains("down") -> 'B'
@@ -392,12 +439,29 @@ fun GridButton(
                         context
                     )
 
+                    //enviar comando al dispositivo por WiFi
+                    managerWiFi.sendChar(
+                        when {
+                            directionsPressed.contains("up") -> 'F'
+                            directionsPressed.contains("down") -> 'B'
+                            directionsPressed.contains("left") -> 'L'
+                            directionsPressed.contains("right") -> 'R'
+                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
+                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
+                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
+                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
+
+                            else -> ' '
+                        },
+                        context
+                    )
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    manager.sendChar('S', context)
+                    managerBluetooth.sendChar('S', context)
 
+                    managerWiFi.sendChar('S', context)
                 }
             )
             Spacer(Modifier.padding(15.dp))
@@ -409,7 +473,24 @@ fun GridButton(
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     //enviar comando al dispositivo por Bluetooth
-                    manager.sendChar(
+                    managerBluetooth.sendChar(
+                        when {
+                            directionsPressed.contains("up") -> 'F'
+                            directionsPressed.contains("down") -> 'B'
+                            directionsPressed.contains("left") -> 'L'
+                            directionsPressed.contains("right") -> 'R'
+                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
+                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
+                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
+                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
+
+                            else -> ' '
+                        },
+                        context
+                    )
+
+                    //enviar comando al dispositivo por WiFi
+                    managerWiFi.sendChar(
                         when {
                             directionsPressed.contains("up") -> 'F'
                             directionsPressed.contains("down") -> 'B'
@@ -428,8 +509,9 @@ fun GridButton(
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    manager.sendChar('S', context)
+                    managerBluetooth.sendChar('S', context)
 
+                    managerWiFi.sendChar('S', context)
                 }
             )
         }
@@ -444,6 +526,8 @@ fun MainScreen(
     var devices by remember { mutableStateOf(false) }
 
     val bluetoothConnectionManager = remember { BluetoothConnectionManager() }
+    val wifiManager = remember { WiFiConnectionManager() }
+
     val context = LocalContext.current
 
     Scaffold(
@@ -451,7 +535,8 @@ fun MainScreen(
             TopBar(
                 takePermission,
                 bluetoothAdapter,
-                devicesChange = { devices = !devices }
+                devicesChange = { devices = !devices },
+                wifiManager
             )
         },
         containerColor = Black
@@ -492,7 +577,8 @@ fun MainScreen(
                 contentAlignment = Alignment.Center
             ) {
                 GridButton(
-                    manager = bluetoothConnectionManager
+                    managerBluetooth = bluetoothConnectionManager,
+                    managerWiFi = wifiManager
                 )
 
                 if (devices) {
