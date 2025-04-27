@@ -3,22 +3,54 @@
 package com.example.newcontrolador.screen
 
 import android.Manifest
-import android.bluetooth.*
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.*
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -29,7 +61,12 @@ import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.BluetoothConnectionManager
 import com.example.newcontrolador.connection.WiFiConnectionManager
-import com.example.newcontrolador.ui.theme.*
+import com.example.newcontrolador.ui.theme.Black
+import com.example.newcontrolador.ui.theme.Blue
+import com.example.newcontrolador.ui.theme.DarkGreen
+import com.example.newcontrolador.ui.theme.DarkYellow
+import com.example.newcontrolador.ui.theme.LightGreen
+import com.example.newcontrolador.ui.theme.LightYellow
 
 @Composable
 fun BluetoothDevices(
@@ -67,7 +104,8 @@ fun DeviceItem(
             val context = LocalContext.current
             val deviceName = if (ActivityCompat.checkSelfPermission(
                     context, Manifest.permission.BLUETOOTH_CONNECT
-                ) == PackageManager.PERMISSION_GRANTED) {
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 device.name ?: "Dispositivo desconocido"
             } else {
                 "Permiso requerido"
@@ -79,8 +117,8 @@ fun DeviceItem(
     }
 }
 /**
-    ambas funciones de arriba solo se llama se si esta usando bluetooth
-**/
+ambas funciones de arriba solo se llama se si esta usando bluetooth
+ **/
 @Composable
 fun TopBar(
     takePermission: ActivityResultLauncher<String>,
@@ -121,13 +159,13 @@ fun TopBar(
                     uncheckedIconColor = Black
                 ),
                 thumbContent = {
-                    if (bluetooth){
+                    if (bluetooth) {
                         Icon(
                             painter = painterResource(R.drawable.group_11),
                             contentDescription = null,
                             modifier = Modifier.size(20.dp)
                         )
-                    }else {
+                    } else {
                         Icon(
                             painter = painterResource(R.drawable.group_10),
                             contentDescription = null,
@@ -157,8 +195,12 @@ fun TopBar(
                             }
 
                             if (pairedDevices.isEmpty()) {
-                                Toast.makeText(context, "No se encontraron dispositivos", Toast.LENGTH_SHORT).show()
-                            }else {
+                                Toast.makeText(
+                                    context,
+                                    "No se encontraron dispositivos",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
                                 devicesChange(true)
                             }
                         },
@@ -182,9 +224,17 @@ fun TopBar(
                             IconButton(
                                 onClick = {
                                     if (wifiManager.connectToIp(ip, context)) {
-                                        Toast.makeText(context, "Conectado a $ip", Toast.LENGTH_SHORT).show()
-                                    }else {
-                                        Toast.makeText(context, "No se pudo conectar a $ip", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Conectado a $ip",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "No se pudo conectar a $ip",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                                 }
                             ) {
@@ -231,7 +281,7 @@ fun Button(
 
     Box(
         modifier = Modifier
-            .size(70.dp)
+            .size(90.dp)
             .background(
                 DarkGreen,
                 shape = CircleShape
@@ -250,7 +300,7 @@ fun Button(
         Icon(
             imageVector = arrowDirection,
             contentDescription = null,
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(60.dp),
             tint = Black
         )
     }
@@ -361,7 +411,7 @@ fun GridButton(
                     managerWiFi.sendChar('S', context)
                 }
             )
-            Spacer(Modifier.padding(15.dp))
+            Spacer(Modifier.padding(25.dp))
 
             Button(
                 direction = "down",
@@ -464,7 +514,7 @@ fun GridButton(
                     managerWiFi.sendChar('S', context)
                 }
             )
-            Spacer(Modifier.padding(15.dp))
+            Spacer(Modifier.padding(25.dp))
 
             Button(
                 direction = "right",
@@ -558,13 +608,25 @@ fun MainScreen(
                         if (
                             bluetoothConnectionManager.connectToDevice(device, context)
                         ) {
-                            Toast.makeText(context, "Conectado a ${device.name}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Conectado a ${device.name}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             devices = false // ✅ Cierra la lista después de la conexión
                         } else {
-                            Toast.makeText(context, "No se pudo conectar a ${device.name}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "No se pudo conectar a ${device.name}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     } else {
-                        Toast.makeText(context, "Permiso BLUETOOTH_CONNECT no concedido", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Permiso BLUETOOTH_CONNECT no concedido",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

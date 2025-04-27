@@ -20,7 +20,11 @@ class BluetoothConnectionManager {
 
         // Verificar permisos en Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             Toast.makeText(context, "Permiso BLUETOOTH_CONNECT denegado", Toast.LENGTH_SHORT).show()
             return false
         }

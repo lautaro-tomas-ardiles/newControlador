@@ -33,7 +33,11 @@ class WiFiConnectionManager {
                 true
             } else {
                 Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(context, "La ESP8266 no respondió (código: $responseCode)", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "La ESP8266 no respondió (código: $responseCode)",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 false
             }
@@ -44,10 +48,6 @@ class WiFiConnectionManager {
             }
             false
         }
-    }
-
-    fun isConnected(): Boolean {
-        return espIp != null
     }
 
     fun sendChar(char: Char, context: Context) {
@@ -62,21 +62,22 @@ class WiFiConnectionManager {
             try {
                 val connection = URL(url).openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
-                connection.connectTimeout = 3000
-                connection.readTimeout = 3000
+                connection.connectTimeout = 300
+                connection.readTimeout = 300
                 val responseCode = connection.responseCode
                 connection.disconnect()
 
                 if (responseCode != 200) {
                     Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(context, "Error al enviar: código $responseCode", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Error al enviar: error $responseCode",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } catch (e: IOException) {
                 e.printStackTrace()
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(context, "Fallo la conexión WiFi", Toast.LENGTH_SHORT).show()
-                }
             }
         }.start()
     }

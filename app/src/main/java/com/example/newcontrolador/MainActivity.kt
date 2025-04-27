@@ -45,7 +45,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            NewControladorTheme {
+            NewControladorTheme (
+                darkTheme = true,
+            ) {
                 MainScreen(takePermission, bluetoothAdapter)
             }
         }
