@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -55,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -70,7 +72,7 @@ import com.example.newcontrolador.ui.theme.LightYellow
 
 @Composable
 fun BluetoothDevices(
-    pairedDevices: Set<BluetoothDevice>, // ✅ Usar Set en vez de MutableSet
+    pairedDevices: Set<BluetoothDevice>, // Usar Set en vez de MutableSet
     onDeviceClick: (BluetoothDevice) -> Unit
 ) {
     LazyColumn(
@@ -81,7 +83,7 @@ fun BluetoothDevices(
         items(pairedDevices.toList()) { device ->
             DeviceItem(
                 device = device,
-                onClick = { onDeviceClick(device) } // ✅ Se usa correctamente
+                onClick = { onDeviceClick(device) } // Se usa correctamente
             )
         }
     }
@@ -96,7 +98,7 @@ fun DeviceItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onClick() }, // ✅ Se asegura que el clic funcione
+            .clickable { onClick() }, // Se asegura que el clic funcione
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         colors = CardDefaults.cardColors(containerColor = Blue)
     ) {
@@ -130,11 +132,10 @@ fun TopBar(
     var ip by remember { mutableStateOf("") }
 
     val context = LocalContext.current
+    val permission = Manifest.permission.BLUETOOTH_CONNECT
     val pairedDevices =
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) == PackageManager.PERMISSION_GRANTED
+        if (
+            ActivityCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
         ) {
             bluetoothAdapter.bondedDevices
         } else {
@@ -284,7 +285,7 @@ fun Button(
             .size(90.dp)
             .background(
                 DarkGreen,
-                shape = CircleShape
+                shape = RoundedCornerShape(35)
             )
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -349,6 +350,20 @@ fun Indicators(pressedButton: String) {
     }
 }
 
+fun getDirectionChar(directionsPressed: Set<String>): Char {
+    return when {
+        directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
+        directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
+        directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
+        directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
+        directionsPressed.contains("up") -> 'F'
+        directionsPressed.contains("down") -> 'B'
+        directionsPressed.contains("left") -> 'L'
+        directionsPressed.contains("right") -> 'R'
+        else -> ' '
+    }
+}
+
 @Composable
 fun GridButton(
     managerBluetooth: BluetoothConnectionManager,
@@ -369,39 +384,11 @@ fun GridButton(
                     //lista de teclas presionadas
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-                    //enviar comando al dispositivo por Bluetooth
-                    managerBluetooth.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
+                    val directionChar = getDirectionChar(directionsPressed)
 
-                            else -> ' '
-                        },
-                        context
-                    )
+                    managerBluetooth.sendChar(directionChar, context)
 
-                    //enviar comando al dispositivo por WiFi
-                    managerWiFi.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
-
-                            else -> ' '
-                        },
-                        context
-                    )
+                    managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
@@ -419,39 +406,11 @@ fun GridButton(
                     //lista de teclas presionadas
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-                    //enviar comando al dispositivo por Bluetooth
-                    managerBluetooth.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
+                    val directionChar = getDirectionChar(directionsPressed)
 
-                            else -> ' '
-                        },
-                        context
-                    )
+                    managerBluetooth.sendChar(directionChar, context)
 
-                    //enviar comando al dispositivo por WiFi
-                    managerWiFi.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
-
-                            else -> ' '
-                        },
-                        context
-                    )
+                    managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
@@ -472,39 +431,11 @@ fun GridButton(
                     //lista de teclas presionadas
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-                    //enviar comando al dispositivo por Bluetooth
-                    managerBluetooth.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
+                    val directionChar = getDirectionChar(directionsPressed)
 
-                            else -> ' '
-                        },
-                        context
-                    )
+                    managerBluetooth.sendChar(directionChar, context)
 
-                    //enviar comando al dispositivo por WiFi
-                    managerWiFi.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
-
-                            else -> ' '
-                        },
-                        context
-                    )
+                    managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
@@ -522,39 +453,11 @@ fun GridButton(
                     //lista de teclas presionadas
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-                    //enviar comando al dispositivo por Bluetooth
-                    managerBluetooth.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
+                    val directionChar = getDirectionChar(directionsPressed)
 
-                            else -> ' '
-                        },
-                        context
-                    )
+                    managerBluetooth.sendChar(directionChar, context)
 
-                    //enviar comando al dispositivo por WiFi
-                    managerWiFi.sendChar(
-                        when {
-                            directionsPressed.contains("up") -> 'F'
-                            directionsPressed.contains("down") -> 'B'
-                            directionsPressed.contains("left") -> 'L'
-                            directionsPressed.contains("right") -> 'R'
-                            directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-                            directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-                            directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-                            directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
-
-                            else -> ' '
-                        },
-                        context
-                    )
+                    managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
@@ -646,7 +549,7 @@ fun MainScreen(
                 if (devices) {
                     BluetoothDevices(
                         pairedDevices = bluetoothAdapter.bondedDevices,
-                        onDeviceClick = onDeviceClick  // ✅ Ya no da "The expression is unused"
+                        onDeviceClick = onDeviceClick
                     )
                 }
             }

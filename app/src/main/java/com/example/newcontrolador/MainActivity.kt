@@ -43,6 +43,11 @@ class MainActivity : ComponentActivity() {
         }
 
         super.onCreate(savedInstanceState)
+        window.decorView.systemUiVisibility = (
+                android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                        android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                        android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
+                )
         enableEdgeToEdge()
         setContent {
             NewControladorTheme (
