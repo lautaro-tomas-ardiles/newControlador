@@ -125,7 +125,7 @@ fun GridButton(
             Button(
                 direction = "down",
                 onPress = {
-                    directionsPressed.add(it)
+                    directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     val directionChar = getDirectionChar(directionsPressed)
 
@@ -134,7 +134,7 @@ fun GridButton(
                     managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
-                    directionsPressed.remove(it)
+                    directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
                     managerBluetooth.sendChar('S', context)
 
@@ -149,7 +149,8 @@ fun GridButton(
             Button(
                 direction = "left",
                 onPress = {
-                    directionsPressed.add(it)
+
+                    directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     val directionChar = getDirectionChar(directionsPressed)
 
@@ -158,7 +159,7 @@ fun GridButton(
                     managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
-                    directionsPressed.remove(it)
+                    directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
                     managerBluetooth.sendChar('S', context)
 
@@ -170,7 +171,7 @@ fun GridButton(
             Button(
                 direction = "right",
                 onPress = {
-                    directionsPressed.add(it)
+                    directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     val directionChar = getDirectionChar(directionsPressed)
 
@@ -179,7 +180,7 @@ fun GridButton(
                     managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
-                    directionsPressed.remove(it)
+                    directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
                     managerBluetooth.sendChar('S', context)
 
@@ -227,7 +228,7 @@ fun MainScreen(
                     managerWiFi = wifiManager
                 )
 
-                if (devices && bluetooth) {
+                if (devices) {
                     val hasPermission =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             ActivityCompat.checkSelfPermission(
@@ -258,6 +259,7 @@ fun MainScreen(
                                         "No se pudo conectar a ${it.name}",
                                         Toast.LENGTH_SHORT
                                     ).show()
+                                    devices = false
                                 }
                             } catch (e: Exception) {
                                 e.printStackTrace()
