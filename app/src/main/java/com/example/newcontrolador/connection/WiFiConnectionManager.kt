@@ -13,11 +13,11 @@ class WiFiConnectionManager {
 
     fun connectToIp(ip: String, context: Context): Boolean {
         // Validar formato básico de IP
-        if (!ip.matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}\$"))) {
+        if (!ip.matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$"))) {
             return false
         }
 
-        val url = "http://$ip/" // Puedes cambiar "/" por "/ping" si tu ESP lo soporta
+        val url = "http://$ip/" // Puedes cambiar "/" por "/ping"
 
         return try {
             val connection = URL(url).openConnection() as HttpURLConnection
