@@ -93,7 +93,7 @@ fun Button(
 
     Box(
         modifier = Modifier
-            .size(90.dp)
+            .size(100.dp)
             .background(
                 color = DarkGreen,
                 shape = RoundedCornerShape(35)
@@ -112,7 +112,7 @@ fun Button(
         Icon(
             imageVector = arrowDirection,
             contentDescription = null,
-            modifier = Modifier.size(60.dp),
+            modifier = Modifier.size(70.dp),
             tint = Black
         )
     }
@@ -178,7 +178,7 @@ fun BluetoothSwitch(
 ) {
     Switch(
         checked = bluetooth,
-        onCheckedChange = { onBluetoothChange },
+        onCheckedChange = { onBluetoothChange(it) },
         colors = SwitchDefaults.colors(
             checkedBorderColor = DarkGreen,
             checkedTrackColor = LightGreen,
