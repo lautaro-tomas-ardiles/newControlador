@@ -91,7 +91,7 @@ fun GridButton(
     managerBluetooth: BluetoothConnectionManager,
     managerWiFi: WiFiConnectionManager
 ) {
-    var directionsPressed by remember { mutableStateOf(setOf<String>()) }
+    var directionsPressed by remember { mutableStateOf(mutableSetOf<String>()) }
     val context = LocalContext.current
 
     Row(
@@ -104,7 +104,7 @@ fun GridButton(
                 direction = "up",
                 onPress = {
                     //lista de teclas presionadas
-                    directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+                    directionsPressed.add(it)
 
                     val directionChar = getDirectionChar(directionsPressed)
 
@@ -113,7 +113,7 @@ fun GridButton(
                     managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
-                    directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
+                    directionsPressed.remove(it)
 
                     managerBluetooth.sendChar('S', context)
 
@@ -149,6 +149,7 @@ fun GridButton(
             Button(
                 direction = "left",
                 onPress = {
+
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     val directionChar = getDirectionChar(directionsPressed)
