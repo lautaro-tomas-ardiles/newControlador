@@ -179,6 +179,7 @@ fun GridButton(
                     managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
+
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
                     managerBluetooth.sendChar('S', context)
