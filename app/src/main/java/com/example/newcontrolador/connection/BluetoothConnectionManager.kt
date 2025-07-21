@@ -12,10 +12,10 @@ import java.io.IOException
 import java.util.UUID
 
 class BluetoothConnectionManager {
-    private var _socket: BluetoothSocket? = null
+    private val sockets = mutableMapOf<String, BluetoothSocket>()
 
     fun connectToDevice(device: BluetoothDevice, context: Context): Boolean {
-        // UUID estándar para comunicación SPP con HC-05
+        // UUID estándar para comunicación SPP con HC-05 o HC-06
         val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
         // Verificar permisos en Android 12+
@@ -30,26 +30,35 @@ class BluetoothConnectionManager {
         }
 
         return try {
-            _socket = device.createRfcommSocketToServiceRecord(uuid)
-            _socket?.connect()
+            val socket = device.createRfcommSocketToServiceRecord(uuid)
+            socket.connect()
+            sockets[device.address] = socket
             true
         } catch (e: IOException) {
             e.printStackTrace()
-            _socket = null
             false
         }
     }
 
     fun sendChar(char: Char, context: Context) {
-        if (_socket == null) {
-            Toast.makeText(context, "No hay conexión Bluetooth", Toast.LENGTH_SHORT).show()
+        if (sockets.isEmpty()) {
+            Toast.makeText(context, "No hay conexiones Bluetooth", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        try {
-            _socket?.outputStream?.write(char.code) // Enviar carácter como byte
-        } catch (e: IOException) {
-            e.printStackTrace()
-            Toast.makeText(context, "Error al enviar datos", Toast.LENGTH_SHORT).show()
+        val iterator = sockets.iterator()
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
+            try {
+                entry.value.outputStream.write(char.code)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                Toast.makeText(context, "Error al enviar datos a ${entry.key}", Toast.LENGTH_SHORT).show()
+                try {
+                    entry.value.close()
+                } catch (_: IOException) {}
+                iterator.remove()
+            }
         }
     }
 
