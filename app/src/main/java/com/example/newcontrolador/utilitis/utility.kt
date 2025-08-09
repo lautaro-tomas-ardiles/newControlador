@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package com.example.newcontrolador.utilitis
 
@@ -10,13 +10,17 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,8 +30,10 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +43,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -47,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -54,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.R
+import com.example.newcontrolador.connection.Directions
 import com.example.newcontrolador.connection.WiFiConnectionManager
 import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.Blue
@@ -62,31 +72,76 @@ import com.example.newcontrolador.ui.theme.DarkYellow
 import com.example.newcontrolador.ui.theme.LightGreen
 import com.example.newcontrolador.ui.theme.LightYellow
 
-fun getDirectionChar(directionsPressed: Set<String>): Char {
-    return when {
-        directionsPressed.contains("up") && directionsPressed.contains("left") -> 'G'
-        directionsPressed.contains("up") && directionsPressed.contains("right") -> 'I'
-        directionsPressed.contains("down") && directionsPressed.contains("left") -> 'H'
-        directionsPressed.contains("down") && directionsPressed.contains("right") -> 'J'
-        directionsPressed.contains("up") -> 'F'
-        directionsPressed.contains("down") -> 'B'
-        directionsPressed.contains("left") -> 'L'
-        directionsPressed.contains("right") -> 'R'
-        else -> ' '
+fun getDirectionChar(directionsPressed: Set<Directions>): Char {
+    return Directions.fromSet(directionsPressed).char
+}
+
+@Composable
+fun SettingsItem(direction: Directions){
+    val text = when (direction) {
+        Directions.UP -> "Arriba"
+        Directions.DOWN -> "Abajo"
+        Directions.LEFT -> "Izquierda"
+        Directions.RIGHT -> "Derecha"
+        Directions.UP_LEFT -> "Arriba Izquierda"
+        Directions.UP_RIGHT -> "Arriba Derecha"
+        Directions.DOWN_LEFT -> "Abajo Izquierda"
+        Directions.DOWN_RIGHT -> "Abajo Derecha"
+        Directions.STOP -> "Detener"
+    }
+    var newDirection by remember { mutableStateOf("") }
+    var isError by remember { mutableStateOf(false) }
+    isError = newDirection.length > 1
+
+    Row (
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(Modifier.padding(10.dp))
+        Text(text, color = Black)
+        Spacer(Modifier.padding(10.dp))
+        OutlinedTextField(
+            value = newDirection,
+            onValueChange = {
+                newDirection = it
+                val newChar = it.toCharArray()
+                when (direction) {
+                    Directions.UP -> Directions.UP.char = newChar[0]
+                    Directions.DOWN -> Directions.DOWN.char = newChar[0]
+                    Directions.LEFT -> Directions.LEFT.char = newChar[0]
+                    Directions.RIGHT -> Directions.RIGHT.char = newChar[0]
+                    Directions.UP_LEFT -> Directions.UP_LEFT.char = newChar[0]
+                    Directions.UP_RIGHT -> Directions.UP_RIGHT.char = newChar[0]
+                    Directions.DOWN_LEFT -> Directions.DOWN_LEFT.char = newChar[0]
+                    Directions.DOWN_RIGHT -> Directions.DOWN_RIGHT.char = newChar[0]
+                    Directions.STOP -> Directions.STOP.char = newChar[0]
+                }
+            },
+            placeholder = { Text("${direction.char}", color = Blue) },
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = LightYellow,
+                focusedBorderColor = DarkYellow,
+                focusedTextColor = Black,
+                unfocusedLabelColor = Black
+            ),
+            modifier = Modifier.width(50.dp),
+            isError = isError
+        )
+        Spacer(Modifier.padding(10.dp))
     }
 }
 
 @Composable
 fun Button(
-    direction: String,
-    onPress: (String) -> Unit,
-    onRelease: (String) -> Unit
+    direction: Directions,
+    onPress: (Directions) -> Unit,
+    onRelease: (Directions) -> Unit
 ) {
     val arrowDirection = when (direction) {
-        "up" -> Icons.Default.KeyboardArrowUp
-        "down" -> Icons.Default.KeyboardArrowDown
-        "left" -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
-        "right" -> Icons.AutoMirrored.Filled.KeyboardArrowRight
+        Directions.UP -> Icons.Default.KeyboardArrowUp
+        Directions.DOWN -> Icons.Default.KeyboardArrowDown
+        Directions.LEFT -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
+        Directions.RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
         else -> Icons.Default.KeyboardArrowUp
 
     }
@@ -115,6 +170,42 @@ fun Button(
             modifier = Modifier.size(70.dp),
             tint = Black
         )
+    }
+}
+
+@Composable
+fun IconsButtons(
+    onClick: () -> Unit,
+    isSolidColor: Boolean = true,
+    isBluetooth: Boolean = true,
+    imageVector: ImageVector = Icons.Default.Settings
+) {
+    val color = if (isSolidColor) {
+        LightYellow
+    } else {
+        Color.Transparent
+    }
+
+    IconButton(
+        onClick = { onClick() },
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = color
+        )
+    ) {
+        if (isBluetooth) {
+            Icon(
+                painter = painterResource(R.drawable.group_11),
+                contentDescription = null,
+                tint = Black
+            )
+        } else {
+            Icon(
+                imageVector = imageVector,
+                contentDescription = null,
+                tint = LightGreen,
+                modifier = Modifier.size(35.dp)
+            )
+        }
     }
 }
 
@@ -215,6 +306,7 @@ fun WifiTextField(
     onIpChange: (String) -> Unit
 ) {
     val context = LocalContext.current
+
     OutlinedTextField(
         value = ip,
         onValueChange = { onIpChange(it) },
@@ -261,6 +353,7 @@ fun TopBar(
     isBluetoothEnable: (Boolean) -> Unit
 ) {
     var bluetooth by remember { mutableStateOf(true) }
+    var settingState by remember { mutableStateOf(false) }
     var ip by remember { mutableStateOf("") }
 
     val context = LocalContext.current
@@ -276,8 +369,14 @@ fun TopBar(
             setOf()
         }
 
+    val allDirections = listOf(
+        Directions.UP, Directions.DOWN, Directions.LEFT, Directions.RIGHT,
+        Directions.UP_LEFT, Directions.UP_RIGHT, Directions.DOWN_LEFT, Directions.DOWN_RIGHT,
+        Directions.STOP
+    )
+
     TopAppBar(
-        title = {/* No title needed */ },
+        title = { /* No title needed */ },
         navigationIcon = {
             BluetoothSwitch(bluetooth) { b ->
                 bluetooth = b
@@ -285,40 +384,63 @@ fun TopBar(
             }
         },
         actions = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 35.dp),
             ) {
-                if (bluetooth) {
-                    Text(
-                        text = "Precione para conectar : ",
-                        color = Black,
-                        fontSize = 17.sp
-                    )
-                    IconButton(
-                        onClick = {
-                            if (pairedDevices.isEmpty()) {
-                                Toast.makeText(context, "No se encontraron dispositivos", Toast.LENGTH_SHORT).show()
-                            } else {
-                                devicesChange(true)
-                            }
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = LightYellow
-                        )
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.group_11),
-                            contentDescription = "bluetooth icon",
-                            tint = Black
-                        )
+                Row(
+                    modifier = Modifier.align(Alignment.Center),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (bluetooth) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(end = 10.dp)
+                        ) {
+                            Text(
+                                text = "Precione para conectar : ",
+                                color = Black,
+                                fontSize = 17.sp
+                            )
+
+                            IconsButtons(
+                                onClick = {
+                                    if (pairedDevices.isEmpty()) {
+                                        Toast.makeText(context, "No se encontraron dispositivos", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        devicesChange(true)
+                                    }
+                                }
+                            )
+                        }
+                    } else {
+                        WifiTextField(
+                            wifiManager = wifiManager,
+                            ip = ip,
+                        ) { newIp -> ip = newIp }
                     }
-                } else {
-                    WifiTextField(
-                        wifiManager = wifiManager,
-                        ip = ip,
-                    ) { newIp -> ip = newIp }
+                }
+                Row(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconsButtons(
+                        onClick = { settingState = !settingState },
+                        isBluetooth = false,
+                        isSolidColor = false
+                    )
+                    DropdownMenu(
+                        expanded = settingState,
+                        onDismissRequest = { settingState = false },
+                        modifier = Modifier
+                            .background(LightGreen)
+                            .wrapContentWidth()
+                    ) {
+                        allDirections.forEach { direction ->
+                            SettingsItem(direction)
+                        }
+                    }
                 }
             }
         },
