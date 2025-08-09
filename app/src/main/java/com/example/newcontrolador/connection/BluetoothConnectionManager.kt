@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import java.io.IOException
@@ -62,5 +63,67 @@ class BluetoothConnectionManager {
         }
     }
 
+    private fun translateString(c: String): Char {
+        return when (c.lowercase()) {
+            "u" -> 'F' // arriba
+            "d" -> 'B' // abajo
+            "l" -> 'L' // izquierda
+            "r" -> 'R' // derecha
+            "g" -> 'G' // diagonal arriba izquierda
+            "i" -> 'I' // diagonal arriba derecha
+            "h" -> 'H' // diagonal abajo izquierda
+            "j" -> 'J' // diagonal abajo derecha
+            "s" -> ' ' // stop / sin acción
+            else -> ' ' // desconocido
+        }
+    }
+
+    private fun translateKeyEvent(event: KeyEvent): Char {
+        return when (event.keyCode) {
+            KeyEvent.KEYCODE_U -> 'F'
+            KeyEvent.KEYCODE_D -> 'B'
+            KeyEvent.KEYCODE_L -> 'L'
+            KeyEvent.KEYCODE_R -> 'R'
+            KeyEvent.KEYCODE_G -> 'G'
+            KeyEvent.KEYCODE_I -> 'I'
+            KeyEvent.KEYCODE_H -> 'H'
+            KeyEvent.KEYCODE_J -> 'J'
+            KeyEvent.KEYCODE_S -> ' '
+            else -> ' '
+        }
+    }
+
+    private fun translateInput(input: Any): Char {
+        return when (input) {
+            is String -> translateString(input)
+            is KeyEvent -> translateKeyEvent(input)
+            else -> ' '
+        }
+    }
+
+    fun listenForAllDevices(context: Context) {
+        for ((deviceAddress, socket) in sockets) {
+            Thread {
+                try {
+                    val input = socket.inputStream
+                    val buffer = ByteArray(1024)
+                    while (true) {
+                        val bytesRead = input.read(buffer)
+                        if (bytesRead > 0) {
+                            val data = String(buffer, 0, bytesRead).trim()
+
+                            val translatedChar = translateInput(data)
+
+                            if (translatedChar != ' ') {
+                                sendChar(translatedChar, context)
+                            }
+                        }
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }.start()
+        }
+    }
 }
 

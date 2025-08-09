@@ -1,10 +1,9 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.example.newcontrolador.screen
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.pm.PackageManager
+import android.icu.text.RelativeDateTimeFormatter.Direction
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -20,9 +19,9 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,24 +30,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.connection.BluetoothConnectionManager
+import com.example.newcontrolador.connection.Directions
 import com.example.newcontrolador.connection.WiFiConnectionManager
 import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.Blue
 import com.example.newcontrolador.ui.theme.DarkYellow
+import com.example.newcontrolador.ui.theme.NewControladorTheme
 import com.example.newcontrolador.utilitis.BluetoothDevices
 import com.example.newcontrolador.utilitis.Button
+import com.example.newcontrolador.utilitis.SettingsItem
 import com.example.newcontrolador.utilitis.TopBar
 import com.example.newcontrolador.utilitis.getDirectionChar
 
 @Composable
-fun Indicators(pressedButton: String) {
-    val colorUp = if ("up" in pressedButton) DarkYellow else Blue
-    val colorDown = if ("down" in pressedButton) DarkYellow else Blue
-    val colorLeft = if ("left" in pressedButton) DarkYellow else Blue
-    val colorRight = if ("right" in pressedButton) DarkYellow else Blue
+fun Indicators(pressedButton: Set<Directions>) {
+    val colorUp = if (Directions.UP in pressedButton) DarkYellow else Blue
+    val colorDown = if (Directions.DOWN in pressedButton) DarkYellow else Blue
+    val colorLeft = if (Directions.LEFT in pressedButton) DarkYellow else Blue
+    val colorRight = if (Directions.RIGHT in pressedButton) DarkYellow else Blue
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -91,7 +94,7 @@ fun GridButton(
     managerBluetooth: BluetoothConnectionManager,
     managerWiFi: WiFiConnectionManager
 ) {
-    var directionsPressed by remember { mutableStateOf(mutableSetOf<String>()) }
+    var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
     val context = LocalContext.current
 
     Row(
@@ -101,10 +104,10 @@ fun GridButton(
     ) {
         Column {
             Button(
-                direction = "up",
+                direction = Directions.UP,
                 onPress = {
                     //lista de teclas presionadas
-                    directionsPressed.add(it)
+                    directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     val directionChar = getDirectionChar(directionsPressed)
 
@@ -113,17 +116,17 @@ fun GridButton(
                     managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
-                    directionsPressed.remove(it)
+                    directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    managerBluetooth.sendChar('S', context)
+                    managerBluetooth.sendChar(Directions.STOP.char, context)
 
-                    managerWiFi.sendChar('S', context)
+                    managerWiFi.sendChar(Directions.STOP.char, context)
                 }
             )
             Spacer(Modifier.padding(25.dp))
 
             Button(
-                direction = "down",
+                direction = Directions.DOWN,
                 onPress = {
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -136,20 +139,19 @@ fun GridButton(
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    managerBluetooth.sendChar('S', context)
+                    managerBluetooth.sendChar(Directions.STOP.char, context)
 
-                    managerWiFi.sendChar('S', context)
+                    managerWiFi.sendChar(Directions.STOP.char, context)
                 }
             )
         }
 
-        Indicators(directionsPressed.joinToString(" "))
+        Indicators(directionsPressed)
 
         Row {
             Button(
-                direction = "left",
+                direction = Directions.LEFT,
                 onPress = {
-
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
                     val directionChar = getDirectionChar(directionsPressed)
@@ -161,15 +163,15 @@ fun GridButton(
                 onRelease = {
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    managerBluetooth.sendChar('S', context)
+                    managerBluetooth.sendChar(Directions.STOP.char, context)
 
-                    managerWiFi.sendChar('S', context)
+                    managerWiFi.sendChar(Directions.STOP.char, context)
                 }
             )
             Spacer(Modifier.padding(25.dp))
 
             Button(
-                direction = "right",
+                direction = Directions.RIGHT,
                 onPress = {
                     directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -180,11 +182,12 @@ fun GridButton(
                     managerWiFi.sendChar(directionChar, context)
                 },
                 onRelease = {
+
                     directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    managerBluetooth.sendChar('S', context)
+                    managerBluetooth.sendChar(Directions.STOP.char, context)
 
-                    managerWiFi.sendChar('S', context)
+                    managerWiFi.sendChar(Directions.STOP.char, context)
                 }
             )
         }
@@ -228,49 +231,52 @@ fun MainScreen(
                     managerWiFi = wifiManager
                 )
 
-                if (devices) {
-                    val hasPermission =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            ActivityCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.BLUETOOTH_CONNECT
-                            ) == PackageManager.PERMISSION_GRANTED
-                        } else {
-                            false
-                        }
-
-                    if (hasPermission) {
-                        BluetoothDevices(
-                            pairedDevices = bluetoothAdapter.bondedDevices
-                        ) {
-                            try {
-                                val connectBluetooth =
-                                    bluetoothConnectionManager.connectToDevice(it, context)
-                                if (connectBluetooth) {
-                                    Toast.makeText(
-                                        context,
-                                        "Conectado a ${it.name}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    devices = false
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "No se pudo conectar a ${it.name}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    devices = false
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                Toast.makeText(context, "${e.message}", Toast.LENGTH_LONG).show()
-                            }
-                        }
+                val hasPermission =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) == PackageManager.PERMISSION_GRANTED
                     } else {
-                        Toast.makeText(context, "Permiso BLUETOOTH_CONNECT renegade", Toast.LENGTH_SHORT).show()
+                        false
+                    }
+
+                if (devices && hasPermission) {
+                    BluetoothDevices(
+                        pairedDevices = bluetoothAdapter.bondedDevices
+                    ) {
+                        try {
+                            val connectBluetooth = bluetoothConnectionManager.connectToDevice(it, context)
+
+                            if (connectBluetooth) {
+                                Toast.makeText(context, "Conectado a ${it.name}", Toast.LENGTH_SHORT).show()
+                                bluetoothConnectionManager.listenForAllDevices(context)
+                                devices = false
+                            } else {
+                                Toast.makeText(context, "No se pudo conectar a ${it.name}", Toast.LENGTH_SHORT
+                                ).show()
+                                devices = false
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            Toast.makeText(context, "${e.message}", Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = false)
+@Composable
+private fun A() {
+    NewControladorTheme {
+        Column {
+            SettingsItem(Directions.UP)
+            Spacer(Modifier.padding(10.dp))
+
+            SettingsItem(Directions.DOWN)
         }
     }
 }
