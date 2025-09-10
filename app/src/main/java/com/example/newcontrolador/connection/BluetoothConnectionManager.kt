@@ -54,10 +54,12 @@ class BluetoothConnectionManager {
                 entry.value.outputStream.write(char.code)
             } catch (e: IOException) {
                 e.printStackTrace()
-                Toast.makeText(context, "Error al enviar datos a ${entry.key}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Error al enviar datos a ${entry.key}", Toast.LENGTH_SHORT)
+                    .show()
                 try {
                     entry.value.close()
-                } catch (_: IOException) {}
+                } catch (_: IOException) {
+                }
                 iterator.remove()
             }
         }
@@ -102,7 +104,7 @@ class BluetoothConnectionManager {
     }
 
     fun listenForAllDevices(context: Context) {
-        for ((deviceAddress, socket) in sockets) {
+        for ((_, socket) in sockets) {
             Thread {
                 try {
                     val input = socket.inputStream
