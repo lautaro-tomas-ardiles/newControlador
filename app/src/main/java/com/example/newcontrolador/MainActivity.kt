@@ -9,10 +9,12 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import com.example.newcontrolador.screen.MainScreen
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import com.example.newcontrolador.navigation.AppNavigation
 import com.example.newcontrolador.ui.theme.NewControladorTheme
 
 class MainActivity : ComponentActivity() {
@@ -32,7 +34,7 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode != RESULT_OK) {
-                Toast.makeText(this, "Bluetooth desabilitado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bluetooth deshabilitado", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -50,22 +52,26 @@ class MainActivity : ComponentActivity() {
         // Solicita el permission de Bluetooth
         requestBluetoothPermission()
 
-        // codigo deprecate
-        window.decorView.systemUiVisibility = (
-                android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                        android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                        android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
-                )
+        // --- Nueva forma de ocultar solo la barra de navegación ---
+        WindowCompat.setDecorFitsSystemWindows(window, true) // mantenemos el ajuste de status bar
+        val insetsController = WindowInsetsControllerCompat(window, window.decorView)
 
-        enableEdgeToEdge()
+        // Ocultar SOLO la barra de navegación
+        insetsController.hide(WindowInsetsCompat.Type.navigationBars())
+
+        // Permite que reaparezca con swipe
+        insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        //enableEdgeToEdge()
         setContent {
-            NewControladorTheme (darkTheme = true) {
-                MainScreen(bluetoothAdapter)
+            NewControladorTheme(darkTheme = true) {
+                AppNavigation(bluetoothAdapter)
             }
         }
     }
 
-    // Solicita el permission necesario para usar Bluetooth según la versión de Android
+    // Solicita el permiso necesario para usar Bluetooth según la versión de Android
     private fun requestBluetoothPermission() {
         val permission =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
