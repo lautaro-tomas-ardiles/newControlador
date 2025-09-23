@@ -12,17 +12,17 @@ import com.example.newcontrolador.utilitis.TopBar2
 
 @Composable
 fun MainESP8622Page(navController: NavController) {
-    Scaffold(
-        topBar = {
-            TopBar2("esp 8622", navController)
-        }
-    ) { padding ->
-        Column(
-            Modifier.padding(padding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+	Scaffold(
+		topBar = {
+			TopBar2("esp 8622", navController)
+		}
+	) { padding ->
+		Column(
+			Modifier.padding(padding),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center
+		) {
 
-        }
-    }
+		}
+	}
 }
