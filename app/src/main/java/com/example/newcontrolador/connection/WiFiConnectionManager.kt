@@ -9,76 +9,76 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class WiFiConnectionManager {
-    private var espIp: String? = null
+	private var espIp: String? = null
 
-    fun connectToIp(ip: String, context: Context): Boolean {
-        // Validar formato básico de IP
-        if (!ip.matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$"))) {
-            return false
-        }
+	fun connectToIp(ip: String, context: Context): Boolean {
+		// Validar formato básico de IP
+		if (!ip.matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$"))) {
+			return false
+		}
 
-        val url = "http://$ip/" // Puedes cambiar "/" por "/ping"
+		val url = "http://$ip/" // Puedes cambiar "/" por "/ping"
 
-        return try {
-            val connection = URL(url).openConnection() as HttpURLConnection
-            connection.connectTimeout = 3000
-            connection.readTimeout = 3000
-            connection.requestMethod = "GET"
+		return try {
+			val connection = URL(url).openConnection() as HttpURLConnection
+			connection.connectTimeout = 3000
+			connection.readTimeout = 3000
+			connection.requestMethod = "GET"
 
-            val responseCode = connection.responseCode
-            connection.disconnect()
+			val responseCode = connection.responseCode
+			connection.disconnect()
 
-            if (responseCode == 200) {
-                espIp = ip
-                true
-            } else {
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(
-                        context,
-                        "La ESP8266 no respondió (código: $responseCode)",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                false
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            Handler(Looper.getMainLooper()).post {
-                Toast.makeText(context, "No se pudo conectar a la IP", Toast.LENGTH_SHORT).show()
-            }
-            false
-        }
-    }
+			if (responseCode == 200) {
+				espIp = ip
+				true
+			} else {
+				Handler(Looper.getMainLooper()).post {
+					Toast.makeText(
+						context,
+						"La ESP8266 no respondió (código: $responseCode)",
+						Toast.LENGTH_SHORT
+					).show()
+				}
+				false
+			}
+		} catch (e: IOException) {
+			e.printStackTrace()
+			Handler(Looper.getMainLooper()).post {
+				Toast.makeText(context, "No se pudo conectar a la IP", Toast.LENGTH_SHORT).show()
+			}
+			false
+		}
+	}
 
-    fun sendChar(char: Char, context: Context) {
-        if (espIp == null) {
-            Toast.makeText(context, "No hay IP conectada", Toast.LENGTH_SHORT).show()
-            return
-        }
+	fun sendChar(char: Char, context: Context) {
+		if (espIp == null) {
+			Toast.makeText(context, "No hay IP conectada", Toast.LENGTH_SHORT).show()
+			return
+		}
 
-        val url = "http://$espIp/${char}"
+		val url = "http://$espIp/${char}"
 
-        Thread {
-            try {
-                val connection = URL(url).openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.connectTimeout = 300
-                connection.readTimeout = 300
-                val responseCode = connection.responseCode
-                connection.disconnect()
+		Thread {
+			try {
+				val connection = URL(url).openConnection() as HttpURLConnection
+				connection.requestMethod = "GET"
+				connection.connectTimeout = 300
+				connection.readTimeout = 300
+				val responseCode = connection.responseCode
+				connection.disconnect()
 
-                if (responseCode != 200) {
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(
-                            context,
-                            "Error al enviar: error $responseCode",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        }.start()
-    }
+				if (responseCode != 200) {
+					Handler(Looper.getMainLooper()).post {
+						Toast.makeText(
+							context,
+							"Error al enviar: error $responseCode",
+							Toast.LENGTH_SHORT
+						).show()
+					}
+				}
+			} catch (e: IOException) {
+				e.printStackTrace()
+			}
+		}.start()
+	}
 }
