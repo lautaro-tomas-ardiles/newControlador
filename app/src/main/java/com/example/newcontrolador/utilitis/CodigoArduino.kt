@@ -3,6 +3,7 @@ package com.example.newcontrolador.utilitis
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,10 +19,12 @@ fun CodigoArduino(text: String) {
 			.background(Black2)
 			.padding(16.dp)
 	) {
-		Text(
-			text = text.trimIndent(),
-			color = Color.White,
-			fontFamily = FontFamily.Monospace
-		)
+		SelectionContainer {
+			Text(
+				text = text.trimIndent(),
+				color = Color.White,
+				fontFamily = FontFamily.Monospace
+			)
+		}
 	}
 }

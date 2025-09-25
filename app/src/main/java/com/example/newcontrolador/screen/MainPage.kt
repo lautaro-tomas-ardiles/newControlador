@@ -2,6 +2,7 @@ package com.example.newcontrolador.screen
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
@@ -41,6 +42,7 @@ import com.example.newcontrolador.ui.theme.Blue
 import com.example.newcontrolador.ui.theme.DarkYellow
 import com.example.newcontrolador.utilitis.BluetoothDevices
 import com.example.newcontrolador.utilitis.Button
+import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.TopBarForMainPage
 import com.example.newcontrolador.utilitis.getDirectionChar
 
@@ -193,6 +195,8 @@ fun MainScreen(
 		bluetoothConnectionManager.sendChar(modeSelected.char, context)
 	}
 
+	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, LocalContext.current)
+
 	Scaffold(
 		topBar = {
 			TopBarForMainPage(
@@ -243,19 +247,22 @@ fun MainScreen(
 								Toast.LENGTH_SHORT
 							).show()
 							bluetoothConnectionManager.listenForAllDevices(context)
-							devices = false
 						} else {
 							Toast.makeText(
 								context,
 								"No se pudo conectar a ${it.name}",
 								Toast.LENGTH_SHORT
 							).show()
-							devices = false
 						}
 					} catch (e: Exception) {
 						e.printStackTrace()
-						Toast.makeText(context, "${e.message}", Toast.LENGTH_LONG).show()
+						Toast.makeText(
+							context,
+							"${e.message}",
+							Toast.LENGTH_LONG
+						).show()
 					}
+					devices = false
 				}
 			}
 
