@@ -43,16 +43,12 @@ class WiFiConnectionManager {
 			}
 		} catch (e: IOException) {
 			e.printStackTrace()
-			Handler(Looper.getMainLooper()).post {
-				Toast.makeText(context, "No se pudo conectar a la IP", Toast.LENGTH_SHORT).show()
-			}
 			false
 		}
 	}
 
 	fun sendChar(char: Char, context: Context) {
 		if (espIp == null) {
-			Toast.makeText(context, "No hay IP conectada", Toast.LENGTH_SHORT).show()
 			return
 		}
 

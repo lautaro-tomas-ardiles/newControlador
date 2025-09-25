@@ -1,5 +1,6 @@
 package com.example.newcontrolador.screen
 
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,16 +15,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.newcontrolador.R
 import com.example.newcontrolador.ui.theme.LightYellow
+import com.example.newcontrolador.ui.theme.NewControladorTheme
 import com.example.newcontrolador.utilitis.CodigoArduino
+import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.TopBar2
 
 @Composable
 fun MainESP32Page(navController: NavController) {
+
+	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, LocalContext.current)
+
 	val scroll = rememberScrollState()
 	Scaffold(
 		topBar = {
@@ -32,23 +41,27 @@ fun MainESP32Page(navController: NavController) {
 	) { padding ->
 		Column(
 			Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(scroll),
+				.padding(padding)
+				.fillMaxSize()
+				.padding(horizontal = 10.dp)
+				.verticalScroll(scroll),
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center
 		) {
 			Spacer(Modifier.height(10.dp))
+
 			Image(
 				painter = painterResource(id = R.drawable.captura_desde_2025_09_18_18_45_14),
 				contentDescription = "ESP 32 Diagram"
 			)
 			Spacer(Modifier.height(10.dp))
+
 			Text(
 				text = "Codigo de ejemplo para ESP 32",
 				color = LightYellow
 			)
 			Spacer(Modifier.height(10.dp))
+			
 			CodigoArduino(
 				"""
                     #include <BluetoothSerial.h>
@@ -201,5 +214,15 @@ fun MainESP32Page(navController: NavController) {
                 """.trimIndent()
 			)
 		}
+	}
+}
+
+@Preview
+@Composable
+private fun da() {
+	val navController = rememberNavController()
+
+	NewControladorTheme (darkTheme = true) {
+		MainESP32Page(navController)
 	}
 }

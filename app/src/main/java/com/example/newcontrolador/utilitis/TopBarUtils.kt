@@ -59,8 +59,6 @@ fun TopBar2(text: String, navController: NavController) {
 		},
 		navigationIcon = {
 			Row {
-				Spacer(Modifier.padding(start = 30.dp))
-
 				IconsButtons(
 					onClick = {
 						navController.navigate(AppScreen.MainPage.route)
@@ -176,82 +174,88 @@ fun TopBarForMainPage(
 				.fillMaxWidth()
 				.padding(end = 20.dp)
 		) {
-			TextAndButton("modo :") {
-				menuModeState = !menuModeState
-			}
-			DropdownMenu(
-				expanded = menuModeState,
-				onDismissRequest = { menuModeState = false },
-				modifier = Modifier
-					.background(LightGreen)
-					.wrapContentSize()
-			) {
-				ModeIcon(
-					text = "Automata",
-					onClick = {
-						modeSelect = Modes.AUTOMATA
-						menuModeState = false
-						modeSelected(modeSelect)
-					},
-					stateOfItem = modeSelect == Modes.AUTOMATA
-				)
-				ModeIcon(
-					text = "control manual",
-					onClick = {
-						modeSelect = Modes.MANUAL
-						menuModeState = false
-						modeSelected(modeSelect)
-					},
-					stateOfItem = modeSelect == Modes.MANUAL
-				)
+			Row (verticalAlignment = Alignment.CenterVertically) {
+				TextAndButton("modo :") {
+					menuModeState = !menuModeState
+				}
+				DropdownMenu(
+					expanded = menuModeState,
+					onDismissRequest = { menuModeState = false },
+					modifier = Modifier
+						.background(LightGreen)
+						.wrapContentSize()
+				) {
+					ModeIcon(
+						text = "Automata",
+						onClick = {
+							modeSelect = Modes.AUTOMATA
+							menuModeState = false
+							modeSelected(modeSelect)
+						},
+						stateOfItem = modeSelect == Modes.AUTOMATA
+					)
+					ModeIcon(
+						text = "control manual",
+						onClick = {
+							modeSelect = Modes.MANUAL
+							menuModeState = false
+							modeSelected(modeSelect)
+						},
+						stateOfItem = modeSelect == Modes.MANUAL
+					)
+				}
 			}
 			Spacer(Modifier.width(10.dp))
 
-			TextAndButton("diagramas :") {
-				menuDiagramasState = !menuDiagramasState
-			}
-			DropdownMenu(
-				expanded = menuDiagramasState,
-				onDismissRequest = { menuDiagramasState = false },
-				modifier = Modifier
-					.background(LightGreen)
-					.wrapContentSize()
-			) {
-				DropdownMenuItem(
-					text = {
-						Text(text = "ESP 32", color = Black)
-					},
-					onClick = { navController.navigate(AppScreen.ESP32Page.route) }
-				)
-				DropdownMenuItem(
-					text = {
-						Text(text = "ESP 8622", color = Black)
-					},
-					onClick = { navController.navigate(AppScreen.ESP8622Page.route) }
-				)
-				DropdownMenuItem(
-					text = {
-						Text(text = "Ardiuno y hc-05", color = Black)
-					},
-					onClick = { navController.navigate(AppScreen.ArduinoOneAndHC05Page.route) }
-				)
+			Row (verticalAlignment = Alignment.CenterVertically) {
+				TextAndButton("diagramas :") {
+					menuDiagramasState = !menuDiagramasState
+				}
+				DropdownMenu(
+					expanded = menuDiagramasState,
+					onDismissRequest = { menuDiagramasState = false },
+					modifier = Modifier
+						.background(LightGreen)
+						.wrapContentSize()
+				) {
+					DropdownMenuItem(
+						text = {
+							Text(text = "ESP 32", color = Black)
+						},
+						onClick = { navController.navigate(AppScreen.ESP32Page.route) }
+					)
+					DropdownMenuItem(
+						text = {
+							Text(text = "ESP 8622", color = Black)
+						},
+						onClick = { navController.navigate(AppScreen.ESP8622Page.route) }
+					)
+					DropdownMenuItem(
+						text = {
+							Text(text = "Ardiuno y hc-05", color = Black)
+						},
+						onClick = { navController.navigate(AppScreen.ArduinoOneAndHC05Page.route) }
+					)
+				}
 			}
 			Spacer(modifier = Modifier.width(10.dp))
 
-			IconsButtons(
-				onClick = { menuSettingState = !menuSettingState },
-				isSolidColor = false,
-			)
-			DropdownMenu(
-				expanded = menuSettingState,
-				onDismissRequest = { menuSettingState = false },
-				modifier = Modifier
-					.background(LightGreen)
-					.wrapContentSize()
-					.heightIn(max = 300.dp)
-			) {
-				allDirections.forEach { it ->
-					SettingsItem(it)
+			Row (verticalAlignment = Alignment.CenterVertically) {
+				IconsButtons(
+					onClick = { menuSettingState = !menuSettingState },
+					isSolidColor = false,
+				)
+				DropdownMenu(
+					expanded = menuSettingState,
+					onDismissRequest = { menuSettingState = false },
+					modifier = Modifier
+						.background(LightGreen)
+						.wrapContentSize()
+						.heightIn(max = 300.dp)
+				) {
+					allDirections.forEach { it ->
+						SettingsItem(it)
+					}
 				}
 			}
 		}
@@ -272,8 +276,6 @@ fun TopBar2ForPreview(text: String) {
 		},
 		navigationIcon = {
 			Row {
-				Spacer(Modifier.padding(start = 30.dp))
-
 				IconsButtons(
 					onClick = { /* No action in preview */ },
 					imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -360,82 +362,88 @@ fun TopBarForPreview(
 				.fillMaxWidth()
 				.padding(end = 20.dp)
 		) {
-			TextAndButton("modo :") {
-				menuModeState = !menuModeState
-			}
-			DropdownMenu(
-				expanded = menuModeState,
-				onDismissRequest = { menuModeState = false },
-				modifier = Modifier
-					.background(LightGreen)
-					.wrapContentSize()
-			) {
-				ModeIcon(
-					text = "Automata",
-					onClick = {
-						modeSelect = Modes.AUTOMATA
-						menuModeState = false
-						modeSelected(modeSelect)
-					},
-					stateOfItem = modeSelect == Modes.AUTOMATA
-				)
-				ModeIcon(
-					text = "control manual",
-					onClick = {
-						modeSelect = Modes.MANUAL
-						menuModeState = false
-						modeSelected(modeSelect)
-					},
-					stateOfItem = modeSelect == Modes.MANUAL
-				)
+			Row (verticalAlignment = Alignment.CenterVertically) {
+				TextAndButton("modo :") {
+					menuModeState = !menuModeState
+				}
+				DropdownMenu(
+					expanded = menuModeState,
+					onDismissRequest = { menuModeState = false },
+					modifier = Modifier
+						.background(LightGreen)
+						.wrapContentSize()
+				) {
+					ModeIcon(
+						text = "Automata",
+						onClick = {
+							modeSelect = Modes.AUTOMATA
+							menuModeState = false
+							modeSelected(modeSelect)
+						},
+						stateOfItem = modeSelect == Modes.AUTOMATA
+					)
+					ModeIcon(
+						text = "control manual",
+						onClick = {
+							modeSelect = Modes.MANUAL
+							menuModeState = false
+							modeSelected(modeSelect)
+						},
+						stateOfItem = modeSelect == Modes.MANUAL
+					)
+				}
 			}
 			Spacer(Modifier.width(10.dp))
 
-			TextAndButton("diagramas :") {
-				menuDiagramasState = !menuDiagramasState
-			}
-			DropdownMenu(
-				expanded = menuDiagramasState,
-				onDismissRequest = { menuDiagramasState = false },
-				modifier = Modifier
-					.background(LightGreen)
-					.wrapContentSize()
-			) {
-				DropdownMenuItem(
-					text = {
-						Text(text = "ESP 32", color = Black)
-					},
-					onClick = { }
-				)
-				DropdownMenuItem(
-					text = {
-						Text(text = "ESP 8622", color = Black)
-					},
-					onClick = { }
-				)
-				DropdownMenuItem(
-					text = {
-						Text(text = "Ardiuno y hc-05", color = Black)
-					},
-					onClick = { }
-				)
+			Row (verticalAlignment = Alignment.CenterVertically) {
+				TextAndButton("diagramas :") {
+					menuDiagramasState = !menuDiagramasState
+				}
+				DropdownMenu(
+					expanded = menuDiagramasState,
+					onDismissRequest = { menuDiagramasState = false },
+					modifier = Modifier
+						.background(LightGreen)
+						.wrapContentSize()
+				) {
+					DropdownMenuItem(
+						text = {
+							Text(text = "ESP 32", color = Black)
+						},
+						onClick = {  }
+					)
+					DropdownMenuItem(
+						text = {
+							Text(text = "ESP 8622", color = Black)
+						},
+						onClick = {  }
+					)
+					DropdownMenuItem(
+						text = {
+							Text(text = "Ardiuno y hc-05", color = Black)
+						},
+						onClick = {  }
+					)
+				}
 			}
 			Spacer(modifier = Modifier.width(10.dp))
 
-			IconsButtons(
-				onClick = { menuSettingState = !menuSettingState },
-				isSolidColor = false,
-			)
-			DropdownMenu(
-				expanded = menuSettingState,
-				onDismissRequest = { menuSettingState = false },
-				modifier = Modifier
-					.background(LightGreen)
-					.wrapContentSize()
-					.heightIn(max = 300.dp)
-			) {
-				allDirections.forEach { it ->
-					SettingsItem(it)
+			Row (verticalAlignment = Alignment.CenterVertically) {
+				IconsButtons(
+					onClick = { menuSettingState = !menuSettingState },
+					isSolidColor = false,
+				)
+				DropdownMenu(
+					expanded = menuSettingState,
+					onDismissRequest = { menuSettingState = false },
+					modifier = Modifier
+						.background(LightGreen)
+						.wrapContentSize()
+						.heightIn(max = 300.dp)
+				) {
+					allDirections.forEach { it ->
+						SettingsItem(it)
+					}
 				}
 			}
 		}

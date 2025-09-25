@@ -17,8 +17,7 @@ class BluetoothConnectionManager {
 
 	fun connectToDevice(device: BluetoothDevice, context: Context): Boolean {
 		// UUID estándar para comunicación SPP con HC-05 o HC-06
-		val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
-
+		//val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 		// Verificar permisos en Android 12+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
 			ActivityCompat.checkSelfPermission(
@@ -31,7 +30,7 @@ class BluetoothConnectionManager {
 		}
 
 		return try {
-			val socket = device.createRfcommSocketToServiceRecord(uuid)
+			val socket = device.createInsecureRfcommSocketToServiceRecord(device.uuids[0].uuid)
 			socket.connect()
 			sockets[device.address] = socket
 			true
@@ -54,12 +53,12 @@ class BluetoothConnectionManager {
 				entry.value.outputStream.write(char.code)
 			} catch (e: IOException) {
 				e.printStackTrace()
-				Toast.makeText(context, "Error al enviar datos a ${entry.key}", Toast.LENGTH_SHORT)
-					.show()
-				try {
-					entry.value.close()
-				} catch (_: IOException) {
-				}
+				Toast.makeText(
+					context,
+					"Error al enviar datos a ${entry.key}",
+					Toast.LENGTH_SHORT
+				).show()
+				entry.value.close()
 				iterator.remove()
 			}
 		}
