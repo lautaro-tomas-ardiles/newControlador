@@ -92,7 +92,9 @@ fun Indicators(pressedButton: Set<Directions>) {
 @Composable
 fun GridButton(
     managerBluetooth: BluetoothConnectionManager,
-    managerWiFi: WiFiConnectionManager
+    managerWiFi: WiFiConnectionManager,
+    widthButton: Int,
+    heightButton: Int
 ) {
     var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
     val context = LocalContext.current
@@ -121,7 +123,9 @@ fun GridButton(
                     managerBluetooth.sendChar(Directions.STOP.char, context)
 
                     managerWiFi.sendChar(Directions.STOP.char, context)
-                }
+                },
+                width = widthButton,
+                heigth = heightButton
             )
             Spacer(Modifier.padding(25.dp))
 
@@ -142,7 +146,9 @@ fun GridButton(
                     managerBluetooth.sendChar(Directions.STOP.char, context)
 
                     managerWiFi.sendChar(Directions.STOP.char, context)
-                }
+                },
+                width = widthButton,
+                heigth = heightButton
             )
         }
 
@@ -166,7 +172,9 @@ fun GridButton(
                     managerBluetooth.sendChar(Directions.STOP.char, context)
 
                     managerWiFi.sendChar(Directions.STOP.char, context)
-                }
+                },
+                width = widthButton,
+                heigth = heightButton
             )
             Spacer(Modifier.padding(25.dp))
 
@@ -188,7 +196,9 @@ fun GridButton(
                     managerBluetooth.sendChar(Directions.STOP.char, context)
 
                     managerWiFi.sendChar(Directions.STOP.char, context)
-                }
+                },
+                width = widthButton,
+                heigth = heightButton
             )
         }
     }
