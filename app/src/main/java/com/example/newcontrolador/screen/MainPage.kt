@@ -94,7 +94,8 @@ fun GridButton(
     managerBluetooth: BluetoothConnectionManager,
     managerWiFi: WiFiConnectionManager,
     widthButton: Int,
-    heightButton: Int
+    heightButton: Int,
+    paddings: Int
 ) {
     var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
     val context = LocalContext.current
@@ -125,9 +126,9 @@ fun GridButton(
                     managerWiFi.sendChar(Directions.STOP.char, context)
                 },
                 width = widthButton,
-                heigth = heightButton
+                height = heightButton
             )
-            Spacer(Modifier.padding(25.dp))
+            Spacer(Modifier.padding(padding.dp))
 
             Button(
                 direction = Directions.DOWN,
@@ -148,7 +149,7 @@ fun GridButton(
                     managerWiFi.sendChar(Directions.STOP.char, context)
                 },
                 width = widthButton,
-                heigth = heightButton
+                height = heightButton
             )
         }
 
@@ -174,9 +175,9 @@ fun GridButton(
                     managerWiFi.sendChar(Directions.STOP.char, context)
                 },
                 width = widthButton,
-                heigth = heightButton
+                height = heightButton
             )
-            Spacer(Modifier.padding(25.dp))
+            Spacer(Modifier.padding(padding.dp))
 
             Button(
                 direction = Directions.RIGHT,
@@ -198,7 +199,7 @@ fun GridButton(
                     managerWiFi.sendChar(Directions.STOP.char, context)
                 },
                 width = widthButton,
-                heigth = heightButton
+                height = heightButton
             )
         }
     }
@@ -208,6 +209,10 @@ fun GridButton(
 fun MainScreen(
     bluetoothAdapter: BluetoothAdapter
 ) {
+    var padding by remember { mutableIntStateOf() }
+    var width by remember { mutableIntStateOf() }
+    var height by remember { mutableIntStateOf() }
+    
     var devices by remember { mutableStateOf(false) }
     var bluetooth by remember { mutableStateOf(false) }
 
@@ -222,7 +227,10 @@ fun MainScreen(
                 wifiManager,
                 bluetoothAdapter,
                 devicesChange = { devices = it },
-                isBluetoothEnable = { bluetooth = it }
+                isBluetoothEnable = { bluetooth = it },
+                buttonWidthValue = { width = it },
+                buttonheightValue = { height = it },
+                paddingValue = { padding = it}
             )
         },
         containerColor = Black
@@ -238,7 +246,10 @@ fun MainScreen(
             ) {
                 GridButton(
                     managerBluetooth = bluetoothConnectionManager,
-                    managerWiFi = wifiManager
+                    managerWiFi = wifiManager,
+                    widthButton = width,
+                    heightButton = height,
+                    paddings = padding
                 )
 
                 val hasPermission =
@@ -275,6 +286,44 @@ fun MainScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun B() {
+    var padding by remember { mutableIntStateOf(5) }
+    var width by remember { mutableIntStateOf(165) }
+    var height by remember { mutableIntStateOf(150) }
+    
+    NewControladorTheme {
+        Column {
+            Slider(
+                value = padding,
+                onValueChange = { padding = it },
+                valueRange = 0f..50f
+            )
+            Text(text = sliderPosition.toString())
+
+            Spacer(Modifier.padding(10.dp))
+
+            Slider(
+                value = width,
+                onValueChange = { width = it },
+                valueRange = 0f..300f
+            )
+            Text(text = sliderPosition.toString())
+
+            Spacer(Modifier.padding(10.dp))
+
+            Slider(
+                value = height,
+                onValueChange = { heigth = it },
+                valueRange = 0f..300f
+            )
+            Text(text = sliderPosition.toString())
+        }
+        
     }
 }
 
