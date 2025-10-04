@@ -6,6 +6,7 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,16 +30,20 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
+import com.example.newcontrolador.R
+import com.example.newcontrolador.connection.BluetoothConnectionManager
 import com.example.newcontrolador.connection.Directions
 import com.example.newcontrolador.connection.Modes
 import com.example.newcontrolador.connection.WiFiConnectionManager
@@ -75,16 +80,132 @@ fun TopBar2(text: String, navController: NavController) {
 }
 
 @Composable
-fun TopBarForMainPage(
-	bluetoothAdapter: BluetoothAdapter,
-	wiFiConnectionManager: WiFiConnectionManager,
-	navController: NavController,
+private fun TopBarForMainPageStart(
 	isBluetoothEnable: (Boolean) -> Unit,
-	devicesChange: (Boolean) -> Unit,
-	modeSelected: (Modes) -> Unit
+	bluetoothConnectionManager: BluetoothConnectionManager,
+	bluetoothAdapter: BluetoothAdapter,
+	wifiManager: WiFiConnectionManager
 ) {
-	var bluetooth by remember { mutableStateOf(true) }
 	var ip by remember { mutableStateOf("") }
+
+	var menuDevicesState by remember { mutableStateOf(false) }
+
+	var bluetooth by remember { mutableStateOf(true) }
+
+	val context = LocalContext.current
+
+	val hasPermission =
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+			ActivityCompat.checkSelfPermission(
+				context,
+				Manifest.permission.BLUETOOTH_CONNECT
+			) == PackageManager.PERMISSION_GRANTED
+		} else {
+			ActivityCompat.checkSelfPermission(
+				context,
+				Manifest.permission.BLUETOOTH
+			) == PackageManager.PERMISSION_GRANTED
+		}
+
+	val pairedDevices: Set<BluetoothDevice>
+
+	if (hasPermission) {
+		pairedDevices = bluetoothAdapter.bondedDevices
+	} else {
+		pairedDevices = setOf()
+	}
+
+	Row(
+		horizontalArrangement = Arrangement.Start,
+		verticalAlignment = Alignment.CenterVertically,
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(start = 20.dp)
+	) {
+		BluetoothSwitch(bluetooth) {
+			bluetooth = it
+			isBluetoothEnable(it)
+		}
+		Spacer(Modifier.width(20.dp))
+
+		Row(
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.End
+		) {
+			if (bluetooth) {
+				TextAndButton(
+					text = "Conecte a el robot :",
+					isBluetooth = true
+				) {
+					if (pairedDevices.isEmpty()) {
+						Toast.makeText(
+							context,
+							"No se encontraron dispositivos",
+							Toast.LENGTH_SHORT
+						).show()
+					} else {
+						menuDevicesState = !menuDevicesState
+					}
+				}
+				BluetoothDropMenu(
+					state = menuDevicesState,
+					onStateChange = { menuDevicesState = it },
+					content = {
+						pairedDevices.forEach { device ->
+							DeviceItem(device) {
+								try {
+									val connectBluetooth =
+										bluetoothConnectionManager.connectToDevice(device, context)
+
+									if (connectBluetooth) {
+										Toast.makeText(
+											context,
+											"Conectado a ${device.name}",
+											Toast.LENGTH_SHORT
+										).show()
+
+										bluetoothConnectionManager.listenForAllDevices(context)
+									} else {
+										Toast.makeText(
+											context,
+											"No se pudo conectar a ${device.name}",
+											Toast.LENGTH_SHORT
+										).show()
+									}
+								} catch (e: Exception) {
+									e.printStackTrace()
+									Toast.makeText(context, "${e.message}", Toast.LENGTH_LONG)
+										.show()
+								}
+								menuDevicesState = false
+							}
+						}
+					}
+				)
+			} else {
+				WifiTextField(
+					wifiManager = wifiManager,
+					ip = ip
+				) {
+					ip = it
+				}
+			}
+		}
+	}
+}
+
+@Composable
+private fun TopBarForMainPageEnd(
+	modeSelected: (Modes) -> Unit,
+	navController: NavController,
+	buttonHeight: (Int) -> Unit,
+	buttonWidth: (Int) -> Unit,
+	padding: (Int) -> Unit
+) {
+	val defaultButtonSize = DefaultButtonSize()
+	var buttonHeight by remember { mutableFloatStateOf(defaultButtonSize.height) }
+	var buttonWidth by remember { mutableFloatStateOf(defaultButtonSize.width) }
+	var paddings by remember { mutableFloatStateOf(defaultButtonSize.padding) }
 
 	var menuModeState by remember { mutableStateOf(false) }
 	var modeSelect by remember { mutableStateOf(Modes.MANUAL) }
@@ -93,21 +214,7 @@ fun TopBarForMainPage(
 
 	var menuSettingState by remember { mutableStateOf(false) }
 
-	val context = LocalContext.current
-
-	val pairedDevices: Set<BluetoothDevice>
-	if (
-		ActivityCompat.checkSelfPermission(
-			context,
-			Manifest.permission.BLUETOOTH_CONNECT
-		) == PackageManager.PERMISSION_GRANTED
-	) {
-		pairedDevices = bluetoothAdapter.bondedDevices
-	} else {
-		pairedDevices = setOf()
-	}
-
-	val allDirections = remember {
+	val allDirectionsAndModes = remember {
 		listOf(
 			Directions.UP,
 			Directions.DOWN,
@@ -123,68 +230,21 @@ fun TopBarForMainPage(
 		)
 	}
 
-	Box(
-		contentAlignment = Alignment.Center,
+	Row(
+		horizontalArrangement = Arrangement.End,
+		verticalAlignment = Alignment.CenterVertically,
 		modifier = Modifier
 			.fillMaxWidth()
-			.background(Blue)
-			.padding(vertical = 7.dp)
+			.padding(end = 20.dp)
 	) {
-		Row(
-			horizontalArrangement = Arrangement.Start,
-			verticalAlignment = Alignment.CenterVertically,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(start = 20.dp)
-		) {
-			BluetoothSwitch(bluetooth) {
-				bluetooth = it
-				isBluetoothEnable(it)
+		Row(verticalAlignment = Alignment.CenterVertically) {
+			TextAndButton("modo :") {
+				menuModeState = !menuModeState
 			}
-			Spacer(Modifier.width(20.dp))
-
-			if (bluetooth) {
-				TextAndButton(
-					text = "Conecte a el robot :",
-					isBluetooth = true
-				) {
-					if (pairedDevices.isEmpty()) {
-						Toast.makeText(
-							context,
-							"No se encontraron dispositivos",
-							Toast.LENGTH_SHORT
-						).show()
-					} else {
-						devicesChange(true)
-					}
-				}
-			} else {
-				WifiTextField(
-					wifiManager = wiFiConnectionManager,
-					ip = ip
-				) { newIp ->
-					ip = newIp
-				}
-			}
-		}
-		Row(
-			horizontalArrangement = Arrangement.End,
-			verticalAlignment = Alignment.CenterVertically,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(end = 20.dp)
-		) {
-			Row (verticalAlignment = Alignment.CenterVertically) {
-				TextAndButton("modo :") {
-					menuModeState = !menuModeState
-				}
-				DropdownMenu(
-					expanded = menuModeState,
-					onDismissRequest = { menuModeState = false },
-					modifier = Modifier
-						.background(LightGreen)
-						.wrapContentSize()
-				) {
+			ModeDropMenu(
+				state = menuModeState,
+				onStateChange = { menuModeState = it },
+				content = {
 					ModeIcon(
 						text = "Automata",
 						onClick = {
@@ -204,61 +264,114 @@ fun TopBarForMainPage(
 						stateOfItem = modeSelect == Modes.MANUAL
 					)
 				}
-			}
-			Spacer(Modifier.width(10.dp))
+			)
 
-			Row (verticalAlignment = Alignment.CenterVertically) {
-				TextAndButton("diagramas :") {
-					menuDiagramasState = !menuDiagramasState
-				}
-				DropdownMenu(
-					expanded = menuDiagramasState,
-					onDismissRequest = { menuDiagramasState = false },
-					modifier = Modifier
-						.background(LightGreen)
-						.wrapContentSize()
-				) {
-					DropdownMenuItem(
-						text = {
-							Text(text = "ESP 32", color = Black)
-						},
-						onClick = { navController.navigate(AppScreen.ESP32Page.route) }
-					)
-					DropdownMenuItem(
-						text = {
-							Text(text = "ESP 8622", color = Black)
-						},
-						onClick = { navController.navigate(AppScreen.ESP8622Page.route) }
-					)
-					DropdownMenuItem(
-						text = {
-							Text(text = "Ardiuno y hc-05", color = Black)
-						},
-						onClick = { navController.navigate(AppScreen.ArduinoOneAndHC05Page.route) }
-					)
-				}
-			}
-			Spacer(modifier = Modifier.width(10.dp))
+		}
+		Spacer(Modifier.width(10.dp))
 
-			Row (verticalAlignment = Alignment.CenterVertically) {
-				IconsButtons(
-					onClick = { menuSettingState = !menuSettingState },
-					isSolidColor = false,
-				)
-				DropdownMenu(
-					expanded = menuSettingState,
-					onDismissRequest = { menuSettingState = false },
-					modifier = Modifier
-						.background(LightGreen)
-						.wrapContentSize()
-						.heightIn(max = 300.dp)
-				) {
-					allDirections.forEach { it ->
+		Row(verticalAlignment = Alignment.CenterVertically) {
+			TextAndButton("diagramas :") {
+				menuDiagramasState = !menuDiagramasState
+			}
+			DiagramaDropMenu(
+				state = menuDiagramasState,
+				onStateChange = { menuDiagramasState = it },
+				content = {
+					DiagramaItem("ESP 32") {
+						navController.navigate(AppScreen.ESP32Page.route)
+					}
+					DiagramaItem("ESP 8622") {
+						navController.navigate(AppScreen.ESP8622Page.route)
+					}
+					DiagramaItem("Ardiuno y hc-05") {
+						navController.navigate(AppScreen.ArduinoOneAndHC05Page.route)
+					}
+				}
+			)
+		}
+		Spacer(modifier = Modifier.width(10.dp))
+
+		Row(verticalAlignment = Alignment.CenterVertically) {
+			IconsButtons(
+				onClick = { menuSettingState = !menuSettingState },
+				isSolidColor = false,
+			)
+			SettingsDropMenu(
+				state = menuSettingState,
+				onStateChange = { menuSettingState = it },
+				content = {
+					SliderForConfiguration(
+						value = buttonWidth,
+						onValueChange = {
+							buttonWidth = it
+							buttonWidth(it.toInt())
+						},
+						typeForReset = ButtonSize.WIDTH,
+						valueRange = 100f..300f,
+						ruta = painterResource(id = R.drawable.group_1)
+					)
+					SliderForConfiguration(
+						value = buttonHeight,
+						onValueChange = {
+							buttonHeight = it
+							buttonHeight(it.toInt())
+						},
+						valueRange = 100f..300f,
+						ruta = painterResource(id = R.drawable.group_3)
+					)
+					SliderForConfiguration(
+						value = paddings,
+						onValueChange = {
+							paddings = it
+							padding(it.toInt())
+						},
+						typeForReset = ButtonSize.PADDING,
+						valueRange = 0f..50f,
+						ruta = painterResource(id = R.drawable.group_4__1_)
+					)
+					allDirectionsAndModes.forEach { it ->
 						SettingsItem(it)
 					}
 				}
-			}
+			)
 		}
+	}
+
+}
+
+@Composable
+fun TopBarForMainPage(
+	bluetoothAdapter: BluetoothAdapter,
+	bluetoothConnectionManager: BluetoothConnectionManager,
+	wiFiConnectionManager: WiFiConnectionManager,
+	navController: NavController,
+	bluetoothEnable: (Boolean) -> Unit,
+	modeSelected: (Modes) -> Unit,
+	buttonWidthValue: (Int) -> Unit,
+	buttonHeightValue: (Int) -> Unit,
+	paddingValues: (Int) -> Unit
+) {
+	Box(
+		contentAlignment = Alignment.Center,
+		modifier = Modifier
+			.fillMaxWidth()
+			.background(Blue)
+			.padding(vertical = 7.dp)
+	) {
+		TopBarForMainPageStart(
+			isBluetoothEnable = { bluetoothEnable(it) },
+			bluetoothConnectionManager = bluetoothConnectionManager,
+			bluetoothAdapter = bluetoothAdapter,
+			wifiManager = wiFiConnectionManager
+		)
+
+		TopBarForMainPageEnd(
+			modeSelected = { modeSelected(it) },
+			navController = navController,
+			buttonHeight = { buttonHeightValue(it) },
+			buttonWidth = { buttonWidthValue(it) },
+			padding = { paddingValues(it) }
+		)
 	}
 }
 
@@ -362,7 +475,7 @@ fun TopBarForPreview(
 				.fillMaxWidth()
 				.padding(end = 20.dp)
 		) {
-			Row (verticalAlignment = Alignment.CenterVertically) {
+			Row(verticalAlignment = Alignment.CenterVertically) {
 				TextAndButton("modo :") {
 					menuModeState = !menuModeState
 				}
@@ -395,7 +508,7 @@ fun TopBarForPreview(
 			}
 			Spacer(Modifier.width(10.dp))
 
-			Row (verticalAlignment = Alignment.CenterVertically) {
+			Row(verticalAlignment = Alignment.CenterVertically) {
 				TextAndButton("diagramas :") {
 					menuDiagramasState = !menuDiagramasState
 				}
@@ -410,25 +523,25 @@ fun TopBarForPreview(
 						text = {
 							Text(text = "ESP 32", color = Black)
 						},
-						onClick = {  }
+						onClick = { }
 					)
 					DropdownMenuItem(
 						text = {
 							Text(text = "ESP 8622", color = Black)
 						},
-						onClick = {  }
+						onClick = { }
 					)
 					DropdownMenuItem(
 						text = {
 							Text(text = "Ardiuno y hc-05", color = Black)
 						},
-						onClick = {  }
+						onClick = { }
 					)
 				}
 			}
 			Spacer(modifier = Modifier.width(10.dp))
 
-			Row (verticalAlignment = Alignment.CenterVertically) {
+			Row(verticalAlignment = Alignment.CenterVertically) {
 				IconsButtons(
 					onClick = { menuSettingState = !menuSettingState },
 					isSolidColor = false,

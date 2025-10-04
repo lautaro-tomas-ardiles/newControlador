@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.view.KeyEvent
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import java.io.IOException
@@ -17,7 +16,7 @@ class BluetoothConnectionManager {
 
 	fun connectToDevice(device: BluetoothDevice, context: Context): Boolean {
 		// UUID estándar para comunicación SPP con HC-05 o HC-06
-		//val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+		val uuidPorDefecto = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 		// Verificar permisos en Android 12+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
 			ActivityCompat.checkSelfPermission(
@@ -30,7 +29,8 @@ class BluetoothConnectionManager {
 		}
 
 		return try {
-			val socket = device.createInsecureRfcommSocketToServiceRecord(device.uuids[0].uuid)
+			val uuid = device.uuids?.firstOrNull()?.uuid ?: uuidPorDefecto
+			val socket = device.createInsecureRfcommSocketToServiceRecord(uuid)
 			socket.connect()
 			sockets[device.address] = socket
 			true
@@ -42,7 +42,6 @@ class BluetoothConnectionManager {
 
 	fun sendChar(char: Char, context: Context) {
 		if (sockets.isEmpty()) {
-			Toast.makeText(context, "No hay conexiones Bluetooth", Toast.LENGTH_SHORT).show()
 			return
 		}
 
@@ -64,41 +63,18 @@ class BluetoothConnectionManager {
 		}
 	}
 
-	private fun translateString(c: String): Char {
-		return when (c.lowercase()) {
-			"u" -> 'F' // arriba
-			"d" -> 'B' // abajo
-			"l" -> 'L' // izquierda
-			"r" -> 'R' // derecha
-			"g" -> 'G' // diagonal arriba izquierda
-			"i" -> 'I' // diagonal arriba derecha
-			"h" -> 'H' // diagonal abajo izquierda
-			"j" -> 'J' // diagonal abajo derecha
-			"s" -> ' ' // stop / sin acción
-			else -> ' ' // desconocido
-		}
-	}
-
-	private fun translateKeyEvent(event: KeyEvent): Char {
-		return when (event.keyCode) {
-			KeyEvent.KEYCODE_U -> Directions.UP.char
-			KeyEvent.KEYCODE_D -> Directions.DOWN.char
-			KeyEvent.KEYCODE_L -> Directions.LEFT.char
-			KeyEvent.KEYCODE_R -> Directions.RIGHT.char
-			KeyEvent.KEYCODE_G -> Directions.UP_LEFT.char
-			KeyEvent.KEYCODE_I -> Directions.UP_RIGHT.char
-			KeyEvent.KEYCODE_H -> Directions.DOWN_LEFT.char
-			KeyEvent.KEYCODE_J -> Directions.DOWN_RIGHT.char
-			KeyEvent.KEYCODE_S -> Directions.STOP.char
-			else -> ' '
-		}
-	}
-
-	private fun translateInput(input: Any): Char {
-		return when (input) {
-			is String -> translateString(input)
-			is KeyEvent -> translateKeyEvent(input)
-			else -> ' '
+	private fun translateChar(c: Char): Char {
+		return when (c) {
+			'u' -> Directions.UP.char
+			'd' -> Directions.DOWN.char
+			'l' -> Directions.LEFT.char
+			'r' -> Directions.RIGHT.char
+			'g' -> Directions.UP_LEFT.char
+			'i' -> Directions.UP_RIGHT.char
+			'h' -> Directions.DOWN_LEFT.char
+			'j' -> Directions.DOWN_RIGHT.char
+			's' -> Directions.STOP.char
+			else -> Directions.STOP.char
 		}
 	}
 
@@ -109,17 +85,18 @@ class BluetoothConnectionManager {
 					val input = socket.inputStream
 					val buffer = ByteArray(1024)
 					while (true) {
-						val bytesRead = input.read(buffer)
-						if (bytesRead > 0) {
-							val data = String(buffer, 0, bytesRead).trim()
+                        val bytesRead = input.read(buffer)
+                        if (bytesRead > 0) {
+                            val data = String(buffer, 0, bytesRead)
 
-							val translatedChar = translateInput(data)
-
-							if (translatedChar != ' ') {
-								sendChar(translatedChar, context)
-							}
-						}
-					}
+                            for (char in data.lowercase()) {
+                                val translatedChar = translateChar(char)
+                                if (translatedChar != ' ') {
+                                    sendChar(translatedChar, context)
+                                }
+                            }
+                        }
+                    }
 				} catch (e: IOException) {
 					e.printStackTrace()
 				}

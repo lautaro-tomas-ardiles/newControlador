@@ -1,14 +1,17 @@
 package com.example.newcontrolador.utilitis
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -30,6 +33,19 @@ import com.example.newcontrolador.ui.theme.Blue
 import com.example.newcontrolador.ui.theme.DarkYellow
 import com.example.newcontrolador.ui.theme.LightGreen
 import com.example.newcontrolador.ui.theme.LightYellow
+
+@Composable
+fun DiagramaItem(
+	text: String,
+	onClick: () -> Unit
+) {
+	DropdownMenuItem(
+		text = {
+			Text(text = text, color = Black)
+		},
+		onClick = { onClick() }
+	)
+}
 
 @Composable
 fun SettingsItem(directionOrMode: Any) {
@@ -142,4 +158,55 @@ fun ModeIcon(
 			)
 		}
 	)
+}
+
+@Composable
+fun ModeDropMenu(
+	state: Boolean,
+	onStateChange: (Boolean) -> Unit,
+	content: @Composable () -> Unit
+) {
+	DropdownMenu(
+		expanded = state,
+		onDismissRequest = { onStateChange(false) },
+		modifier = Modifier
+			.background(LightGreen)
+			.wrapContentSize()
+	) {
+		content()
+	}
+}
+
+@Composable
+fun SettingsDropMenu(
+	state: Boolean,
+	onStateChange: (Boolean) -> Unit,
+	content: @Composable () -> Unit
+) {
+	DropdownMenu(
+		expanded = state,
+		onDismissRequest = { onStateChange(false) },
+		modifier = Modifier
+			.background(LightGreen)
+			.wrapContentSize()
+	) {
+		content()
+	}
+}
+
+@Composable
+fun DiagramaDropMenu(
+	state: Boolean,
+	onStateChange: (Boolean) -> Unit,
+	content: @Composable () -> Unit
+) {
+	DropdownMenu(
+		expanded = state,
+		onDismissRequest = { onStateChange(false) },
+		modifier = Modifier
+			.background(LightGreen)
+			.wrapContentSize()
+	) {
+		content()
+	}
 }
