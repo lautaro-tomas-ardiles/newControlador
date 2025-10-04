@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -18,12 +19,19 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,7 +52,9 @@ import com.example.newcontrolador.ui.theme.NewControladorTheme
 fun Button(
 	direction: Directions,
 	onPress: (Directions) -> Unit,
-	onRelease: (Directions) -> Unit
+	onRelease: (Directions) -> Unit,
+	width: Int,
+	height: Int
 ) {
 	val arrowDirection = when (direction) {
 		Directions.UP -> Icons.Default.KeyboardArrowUp
@@ -58,8 +68,8 @@ fun Button(
 		modifier = Modifier
 			//.heightIn(80.dp, 150.dp) se pone el minimo no se como usarlo
 			//.widthIn(90.dp,160.dp)
-			.height(150.dp)
-			.width(165.dp)
+			.height(height.dp)
+			.width(width.dp)
 			.background(DarkGreen)
 			.border(2.dp, LightYellow)
 			.pointerInput(Unit) {
@@ -157,7 +167,9 @@ private fun ButtonPrev() {
 		Button(
 			Directions.UP,
 			onPress = {},
-			onRelease = {}
+			onRelease = {},
+			width = 165,
+			height = 150
 		)
 	}
 }
@@ -178,6 +190,39 @@ private fun TextAndButtonPrev() {
 			TextAndButton(text = "Ajustes :") {
 
 			}
+		}
+	}
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showSystemUi = false, showBackground = true)
+@Composable
+private fun D() {
+	var sliderValue by remember { mutableFloatStateOf(150f) }
+
+	val sliderState = remember {
+        SliderState(
+            value = 0f,
+            steps = 0,
+            valueRange = -200f..200f
+        )
+    }
+
+	NewControladorTheme {
+		Column {
+			Slider(
+                value = sliderValue,
+                onValueChange = { sliderValue = it },
+                valueRange = 0f..200f
+            )
+            Text(text = "Valor: ${sliderValue.toInt()}")
+
+			Spacer(Modifier.height(10.dp))
+
+			Slider(state = sliderState)
+        	Text("Valor: ${sliderState.value.toInt()}")
+
+
 		}
 	}
 }

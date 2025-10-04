@@ -9,17 +9,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -27,7 +27,6 @@ import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.Directions
 import com.example.newcontrolador.ui.theme.Black
-import com.example.newcontrolador.ui.theme.Blue
 import com.example.newcontrolador.ui.theme.DarkGreen
 import com.example.newcontrolador.ui.theme.DarkYellow
 import com.example.newcontrolador.ui.theme.LightGreen
@@ -38,23 +37,19 @@ fun getDirectionChar(directionsPressed: Set<Directions>): Char {
 }
 
 @Composable
-fun BluetoothDevices(
-	pairedDevices: Set<BluetoothDevice>,
-	onDeviceClick: (BluetoothDevice) -> Unit
+fun BluetoothDropMenu(
+	state: Boolean,
+	onStateChange: (Boolean) -> Unit,
+	content: @Composable () -> Unit
 ) {
-	LazyColumn(
+	DropdownMenu(
+		expanded = state,
+		onDismissRequest = { onStateChange(false) },
 		modifier = Modifier
-			.background(color = DarkYellow)
-			.fillMaxWidth(0.4f)
+			.background(DarkGreen)
+			.wrapContentSize()
 	) {
-		items(
-			items = pairedDevices.toList()
-		) { device ->
-			DeviceItem(
-				device = device,
-				onClick = { onDeviceClick(device) } // Se usa correctamente
-			)
-		}
+		content()
 	}
 }
 
@@ -64,35 +59,44 @@ fun DeviceItem(
 	onClick: () -> Unit
 ) {
 	val context = LocalContext.current
-	val deviceName =
-		if (ActivityCompat.checkSelfPermission(
+	val hasPermission =
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+			ActivityCompat.checkSelfPermission(
 				context,
 				Manifest.permission.BLUETOOTH_CONNECT
 			) == PackageManager.PERMISSION_GRANTED
-		) {
-			device.name ?: "Dispositivo desconocido"
 		} else {
-			"Permiso requerido"
+			ActivityCompat.checkSelfPermission(
+				context,
+				Manifest.permission.BLUETOOTH
+			) == PackageManager.PERMISSION_GRANTED
 		}
+
+	val deviceName = if (hasPermission) {
+		device.name ?: "Dispositivo desconocido"
+	} else {
+		"Permiso requerido"
+	}
 
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(8.dp)
+			.wrapContentWidth()
 			.clickable { onClick() },
-		elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-		colors = CardDefaults.cardColors(containerColor = Blue)
+		//elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+		colors = CardDefaults.cardColors(containerColor = DarkYellow)
 	) {
 		Column(
 			Modifier.padding(16.dp)
 		) {
 			Text(
 				text = deviceName,
-				color = Color.White
+				color = Black
 			)
 			Text(
 				text = device.address,
-				color = Color.Gray
+				color = DarkGreen
 			)
 		}
 	}
