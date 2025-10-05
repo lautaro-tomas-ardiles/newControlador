@@ -27,10 +27,9 @@ import com.example.newcontrolador.utilitis.TopBar2
 
 @Composable
 fun MainESP32Page(navController: NavController) {
-
+	val scroll = rememberScrollState()
 	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, LocalContext.current)
 
-	val scroll = rememberScrollState()
 	Scaffold(
 		topBar = {
 			TopBar2("diagrama para esp 32", navController)
@@ -58,7 +57,7 @@ fun MainESP32Page(navController: NavController) {
 				color = LightYellow
 			)
 			Spacer(Modifier.height(10.dp))
-			
+
 			CodigoArduino(
 				"""
                     #include <BluetoothSerial.h>

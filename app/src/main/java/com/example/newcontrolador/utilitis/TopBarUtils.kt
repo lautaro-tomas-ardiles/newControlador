@@ -11,19 +11,13 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -38,20 +32,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
-import com.example.newcontrolador.connection.BluetoothConnectionManager
+import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.connection.Directions
 import com.example.newcontrolador.connection.Modes
-import com.example.newcontrolador.connection.WiFiConnectionManager
 import com.example.newcontrolador.navigation.AppScreen
 import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.Blue
-import com.example.newcontrolador.ui.theme.LightGreen
-import com.example.newcontrolador.ui.theme.NewControladorTheme
 
 @Composable
 fun TopBar2(text: String, navController: NavController) {
@@ -81,10 +71,9 @@ fun TopBar2(text: String, navController: NavController) {
 
 @Composable
 private fun TopBarForMainPageStart(
-	isBluetoothEnable: (Boolean) -> Unit,
-	bluetoothConnectionManager: BluetoothConnectionManager,
-	bluetoothAdapter: BluetoothAdapter,
-	wifiManager: WiFiConnectionManager
+	onBluetoothChange: (Boolean) -> Unit,
+	connectionManager: ConnectionViewModel,
+	bluetoothAdapter: BluetoothAdapter
 ) {
 	var ip by remember { mutableStateOf("") }
 
@@ -124,7 +113,7 @@ private fun TopBarForMainPageStart(
 	) {
 		BluetoothSwitch(bluetooth) {
 			bluetooth = it
-			isBluetoothEnable(it)
+			onBluetoothChange(it)
 		}
 		Spacer(Modifier.width(20.dp))
 
@@ -153,30 +142,8 @@ private fun TopBarForMainPageStart(
 					content = {
 						pairedDevices.forEach { device ->
 							DeviceItem(device) {
-								try {
-									val connectBluetooth =
-										bluetoothConnectionManager.connectToDevice(device, context)
-
-									if (connectBluetooth) {
-										Toast.makeText(
-											context,
-											"Conectado a ${device.name}",
-											Toast.LENGTH_SHORT
-										).show()
-
-										bluetoothConnectionManager.listenForAllDevices(context)
-									} else {
-										Toast.makeText(
-											context,
-											"No se pudo conectar a ${device.name}",
-											Toast.LENGTH_SHORT
-										).show()
-									}
-								} catch (e: Exception) {
-									e.printStackTrace()
-									Toast.makeText(context, "${e.message}", Toast.LENGTH_LONG)
-										.show()
-								}
+								connectionManager.conectToBluetoth(device, context)
+								connectionManager.listenForBluetoothMessages()
 								menuDevicesState = false
 							}
 						}
@@ -184,7 +151,7 @@ private fun TopBarForMainPageStart(
 				)
 			} else {
 				WifiTextField(
-					wifiManager = wifiManager,
+					connectionManager = connectionManager,
 					ip = ip
 				) {
 					ip = it
@@ -342,10 +309,8 @@ private fun TopBarForMainPageEnd(
 @Composable
 fun TopBarForMainPage(
 	bluetoothAdapter: BluetoothAdapter,
-	bluetoothConnectionManager: BluetoothConnectionManager,
-	wiFiConnectionManager: WiFiConnectionManager,
+	connectionManager: ConnectionViewModel,
 	navController: NavController,
-	bluetoothEnable: (Boolean) -> Unit,
 	modeSelected: (Modes) -> Unit,
 	buttonWidthValue: (Int) -> Unit,
 	buttonHeightValue: (Int) -> Unit,
@@ -359,10 +324,9 @@ fun TopBarForMainPage(
 			.padding(vertical = 7.dp)
 	) {
 		TopBarForMainPageStart(
-			isBluetoothEnable = { bluetoothEnable(it) },
-			bluetoothConnectionManager = bluetoothConnectionManager,
-			bluetoothAdapter = bluetoothAdapter,
-			wifiManager = wiFiConnectionManager
+			onBluetoothChange = { connectionManager.isBluetooth = it },
+			connectionManager = connectionManager,
+			bluetoothAdapter = bluetoothAdapter
 		)
 
 		TopBarForMainPageEnd(
@@ -372,214 +336,5 @@ fun TopBarForMainPage(
 			buttonWidth = { buttonWidthValue(it) },
 			padding = { paddingValues(it) }
 		)
-	}
-}
-
-/**
- * preview de las otras funciones
- * */
-@Composable
-fun TopBar2ForPreview(text: String) {
-	TopAppBar(
-		title = {
-			Text(
-				text = text,
-				color = Black
-			)
-		},
-		navigationIcon = {
-			Row {
-				IconsButtons(
-					onClick = { /* No action in preview */ },
-					imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-					tintColor = Black
-				)
-			}
-		},
-		colors = TopAppBarDefaults.topAppBarColors(
-			containerColor = Blue
-		)
-	)
-}
-
-@Composable
-fun TopBarForPreview(
-	wiFiConnectionManager: WiFiConnectionManager,
-	isBluetoothEnable: (Boolean) -> Unit,
-	modeSelected: (Modes) -> Unit
-) {
-	var bluetooth by remember { mutableStateOf(true) }
-	var ip by remember { mutableStateOf("") }
-
-	var menuModeState by remember { mutableStateOf(false) }
-	var modeSelect by remember { mutableStateOf(Modes.MANUAL) }
-
-	var menuDiagramasState by remember { mutableStateOf(false) }
-
-	var menuSettingState by remember { mutableStateOf(false) }
-
-	val allDirections = remember {
-		listOf(
-			Directions.UP,
-			Directions.DOWN,
-			Directions.LEFT,
-			Directions.RIGHT,
-			Directions.UP_LEFT,
-			Directions.UP_RIGHT,
-			Directions.DOWN_LEFT,
-			Directions.DOWN_RIGHT,
-			Directions.STOP,
-			Modes.MANUAL,
-			Modes.AUTOMATA
-		)
-	}
-
-	Box(
-		contentAlignment = Alignment.Center,
-		modifier = Modifier
-			.fillMaxWidth()
-			.background(Blue)
-			.padding(vertical = 7.dp)
-	) {
-		Row(
-			horizontalArrangement = Arrangement.Start,
-			verticalAlignment = Alignment.CenterVertically,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(start = 20.dp)
-		) {
-			BluetoothSwitch(bluetooth) {
-				bluetooth = it
-				isBluetoothEnable(it)
-			}
-			Spacer(Modifier.width(20.dp))
-
-			if (bluetooth) {
-				TextAndButton(
-					text = "Conecte a el robot :",
-					isBluetooth = true
-				) { }
-			} else {
-				WifiTextField(
-					wifiManager = wiFiConnectionManager,
-					ip = ip
-				) { newIp ->
-					ip = newIp
-				}
-			}
-		}
-		Row(
-			horizontalArrangement = Arrangement.End,
-			verticalAlignment = Alignment.CenterVertically,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(end = 20.dp)
-		) {
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				TextAndButton("modo :") {
-					menuModeState = !menuModeState
-				}
-				DropdownMenu(
-					expanded = menuModeState,
-					onDismissRequest = { menuModeState = false },
-					modifier = Modifier
-						.background(LightGreen)
-						.wrapContentSize()
-				) {
-					ModeIcon(
-						text = "Automata",
-						onClick = {
-							modeSelect = Modes.AUTOMATA
-							menuModeState = false
-							modeSelected(modeSelect)
-						},
-						stateOfItem = modeSelect == Modes.AUTOMATA
-					)
-					ModeIcon(
-						text = "control manual",
-						onClick = {
-							modeSelect = Modes.MANUAL
-							menuModeState = false
-							modeSelected(modeSelect)
-						},
-						stateOfItem = modeSelect == Modes.MANUAL
-					)
-				}
-			}
-			Spacer(Modifier.width(10.dp))
-
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				TextAndButton("diagramas :") {
-					menuDiagramasState = !menuDiagramasState
-				}
-				DropdownMenu(
-					expanded = menuDiagramasState,
-					onDismissRequest = { menuDiagramasState = false },
-					modifier = Modifier
-						.background(LightGreen)
-						.wrapContentSize()
-				) {
-					DropdownMenuItem(
-						text = {
-							Text(text = "ESP 32", color = Black)
-						},
-						onClick = { }
-					)
-					DropdownMenuItem(
-						text = {
-							Text(text = "ESP 8622", color = Black)
-						},
-						onClick = { }
-					)
-					DropdownMenuItem(
-						text = {
-							Text(text = "Ardiuno y hc-05", color = Black)
-						},
-						onClick = { }
-					)
-				}
-			}
-			Spacer(modifier = Modifier.width(10.dp))
-
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				IconsButtons(
-					onClick = { menuSettingState = !menuSettingState },
-					isSolidColor = false,
-				)
-				DropdownMenu(
-					expanded = menuSettingState,
-					onDismissRequest = { menuSettingState = false },
-					modifier = Modifier
-						.background(LightGreen)
-						.wrapContentSize()
-						.heightIn(max = 300.dp)
-				) {
-					allDirections.forEach { it ->
-						SettingsItem(it)
-					}
-				}
-			}
-		}
-	}
-}
-
-@Preview(
-	device = "spec:parent=pixel_5,orientation=landscape",
-	showBackground = true
-)
-@Composable
-private fun PreviewA() {
-	val wifiManager = remember { WiFiConnectionManager() }
-
-	NewControladorTheme {
-		Column {
-			TopBarForPreview(
-				wiFiConnectionManager = wifiManager,
-				isBluetoothEnable = { },
-				modeSelected = { }
-			)
-			Spacer(Modifier.height(20.dp))
-			TopBar2ForPreview("diagrama para esp 32")
-		}
 	}
 }

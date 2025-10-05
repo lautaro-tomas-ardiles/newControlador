@@ -39,10 +39,10 @@ fun MainArduinoOneAndHC05Page(navController: NavController) {
 	) { padding ->
 		Column(
 			Modifier
-                .padding(padding)
-                .fillMaxSize()
+				.padding(padding)
+				.fillMaxSize()
 				.padding(horizontal = 10.dp)
-                .verticalScroll(scroll),
+				.verticalScroll(scroll),
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center
 		) {

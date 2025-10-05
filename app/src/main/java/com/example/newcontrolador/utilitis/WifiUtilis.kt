@@ -1,6 +1,5 @@
 package com.example.newcontrolador.utilitis
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -9,19 +8,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.connection.WiFiConnectionManager
 import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.DarkYellow
 
 @Composable
 fun WifiTextField(
-	wifiManager: WiFiConnectionManager,
+	connectionManager: ConnectionViewModel,
 	ip: String,
 	onIpChange: (String) -> Unit
 ) {
-	val context = LocalContext.current
-
 	TextField(
 		value = ip,
 		onValueChange = { onIpChange(it) },
@@ -31,20 +28,7 @@ fun WifiTextField(
 		trailingIcon = {
 			IconsButtons(
 				onClick = {
-					val connectIp = wifiManager.connectToIp(ip, context)
-					if (connectIp) {
-						Toast.makeText(
-							context,
-							"Conectado a $ip",
-							Toast.LENGTH_SHORT
-						).show()
-					} else {
-						Toast.makeText(
-							context,
-							"No se pudo conectar a $ip",
-							Toast.LENGTH_SHORT
-						).show()
-					}
+					connectionManager.conectToWifi(ip)
 				},
 				tintColor = Black,
 				imageVector = Icons.AutoMirrored.Filled.Send

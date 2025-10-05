@@ -5,6 +5,7 @@ data class DefaultButtonSize(
 	val height: Float = 150f,
 	val padding: Float = 0f
 )
+
 enum class ButtonSize {
 	WIDTH,
 	HEIGHT,
