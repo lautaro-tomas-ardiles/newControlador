@@ -6,6 +6,6 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun SetOrientation(orientation: Int, context: Context) {
-    val activity = context as? Activity
-    activity?.requestedOrientation = orientation
+	val activity = context as? Activity
+	activity?.requestedOrientation = orientation
 }

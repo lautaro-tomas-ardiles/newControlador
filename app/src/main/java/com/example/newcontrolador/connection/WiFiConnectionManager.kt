@@ -1,25 +1,26 @@
 package com.example.newcontrolador.connection
 
-import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import android.widget.Toast
+import com.example.newcontrolador.exceptions.*
 import java.io.IOException
+import java.net.ConnectException
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URL
+import java.net.UnknownHostException
 
 class WiFiConnectionManager {
 	private var espIp: String? = null
 
-	fun connectToIp(ip: String, context: Context): Boolean {
+	@Throws(Exception::class)
+	fun connectToIp(ip: String) {
 		// Validar formato básico de IP
 		if (!ip.matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$"))) {
-			return false
+			throw InvalidIpException("Formato de IP inválido: $ip")
 		}
 
-		val url = "http://$ip/" // Puedes cambiar "/" por "/ping"
+		val url = "http://$ip/"
 
-		return try {
+		try {
 			val connection = URL(url).openConnection() as HttpURLConnection
 			connection.connectTimeout = 3000
 			connection.readTimeout = 3000
@@ -30,51 +31,49 @@ class WiFiConnectionManager {
 
 			if (responseCode == 200) {
 				espIp = ip
-				true
 			} else {
-				Handler(Looper.getMainLooper()).post {
-					Toast.makeText(
-						context,
-						"La ESP8266 no respondió (código: $responseCode)",
-						Toast.LENGTH_SHORT
-					).show()
-				}
-				false
+				throw UnexpectedResponseException("respondió con código: $responseCode")
 			}
+		} catch (_: SocketTimeoutException) {
+			throw ConnectionTimeoutException("Tiempo de espera agotado al conectar con $ip")
+		} catch (_: UnknownHostException) {
+			throw DeviceNotFoundException("No se encontró el host: $ip")
+		} catch (_: ConnectException) {
+			throw ConnectionFailedException("No se pudo conectar al dispositivo")
 		} catch (e: IOException) {
-			e.printStackTrace()
-			false
+			throw ConnectionFailedException("Error de conexión: ${e.message}")
 		}
 	}
 
-	fun sendChar(char: Char, context: Context) {
-		if (espIp == null) {
-			return
-		}
+	@Throws(Exception::class)
+	fun sendCharWifi(char: Char) {
+		val ip = espIp ?: throw InvalidIpException("No hay una IP configurada")
 
-		val url = "http://$espIp/${char}"
+		val url = "http://$ip/$char"
 
-		Thread {
-			try {
-				val connection = URL(url).openConnection() as HttpURLConnection
-				connection.requestMethod = "GET"
-				connection.connectTimeout = 300
-				connection.readTimeout = 300
-				val responseCode = connection.responseCode
-				connection.disconnect()
-
-				if (responseCode != 200) {
-					Handler(Looper.getMainLooper()).post {
-						Toast.makeText(
-							context,
-							"Error al enviar: error $responseCode",
-							Toast.LENGTH_SHORT
-						).show()
-					}
-				}
-			} catch (e: IOException) {
-				e.printStackTrace()
+		try {
+			val connection = (URL(url).openConnection() as HttpURLConnection).apply {
+				requestMethod = "GET"
+				connectTimeout = 300
+				readTimeout = 300
 			}
-		}.start()
+
+			val responseCode = connection.responseCode
+			connection.disconnect()
+
+			if (responseCode != 200) {
+				throw SendCharFailedException("error $responseCode al enviar '$char'")
+			}
+
+		} catch (_: SocketTimeoutException) {
+			throw ConnectionTimeoutException("Tiempo de espera agotado")
+		} catch (_: UnknownHostException) {
+			throw DeviceNotFoundException("No se encontró el dispositivo")
+		} catch (_: ConnectException) {
+			throw ConnectionFailedException("No se pudo conectar")
+		} catch (e: IOException) {
+			throw SendCharFailedException("Error de conexión: ${e.message}")
+		}
 	}
+
 }

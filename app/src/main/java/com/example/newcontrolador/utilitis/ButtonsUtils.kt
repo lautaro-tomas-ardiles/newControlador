@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,26 +17,18 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.Directions
@@ -46,7 +36,6 @@ import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.DarkGreen
 import com.example.newcontrolador.ui.theme.LightGreen
 import com.example.newcontrolador.ui.theme.LightYellow
-import com.example.newcontrolador.ui.theme.NewControladorTheme
 
 @Composable
 fun Button(
@@ -66,8 +55,6 @@ fun Button(
 
 	Box(
 		modifier = Modifier
-			//.heightIn(80.dp, 150.dp) se pone el minimo no se como usarlo
-			//.widthIn(90.dp,160.dp)
 			.height(height.dp)
 			.width(width.dp)
 			.background(DarkGreen)
@@ -154,75 +141,4 @@ fun TextAndButton(
 		isBluetooth = isBluetooth,
 		isSolidColor = isBluetooth // si es el boton de bluetooth tiene que ser solido
 	)
-}
-
-/**
- * Preview
- */
-
-@Preview
-@Composable
-private fun ButtonPrev() {
-	NewControladorTheme {
-		Button(
-			Directions.UP,
-			onPress = {},
-			onRelease = {},
-			width = 165,
-			height = 150
-		)
-	}
-}
-
-@Preview
-@Composable
-private fun IconsButtonsPrev() {
-	NewControladorTheme {
-		IconsButtons(onClick = {})
-	}
-}
-
-@Preview(showSystemUi = false, showBackground = true, backgroundColor = 0xFF000000)
-@Composable
-private fun TextAndButtonPrev() {
-	NewControladorTheme {
-		Row {
-			TextAndButton(text = "Ajustes :") {
-
-			}
-		}
-	}
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showSystemUi = false, showBackground = true)
-@Composable
-private fun D() {
-	var sliderValue by remember { mutableFloatStateOf(150f) }
-
-	val sliderState = remember {
-        SliderState(
-            value = 0f,
-            steps = 0,
-            valueRange = -200f..200f
-        )
-    }
-
-	NewControladorTheme {
-		Column {
-			Slider(
-                value = sliderValue,
-                onValueChange = { sliderValue = it },
-                valueRange = 0f..200f
-            )
-            Text(text = "Valor: ${sliderValue.toInt()}")
-
-			Spacer(Modifier.height(10.dp))
-
-			Slider(state = sliderState)
-        	Text("Valor: ${sliderState.value.toInt()}")
-
-
-		}
-	}
 }

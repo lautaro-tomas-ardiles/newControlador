@@ -84,7 +84,7 @@ fun DeviceItem(
 			.padding(8.dp)
 			.wrapContentWidth()
 			.clickable { onClick() },
-		//elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+		elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
 		colors = CardDefaults.cardColors(containerColor = DarkYellow)
 	) {
 		Column(

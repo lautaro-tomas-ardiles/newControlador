@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -18,6 +19,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.connection.BluetoothConnectionManager
+import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.connection.Directions
 import com.example.newcontrolador.connection.Modes
 import com.example.newcontrolador.connection.WiFiConnectionManager
@@ -38,6 +42,7 @@ import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.Blue
 import com.example.newcontrolador.ui.theme.DarkYellow
 import com.example.newcontrolador.utilitis.Button
+import com.example.newcontrolador.utilitis.CustomSnackbar
 import com.example.newcontrolador.utilitis.DefaultButtonSize
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.TopBarForMainPage
@@ -56,14 +61,14 @@ fun Indicators(pressedButton: Set<Directions>) {
 	) {
 		Icon(
 			imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-			contentDescription = null,
+			contentDescription = "indicador izquierdo",
 			modifier = Modifier.size(65.dp),
 			tint = colorLeft
 		)
 		Column {
 			Icon(
 				imageVector = Icons.Default.KeyboardArrowUp,
-				contentDescription = null,
+				contentDescription = "indicador superior",
 				modifier = Modifier.size(65.dp),
 				tint = colorUp
 			)
@@ -71,7 +76,7 @@ fun Indicators(pressedButton: Set<Directions>) {
 
 			Icon(
 				imageVector = Icons.Default.KeyboardArrowDown,
-				contentDescription = null,
+				contentDescription = "indicador inferior",
 				modifier = Modifier.size(65.dp),
 				tint = colorDown
 			)
@@ -79,7 +84,7 @@ fun Indicators(pressedButton: Set<Directions>) {
 
 		Icon(
 			imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-			contentDescription = null,
+			contentDescription = "indicador derecho",
 			modifier = Modifier.size(65.dp),
 			tint = colorRight
 		)
@@ -88,23 +93,12 @@ fun Indicators(pressedButton: Set<Directions>) {
 
 @Composable
 fun GridButton(
-	managerBluetooth: BluetoothConnectionManager,
-	managerWiFi: WiFiConnectionManager,
-	isBluetooth: Boolean,
+	conectionManager: ConnectionViewModel,
 	buttonHeight: Int,
 	buttonWidth: Int,
 	padding: Int
 ) {
 	var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
-	val context = LocalContext.current
-
-	fun sendChar(char: Char) {
-		if (isBluetooth) {
-			managerBluetooth.sendChar(char, context)
-		} else {
-			managerWiFi.sendChar(char, context)
-		}
-	}
 
 	Row(
 		Modifier.fillMaxSize(),
@@ -117,12 +111,12 @@ fun GridButton(
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-					sendChar(getDirectionChar(directionsPressed))
+					conectionManager.sendChar(getDirectionChar(directionsPressed))
 				},
 				onRelease = {
 					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-					sendChar(Directions.STOP.char)
+					conectionManager.sendChar(Directions.STOP.char)
 				},
 				height = buttonHeight,
 				width = buttonWidth
@@ -134,12 +128,12 @@ fun GridButton(
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-					sendChar(getDirectionChar(directionsPressed))
+					conectionManager.sendChar(getDirectionChar(directionsPressed))
 				},
 				onRelease = {
 					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-					sendChar(Directions.STOP.char)
+					conectionManager.sendChar(Directions.STOP.char)
 				},
 				height = buttonHeight,
 				width = buttonWidth
@@ -154,12 +148,12 @@ fun GridButton(
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-					sendChar(getDirectionChar(directionsPressed))
+					conectionManager.sendChar(getDirectionChar(directionsPressed))
 				},
 				onRelease = {
 					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-					sendChar(Directions.STOP.char)
+					conectionManager.sendChar(Directions.STOP.char)
 				},
 				height = buttonHeight,
 				width = buttonWidth
@@ -171,12 +165,12 @@ fun GridButton(
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-					sendChar(getDirectionChar(directionsPressed))
+					conectionManager.sendChar(getDirectionChar(directionsPressed))
 				},
 				onRelease = {
 					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-					sendChar(Directions.STOP.char)
+					conectionManager.sendChar(Directions.STOP.char)
 				},
 				height = buttonHeight,
 				width = buttonWidth
@@ -191,21 +185,32 @@ fun MainScreen(
 	navController: NavController
 ) {
 	val defaultButtonSize = DefaultButtonSize()
+
 	var buttonHeight by remember { mutableIntStateOf(defaultButtonSize.height.toInt()) }
 	var buttonWidth by remember { mutableIntStateOf(defaultButtonSize.width.toInt()) }
 	var paddings by remember { mutableIntStateOf(defaultButtonSize.padding.toInt()) }
 
-	var bluetooth by remember { mutableStateOf(false) }
+	val snackbarHostState = remember { SnackbarHostState() }
 
 	var modeSelected by remember { mutableStateOf(Modes.MANUAL) }
 
 	val bluetoothConnectionManager = remember { BluetoothConnectionManager() }
 	val wifiManager = remember { WiFiConnectionManager() }
+	val connectionManager = remember {
+		ConnectionViewModel(
+			bluetoothConnectionManager = bluetoothConnectionManager,
+			wifiConnectionManager = wifiManager
+		)
+	}
 
-	val context = LocalContext.current
-
-	LaunchedEffect(modeSelected, Unit) {
-		bluetoothConnectionManager.sendChar(modeSelected.char, context)
+	LaunchedEffect(modeSelected) {
+		connectionManager.sendChar(modeSelected.char)
+	}
+	LaunchedEffect(connectionManager.message) {
+		connectionManager.message?.let {
+			snackbarHostState.showSnackbar(it)
+			connectionManager.cleanMessage()
+		}
 	}
 	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, LocalContext.current)
 
@@ -213,15 +218,23 @@ fun MainScreen(
 		topBar = {
 			TopBarForMainPage(
 				bluetoothAdapter = bluetoothAdapter,
-				wiFiConnectionManager = wifiManager,
+				connectionManager = connectionManager,
 				navController = navController,
-				bluetoothConnectionManager = bluetoothConnectionManager,
-				bluetoothEnable = { bluetooth = it },
 				modeSelected = { modeSelected = it },
 				buttonWidthValue = { buttonWidth = it },
 				buttonHeightValue = { buttonHeight = it },
 				paddingValues = { paddings = it }
 			)
+		},
+		snackbarHost = {
+			SnackbarHost(
+				snackbarHostState,
+				modifier = Modifier
+					.wrapContentWidth()
+            		.wrapContentHeight()
+			) { data ->
+				CustomSnackbar(data)
+			}
 		},
 		containerColor = Black
 	) { padding ->
@@ -232,9 +245,7 @@ fun MainScreen(
 			contentAlignment = Alignment.Center
 		) {
 			GridButton(
-				managerBluetooth = bluetoothConnectionManager,
-				managerWiFi = wifiManager,
-				isBluetooth = bluetooth,
+				conectionManager = connectionManager,
 				buttonHeight = buttonHeight,
 				buttonWidth = buttonWidth,
 				padding = paddings
