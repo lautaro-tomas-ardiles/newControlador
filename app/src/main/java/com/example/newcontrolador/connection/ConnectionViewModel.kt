@@ -1,7 +1,6 @@
 package com.example.newcontrolador.connection
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.PackageManager
@@ -18,23 +17,25 @@ class ConnectionViewModel (
     private val wifiConnectionManager: WiFiConnectionManager
 ) : ViewModel() {
 
-	// indica si se está usando bluetooth o wifi
+	// Indica si actualmente se está usando Bluetooth o Wi-Fi.
 	var isBluetooth by mutableStateOf(true)
 
-	// mensajes de error y de cumplimiento? (no sé escribir)
+	// Mensaje de error o de cumplimiento? (no sé escribir)
+	// (solo puede modificarse dentro del ViewModel).
 	var message by mutableStateOf<String?>(null)
-		private set // solo se puede cambiar su valor aca dentro
+		private set
 
-	//* Bluetooth
+	// * Bluetooth *
 	/**
-	 * Conect to bluetoth: se le pasa la informacion de un dispocitivo bluetooth,
-	 * e intenta conectarse a ese dispositivo.
+	 * Conecta a un dispositivo Bluetooth.
 	 *
-	 * @param device dispositivo bluetooth al que se quiere conectar
-	 * @param context contexto de la aplicacion al momento de la conexion. Se usa para
-	 * verificar permisos.
+	 * Intenta conectarse con el dispositivo Bluetooth dado en el parametro, verificando antes
+	 * que los permisos necesarios estén.
+	 *
+	 * @param device Dispositivo Bluetooth al que se desea conectar.
+	 * @param context Contexto de la aplicación al momento de la conexión (usado para verificar permisos).
 	 */
-	fun conectToBluetoth(device: BluetoothDevice, context: Context) {
+	fun connectToBluetooth(device: BluetoothDevice , context: Context) {
 		// Verificar permisos
 		val hasPermission =
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -50,9 +51,9 @@ class ConnectionViewModel (
 			}
 
 		if (!hasPermission) {
-			val permiso = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "BLUETOOTH_CONNECT" else "BLUETOOTH"
-
-			message = "Permiso $permiso denegado"
+			val permissionName =
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "BLUETOOTH_CONNECT" else "BLUETOOTH"
+			message = "Permiso $permissionName denegado"
 			return
 		}
 
@@ -71,9 +72,9 @@ class ConnectionViewModel (
 	}
 
 	/**
-	 * Send bluetooth char: envia un caracter por bluetooth al dispositivo conectado.
+	 * Envía un carácter por Bluetooth al dispositivo conectado.
 	 *
-	 * @param char caracter a enviar
+	 * @param char Carácter a enviar.
 	 */
 	private fun sendBluetoothChar(char: Char) {
 		try {
@@ -88,9 +89,10 @@ class ConnectionViewModel (
 	}
 
 	/**
-	 * Listen for bluetooth messages: comienza a escuchar mensajes entrantes. Se usa para detectar
-	 * mensajes entrantes por controles bluetooth para despues traducirlos a comandos de movimiento
-	 * para el robot conectado.
+	 * Comienza a escuchar mensajes entrantes por Bluetooth.
+	 *
+	 * Esta funcion se usa para detectar mensajes recibidos desde controles Bluetooth
+	 * y traducirlos en comandos de movimiento para el robot conectado.
 	 */
 	fun listenForBluetoothMessages() {
 		try {
@@ -103,27 +105,26 @@ class ConnectionViewModel (
 	}
 
 	/**
-	 * Prove bluetooth devices: verifica si el conjunto de dispositivos bluetooth tiene dispocitivos
-	 * o esta vacio
+	 * Verifica si el conjunto de dispositivos Bluetooth disponibles no está vacío.
 	 *
-	 * @param setOfDevices set de dispocitivos bluetooth a verificar
-	 * @return retorna un boolean true si la lista tiene dispocitivos y false en caso contrario
+	 * @param setOfDevices Conjunto de dispositivos Bluetooth a verificar.
+	 * @return `true` si hay dispositivos disponibles, `false` en caso contrario.
 	 */
-	fun proveBluetoothDevices(setOfDevices: Set<BluetoothDevice>): Boolean {
-		if (setOfDevices.isEmpty()){
+	fun verifyBluetoothDevices(setOfDevices: Set<BluetoothDevice>): Boolean {
+		if (setOfDevices.isEmpty()) {
 			message = "No hay dispositivos Bluetooth disponibles"
 			return false
 		}
 		return true
 	}
 
-	//* wifi
+	// * Wi-Fi *
 	/**
-	 * Conect to wifi: resivé una ip y se intenta conectar a la misama
+	 * Conecta a un dispositivo mediante Wi-Fi usando una dirección IP.
 	 *
-	 * @param ip ip en formato string a la que se esta intentando conectar
+	 * @param ip Dirección IP a la que se intentará conectar.
 	 */
-	fun conectToWifi(ip: String) {
+	fun connectToWifi(ip: String) {
 		try {
 			wifiConnectionManager.connectToIp(ip)
 			message = "Conectado a $ip"
@@ -143,9 +144,9 @@ class ConnectionViewModel (
 	}
 
 	/**
-	 * Send wifi char: se resive un caracter y se lo envia a el dispocitivo al que se conecto por ip
+	 * Envía un carácter por Wi-Fi al dispositivo conectado.
 	 *
-	 * @param char caracter a enviar
+	 * @param char Carácter a enviar.
 	 */
 	private fun sendWifiChar(char: Char) {
 		try {
@@ -164,18 +165,19 @@ class ConnectionViewModel (
 			message = "Error desconocido"
 		}
 	}
-	//* general
+
+	// * General *
 	/**
-	 * Clean message: se limpia el mensaje de error
+	 * Limpia el mensaje actual de error o confirmación.
 	 */
 	fun cleanMessage() {
 		message = null
 	}
 
 	/**
-	 * Send char: se resivé un char y se envia por bluetooth o wifi dependiendo el caso
+	 * Envía un carácter por Bluetooth o Wi-Fi según la conexión activa.
 	 *
-	 * @param char caracter a enviar
+	 * @param char Carácter a enviar.
 	 */
 	fun sendChar(char: Char) {
 		if (isBluetooth) {
