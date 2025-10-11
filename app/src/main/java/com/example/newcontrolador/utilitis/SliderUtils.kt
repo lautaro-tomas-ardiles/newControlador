@@ -18,17 +18,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import com.example.newcontrolador.ui.theme.Black
+import com.example.newcontrolador.connection.data.Buttons
+import com.example.newcontrolador.connection.data.DefaultButtonSize
 import com.example.newcontrolador.ui.theme.Blue
 import com.example.newcontrolador.ui.theme.DarkYellow
 import com.example.newcontrolador.ui.theme.LightYellow
 
+/**
+ * Componente de slider para configuración de propiedades de botones u otros elementos.
+ *
+ * Muestra un slider junto con una imagen representativa, un valor numérico y un botón para
+ * reiniciar el valor a su predeterminado según el tipo de configuración (ancho, alto o padding).
+ *
+ * @param value Valor actual del slider.
+ * @param onValueChange Función que se ejecuta al cambiar el valor del slider.
+ * @param textForReset Texto que se mostrará en el botón de reinicio. Por defecto `"Reset"`.
+ * @param typeForReset Tipo de valor que se debe reiniciar. Por defecto `Buttons.HEIGHT`.
+ * @param valueRange Rango permitido para el slider (`ClosedFloatingPointRange<Float>`).
+ * @param ruta Imagen representativa que se mostrará al inicio del slider.
+ */
 @Composable
 fun SliderForConfiguration(
 	value: Float,
 	onValueChange: (Float) -> Unit,
 	textForReset: String = "Reset",
-	typeForReset: ButtonSize = ButtonSize.HEIGHT,
+	typeForReset: Buttons = Buttons.HEIGHT,
 	valueRange: ClosedFloatingPointRange<Float>,
 	ruta: Painter
 ) {
@@ -87,9 +101,9 @@ fun SliderForConfiguration(
 
 			SimpleButton(textForReset) {
 				when (typeForReset) {
-					ButtonSize.WIDTH -> onValueChange(defaultButtonSize.width)
-					ButtonSize.HEIGHT -> onValueChange(defaultButtonSize.height)
-					ButtonSize.PADDING -> onValueChange(defaultButtonSize.padding)
+					Buttons.WIDTH -> onValueChange(defaultButtonSize.width)
+					Buttons.HEIGHT -> onValueChange(defaultButtonSize.height)
+					Buttons.PADDING -> onValueChange(defaultButtonSize.padding)
 				}
 			}
 		}

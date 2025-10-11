@@ -36,12 +36,21 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.Directions
-import com.example.newcontrolador.connection.Modes
+import com.example.newcontrolador.connection.data.Buttons
+import com.example.newcontrolador.connection.data.DefaultButtonSize
+import com.example.newcontrolador.connection.data.Directions
+import com.example.newcontrolador.connection.data.Modes
+import com.example.newcontrolador.connection.data.SliderConfig
 import com.example.newcontrolador.navigation.AppScreen
 import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.Blue
 
+/**
+ * TopBar genérica con título y botón de navegación.
+ *
+ * @param text Texto que se mostrará en la barra superior.
+ * @param navController Controlador de navegación para manejar la acción de retroceso.
+ */
 @Composable
 fun TopBar2(text: String, navController: NavController) {
 	TopAppBar(
@@ -53,7 +62,7 @@ fun TopBar2(text: String, navController: NavController) {
 		},
 		navigationIcon = {
 			Row {
-				IconsButtons(
+				IconsButtonsCustom(
 					onClick = {
 						navController.navigate(AppScreen.MainPage.route)
 					},
@@ -68,6 +77,16 @@ fun TopBar2(text: String, navController: NavController) {
 	)
 }
 
+/**
+ * Sección izquierda de la TopBar en la página principal.
+ *
+ * Muestra un switch para alternar Bluetooth/WiFi, un botón para conectarse al robot
+ * y un menú desplegable de dispositivos disponibles.
+ *
+ * @param onBluetoothChange Función que se ejecuta al cambiar el estado del Bluetooth.
+ * @param connectionManager Manager para manejar conexiones Bluetooth/WiFi.
+ * @param bluetoothAdapter Adaptador Bluetooth del dispositivo.
+ */
 @Composable
 private fun TopBarForMainPageStart(
 	onBluetoothChange: (Boolean) -> Unit,
@@ -125,22 +144,16 @@ private fun TopBarForMainPageStart(
 					text = "Conecte a el robot :",
 					isBluetooth = true
 				) {
-					if (connectionManager.proveBluetoothDevices(pairedDevices)) {
+					if (connectionManager.verifyBluetoothDevices(pairedDevices)) {
 						menuDevicesState = !menuDevicesState
 					}
 				}
 				BluetoothDropMenu(
 					state = menuDevicesState,
 					onStateChange = { menuDevicesState = it },
-					content = {
-						pairedDevices.forEach { device ->
-							DeviceItem(device) {
-								connectionManager.conectToBluetoth(device, context)
-								connectionManager.listenForBluetoothMessages()
-								menuDevicesState = false
-							}
-						}
-					}
+					setOfDevices = pairedDevices,
+					connectionManager = connectionManager,
+					context = context
 				)
 			} else {
 				WifiTextField(
@@ -154,13 +167,24 @@ private fun TopBarForMainPageStart(
 	}
 }
 
+/**
+ * Sección derecha de la TopBar en la página principal.
+ *
+ * Muestra los menús de modos, diagramas y configuración de sliders para botones.
+ *
+ * @param modeSelected Función que se ejecuta al seleccionar un modo.
+ * @param navController Controlador de navegación para los diagramas.
+ * @param onChangeButtonHeight Función que actualiza la altura de los botones.
+ * @param onChangeButtonWidth Función que actualiza el ancho de los botones.
+ * @param onChangePadding Función que actualiza el padding de los botones.
+ */
 @Composable
 private fun TopBarForMainPageEnd(
 	modeSelected: (Modes) -> Unit,
 	navController: NavController,
-	buttonHeight: (Int) -> Unit,
-	buttonWidth: (Int) -> Unit,
-	padding: (Int) -> Unit
+	onChangeButtonHeight: (Int) -> Unit,
+	onChangeButtonWidth: (Int) -> Unit,
+	onChangePadding: (Int) -> Unit
 ) {
 	val defaultButtonSize = DefaultButtonSize()
 	var buttonHeight by remember { mutableFloatStateOf(defaultButtonSize.height) }
@@ -174,21 +198,54 @@ private fun TopBarForMainPageEnd(
 
 	var menuSettingState by remember { mutableStateOf(false) }
 
-	val allDirectionsAndModes = remember {
-		listOf(
-			Directions.UP,
-			Directions.DOWN,
-			Directions.LEFT,
-			Directions.RIGHT,
-			Directions.UP_LEFT,
-			Directions.UP_RIGHT,
-			Directions.DOWN_LEFT,
-			Directions.DOWN_RIGHT,
-			Directions.STOP,
-			Modes.MANUAL,
-			Modes.AUTOMATA
+	val modes = setOf(
+		Modes.AUTOMATA ,
+		Modes.MANUAL
+	)
+
+	val directions = setOf(
+		Directions.UP ,
+		Directions.DOWN ,
+		Directions.LEFT ,
+		Directions.RIGHT ,
+		Directions.UP_LEFT ,
+		Directions.UP_RIGHT ,
+		Directions.DOWN_LEFT ,
+		Directions.DOWN_RIGHT ,
+		Directions.STOP
+	)
+
+	val slidersList = listOf(
+		SliderConfig(
+			value = buttonHeight,
+			onValueChange = {
+				buttonHeight = it
+				onChangeButtonHeight(it.toInt())
+			},
+			valueRange = 100f..300f,
+			ruta = painterResource(id = R.drawable.group_3)
+		),
+		SliderConfig(
+			value = buttonWidth,
+			onValueChange = {
+				buttonWidth = it
+				onChangeButtonWidth(it.toInt())
+			},
+			valueRange = 100f..300f,
+			typeForReset = Buttons.WIDTH,
+			ruta = painterResource(id = R.drawable.group_1)
+		),
+		SliderConfig(
+			value = paddings,
+			onValueChange = {
+				paddings = it
+				onChangePadding(it.toInt())
+			},
+			valueRange = 0f..50f,
+			typeForReset = Buttons.PADDING,
+			ruta = painterResource(id = R.drawable.group_4__1_)
 		)
-	}
+	)
 
 	Row(
 		horizontalArrangement = Arrangement.End,
@@ -204,26 +261,13 @@ private fun TopBarForMainPageEnd(
 			ModeDropMenu(
 				state = menuModeState,
 				onStateChange = { menuModeState = it },
-				content = {
-					ModeIcon(
-						text = "Automata",
-						onClick = {
-							modeSelect = Modes.AUTOMATA
-							menuModeState = false
-							modeSelected(modeSelect)
-						},
-						stateOfItem = modeSelect == Modes.AUTOMATA
-					)
-					ModeIcon(
-						text = "control manual",
-						onClick = {
-							modeSelect = Modes.MANUAL
-							menuModeState = false
-							modeSelected(modeSelect)
-						},
-						stateOfItem = modeSelect == Modes.MANUAL
-					)
-				}
+				setOfModes = modes,
+				onClick = { mode ->
+					modeSelect = mode
+					menuModeState = false
+					modeSelected(mode)
+				},
+				modeSelect = modeSelect
 			)
 		}
 		Spacer(Modifier.width(10.dp))
@@ -253,55 +297,36 @@ private fun TopBarForMainPageEnd(
 		Spacer(modifier = Modifier.width(10.dp))
 
 		Row(verticalAlignment = Alignment.CenterVertically) {
-			IconsButtons(
+			IconsButtonsCustom(
 				onClick = { menuSettingState = !menuSettingState },
 				isSolidColor = false,
 			)
 			SettingsDropMenu(
 				state = menuSettingState,
 				onStateChange = { menuSettingState = it },
-				content = {
-					// items para cambiar los tamaños de los botones y padding
-					SliderForConfiguration(
-						value = buttonWidth,
-						onValueChange = {
-							buttonWidth = it
-							buttonWidth(it.toInt())
-						},
-						typeForReset = ButtonSize.WIDTH,
-						valueRange = 100f..300f,
-						ruta = painterResource(id = R.drawable.group_1)
-					)
-					SliderForConfiguration(
-						value = buttonHeight,
-						onValueChange = {
-							buttonHeight = it
-							buttonHeight(it.toInt())
-						},
-						valueRange = 100f..300f,
-						ruta = painterResource(id = R.drawable.group_3)
-					)
-					SliderForConfiguration(
-						value = paddings,
-						onValueChange = {
-							paddings = it
-							padding(it.toInt())
-						},
-						typeForReset = ButtonSize.PADDING,
-						valueRange = 0f..50f,
-						ruta = painterResource(id = R.drawable.group_4__1_)
-					)
-					// items para cambiar los caracteres de las direcciones y modos
-					allDirectionsAndModes.forEach { it ->
-						SettingsItem(it)
-					}
-				}
+				setOfDirections = directions,
+				setOfModes = modes,
+				listOfSliders = slidersList
 			)
 		}
 	}
 
 }
 
+/**
+ * TopBar completa para la página principal.
+ *
+ * Combina la sección izquierda (Bluetooth/WiFi) y derecha (modos, diagramas, sliders) en un
+ * solo componente con fondo azul.
+ *
+ * @param bluetoothAdapter Adaptador Bluetooth del dispositivo.
+ * @param connectionManager Manager de conexión Bluetooth/WiFi.
+ * @param navController Controlador de navegación.
+ * @param modeSelected Función que se ejecuta al seleccionar un modo.
+ * @param buttonWidthValue Función que actualiza el ancho de los botones.
+ * @param buttonHeightValue Función que actualiza la altura de los botones.
+ * @param paddingValues Función que actualiza el padding de los botones.
+ */
 @Composable
 fun TopBarForMainPage(
 	bluetoothAdapter: BluetoothAdapter,
@@ -328,9 +353,9 @@ fun TopBarForMainPage(
 		TopBarForMainPageEnd(
 			modeSelected = { modeSelected(it) },
 			navController = navController,
-			buttonHeight = { buttonHeightValue(it) },
-			buttonWidth = { buttonWidthValue(it) },
-			padding = { paddingValues(it) }
+			onChangeButtonHeight = { buttonHeightValue(it) },
+			onChangeButtonWidth = { buttonWidthValue(it) },
+			onChangePadding = { paddingValues(it) }
 		)
 	}
 }

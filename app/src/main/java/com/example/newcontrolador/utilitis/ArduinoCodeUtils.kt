@@ -12,8 +12,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.ui.theme.Black2
 
+/**
+ * Componente que muestra código de Arduino con formato de bloque.
+ *
+ * Presenta el texto recibido dentro de un contenedor con fondo oscuro y tipografía monoespaciada,
+ * imitando el estilo de un bloque de código. Permite seleccionar el texto para copiarlo fácilmente.
+ *
+ * @param text Código fuente de Arduino que se mostrará en el componente.
+ */
 @Composable
-fun CodigoArduino(text: String) {
+fun ArduinoCode(text: String) {
 	Box(
 		Modifier
 			.background(Black2)

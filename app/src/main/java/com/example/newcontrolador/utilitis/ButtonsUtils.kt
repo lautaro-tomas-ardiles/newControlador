@@ -33,14 +33,26 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.R
-import com.example.newcontrolador.connection.Directions
+import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.DarkGreen
 import com.example.newcontrolador.ui.theme.LightGreen
 import com.example.newcontrolador.ui.theme.LightYellow
 
+/**
+ * Botón direccional para control de movimiento.
+ *
+ * Muestra un botón con una flecha que indica la dirección especificada (arriba, abajo, izquierda o derecha).
+ * Detecta la presión y liberación del botón para enviar eventos personalizados.
+ *
+ * @param direction Dirección del botón (UP, DOWN, LEFT o RIGHT).
+ * @param onPress Función que se ejecuta cuando el botón es presionado.
+ * @param onRelease Función que se ejecuta cuando el botón es liberado.
+ * @param width Ancho del botón en dp.
+ * @param height Alto del botón en dp.
+ */
 @Composable
-fun Button(
+fun DirectionButton(
 	direction: Directions,
 	onPress: (Directions) -> Unit,
 	onRelease: (Directions) -> Unit,
@@ -67,14 +79,14 @@ fun Button(
 						onPress(direction)
 						tryAwaitRelease()
 						onRelease(direction)
-					},
+					}
 				)
 			},
 		contentAlignment = Alignment.Center
 	) {
 		Icon(
 			imageVector = arrowDirection,
-			contentDescription = null,
+			contentDescription = "Flecha de dirección $direction",
 			modifier = Modifier
 				.size(70.dp)
 				.background(LightYellow, CircleShape),
@@ -83,8 +95,21 @@ fun Button(
 	}
 }
 
+/**
+ * Botón icónico configurable.
+ *
+ * Muestra un botón con un ícono, que puede ser sólido o transparente, con o sin borde.
+ * Puede mostrar un ícono especial de Bluetooth según el parámetro.
+ *
+ * @param onClick Acción que se ejecuta al presionar el botón.
+ * @param isSolidColor Indica si el fondo debe ser sólido `true` o transparente `false`.
+ * @param isBluetooth Si es `true`, muestra el ícono personalizado de Bluetooth.
+ * @param border Si es `true`, muestra un borde alrededor del botón.
+ * @param tintColor Color del ícono cuando no es Bluetooth.
+ * @param imageVector Ícono a mostrar (por defecto, el ícono de ajustes).
+ */
 @Composable
-fun IconsButtons(
+fun IconsButtonsCustom(
 	onClick: () -> Unit,
 	isSolidColor: Boolean = false,
 	isBluetooth: Boolean = false,
@@ -108,13 +133,13 @@ fun IconsButtons(
 		if (isBluetooth) {
 			Icon(
 				painter = painterResource(R.drawable.group_11),
-				contentDescription = null,
+				contentDescription = "Ícono de Bluetooth",
 				tint = Black
 			)
 		} else {
 			Icon(
 				imageVector = imageVector,
-				contentDescription = null,
+				contentDescription = "Ícono de acción",
 				tint = tintColor,
 				modifier = Modifier.size(30.dp)
 			)
@@ -122,6 +147,16 @@ fun IconsButtons(
 	}
 }
 
+/**
+ * Componente combinado de texto y botón.
+ *
+ * Muestra un texto acompañado de un botón icónico (por ejemplo, configuración o Bluetooth).
+ *
+ * @param text Texto que se muestra junto al botón.
+ * @param imageVector Ícono del botón (por defecto, el ícono de opciones verticales).
+ * @param isBluetooth Si es `true`, el botón adopta el estilo especial de Bluetooth.
+ * @param onClick Acción que se ejecuta al presionar el botón.
+ */
 @Composable
 fun TextAndButton(
 	text: String,
@@ -136,7 +171,7 @@ fun TextAndButton(
 	)
 	Spacer(modifier = Modifier.padding(3.dp))
 
-	IconsButtons(
+	IconsButtonsCustom(
 		onClick = { onClick() },
 		border = !isBluetooth, // si es bluetooth no debe tener borde
 		imageVector = imageVector,
@@ -145,16 +180,24 @@ fun TextAndButton(
 	)
 }
 
+/**
+ * Botón simple con texto.
+ *
+ * Muestra un botón básico con fondo amarillo y texto negro.
+ *
+ * @param text Texto que se muestra en el botón.
+ * @param onClick Acción que se ejecuta al presionar el botón.
+ */
 @Composable
 fun SimpleButton(
 	text: String,
 	onClick: () -> Unit
-){
+) {
 	Button(
 		onClick = {	onClick() },
 		colors = ButtonDefaults.buttonColors(
 			containerColor = LightYellow
-		),
+		)
 	) {
 		Text(
 			text = text,
