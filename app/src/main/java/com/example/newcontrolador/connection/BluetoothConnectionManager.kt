@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
+import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.exceptions.*
 import java.io.IOException
 import java.util.UUID
