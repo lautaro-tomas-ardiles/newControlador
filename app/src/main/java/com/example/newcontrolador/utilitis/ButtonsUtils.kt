@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -141,4 +143,22 @@ fun TextAndButton(
 		isBluetooth = isBluetooth,
 		isSolidColor = isBluetooth // si es el boton de bluetooth tiene que ser solido
 	)
+}
+
+@Composable
+fun SimpleButton(
+	text: String,
+	onClick: () -> Unit
+){
+	Button(
+		onClick = {	onClick() },
+		colors = ButtonDefaults.buttonColors(
+			containerColor = LightYellow
+		),
+	) {
+		Text(
+			text = text,
+			color = Black
+		)
+	}
 }

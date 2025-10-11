@@ -68,7 +68,6 @@ fun SettingsItem(directionOrMode: Any) {
 	}
 	var newDirection by remember { mutableStateOf("") }
 	var isError by remember { mutableStateOf(false) }
-	isError = newDirection.length > 1
 
 	Card(
 		modifier = Modifier
@@ -81,15 +80,11 @@ fun SettingsItem(directionOrMode: Any) {
 	) {
 		Spacer(Modifier.padding(5.dp))
 
-		Row(
-			verticalAlignment = Alignment.CenterVertically
-		) {
+		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.padding(5.dp))
 
-			Text(
-				text = text,
-				color = Black
-			)
+			Text(text = text, color = Black)
+
 			Spacer(Modifier.padding(10.dp))
 
 			OutlinedTextField(
@@ -112,6 +107,9 @@ fun SettingsItem(directionOrMode: Any) {
 							Modes.MANUAL -> Modes.MANUAL.char = newChar
 							Modes.AUTOMATA -> Modes.AUTOMATA.char = newChar
 						}
+						isError = false
+					} else {
+						isError = true
 					}
 				},
 				placeholder = {
