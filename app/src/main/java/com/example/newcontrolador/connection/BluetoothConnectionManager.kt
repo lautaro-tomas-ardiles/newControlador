@@ -12,15 +12,31 @@ import com.example.newcontrolador.exceptions.*
 import java.io.IOException
 import java.util.UUID
 
+/**
+ * Gestor de conexión Bluetooth que maneja conexiones con múltiples dispositivos (p. ej. HC-05 / HC-06).
+ * Permite conectar, enviar datos y escuchar información desde dispositivos conectados.
+ */
 class BluetoothConnectionManager {
-	private val sockets = mutableMapOf<String, BluetoothSocket>()
 
-	@Throws(Exception::class)
-	fun connectToDevice(device: BluetoothDevice, context: Context) {
-		// UUID estándar para comunicación SPP con HC-05 o HC-06
-		val uuidPorDefecto = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+    // * Mapa de direcciones MAC a sockets Bluetooth activos. *
+    private val sockets = mutableMapOf<String, BluetoothSocket>()
 
-		// Verificar permisos
+    // * UUID estándar para comunicación SPP (Serial Port Profile). *
+    private val defaultUuid: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+
+    /**
+     * Intenta conectar con un dispositivo Bluetooth.
+     *
+     * @param device Dispositivo Bluetooth destino.
+     * @param context Contexto necesario para verificar permisos.
+     * @throws BluetoothPermissionException Si no se tienen los permisos necesarios.
+     * @throws BluetoothSecurityException Si ocurre un error de seguridad.
+     * @throws BluetoothConnectionFailedException Si no se logra conectar al dispositivo.
+     */
+    @Throws(Exception::class)
+    fun connectToDevice(device: BluetoothDevice, context: Context) {
+
+        // Verificación de permisos dinámica según versión de Android
 		val hasPermission =
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 				ActivityCompat.checkSelfPermission(
@@ -45,7 +61,7 @@ class BluetoothConnectionManager {
 		}
 
 		try {
-			val uuid = device.uuids?.firstOrNull()?.uuid ?: uuidPorDefecto
+			val uuid = device.uuids?.firstOrNull()?.uuid ?: defaultUuid
 			val socket = device.createRfcommSocketToServiceRecord(uuid)
 			socket.connect()
 			sockets[device.address] = socket
@@ -56,13 +72,20 @@ class BluetoothConnectionManager {
 		}
 	}
 
+	/**
+	 * Envía un carácter a todos los dispositivos Bluetooth conectados.
+	 *
+	 * @param char Carácter a enviar.
+	 * @throws BluetoothDeviceNotFoundException Si no hay dispositivos conectados.
+	 * @throws BluetoothSendFailedException Si falla el envío de datos.
+	 */
 	@Throws(Exception::class)
 	fun sendCharBluetooth(char: Char) {
 		if (sockets.isEmpty()) {
 			throw BluetoothDeviceNotFoundException("No hay dispositivos Bluetooth conectados")
 		}
-
 		val iterator = sockets.iterator()
+
 		while (iterator.hasNext()) {
 			val entry = iterator.next()
 			try {
@@ -75,6 +98,9 @@ class BluetoothConnectionManager {
 		}
 	}
 
+	/**
+	 * Traduce caracteres de entrada en comandos definidos por el enum [Directions].
+	 */
 	private fun translateChar(c: Char): Char {
 		return when (c) {
 			'u' -> Directions.UP.char
@@ -90,6 +116,12 @@ class BluetoothConnectionManager {
 		}
 	}
 
+    /**
+     * Escucha datos entrantes de todos los dispositivos conectados en hilos separados.
+     * Cada dato recibido se traduce y reenvía mediante [sendCharBluetooth].
+     *
+     * @throws BluetoothReadException Si ocurre un error al leer los datos.
+     */
 	@Throws(Exception::class)
 	fun listenForAllDevices() {
 		for ((_, socket) in sockets) {
@@ -116,4 +148,3 @@ class BluetoothConnectionManager {
 		}
 	}
 }
-

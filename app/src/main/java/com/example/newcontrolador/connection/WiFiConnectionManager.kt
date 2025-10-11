@@ -8,11 +8,29 @@ import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.UnknownHostException
 
+/**
+ * Gestor de conexión WiFi para comunicarse con un dispositivo mediante HTTP.
+ *
+ * Permite conectarse a un IP específica y enviar caracteres como comandos.
+ */
 class WiFiConnectionManager {
+
+	//* IP del dispositivo al que estamos conectados. *
 	private var espIp: String? = null
 
+	/**
+	 * Intenta conectar a un dispositivo mediante su IP.
+	 *
+	 * @param ip IP del dispositivo (formato "192.168.x.x").
+	 * @throws InvalidIpException Si el formato de la IP es incorrecto.
+	 * @throws ConnectionTimeoutException Si la conexión tarda demasiado.
+	 * @throws DeviceNotFoundException Si no se encuentra el host.
+	 * @throws ConnectionFailedException Si ocurre cualquier otro fallo de conexión.
+	 * @throws UnexpectedResponseException Si la respuesta HTTP no es 200 OK.
+	 */
 	@Throws(Exception::class)
 	fun connectToIp(ip: String) {
+
 		// Validar formato básico de IP
 		if (!ip.matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$"))) {
 			throw InvalidIpException("Formato de IP inválido: $ip")
@@ -32,19 +50,29 @@ class WiFiConnectionManager {
 			if (responseCode == 200) {
 				espIp = ip
 			} else {
-				throw UnexpectedResponseException("respondió con código: $responseCode")
+				throw UnexpectedResponseException("Respondió con código: $responseCode")
 			}
 		} catch (_: SocketTimeoutException) {
 			throw ConnectionTimeoutException("Tiempo de espera agotado al conectar con $ip")
 		} catch (_: UnknownHostException) {
 			throw DeviceNotFoundException("No se encontró el host: $ip")
 		} catch (_: ConnectException) {
-			throw ConnectionFailedException("No se pudo conectar al dispositivo")
+			throw ConnectionFailedException("No se pudo conectar al dispositivo $ip")
 		} catch (e: IOException) {
 			throw ConnectionFailedException("Error de conexión: ${e.message}")
 		}
 	}
 
+	/**
+	 * Envía un carácter al dispositivo conectado mediante HTTP.
+	 *
+	 * @param char Carácter a enviar como comando.
+	 * @throws InvalidIpException Si no hay una IP configurada.
+	 * @throws ConnectionTimeoutException Si la conexión tarda demasiado.
+	 * @throws DeviceNotFoundException Si no se encuentra el dispositivo.
+	 * @throws ConnectionFailedException Si ocurre cualquier otro fallo de conexión.
+	 * @throws SendCharFailedException Si la respuesta HTTP no es 200 OK.
+	 */
 	@Throws(Exception::class)
 	fun sendCharWifi(char: Char) {
 		val ip = espIp ?: throw InvalidIpException("No hay una IP configurada")
@@ -62,18 +90,17 @@ class WiFiConnectionManager {
 			connection.disconnect()
 
 			if (responseCode != 200) {
-				throw SendCharFailedException("error $responseCode al enviar '$char'")
+				throw SendCharFailedException("Error $responseCode al enviar '$char'")
 			}
 
 		} catch (_: SocketTimeoutException) {
-			throw ConnectionTimeoutException("Tiempo de espera agotado")
+			throw ConnectionTimeoutException("Tiempo de espera agotado al enviar '$char'")
 		} catch (_: UnknownHostException) {
 			throw DeviceNotFoundException("No se encontró el dispositivo")
 		} catch (_: ConnectException) {
-			throw ConnectionFailedException("No se pudo conectar")
+			throw ConnectionFailedException("No se pudo conectar al dispositivo")
 		} catch (e: IOException) {
 			throw SendCharFailedException("Error de conexión: ${e.message}")
 		}
 	}
-
 }
