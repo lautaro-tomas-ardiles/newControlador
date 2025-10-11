@@ -47,9 +47,10 @@ import com.example.newcontrolador.utilitis.DefaultButtonSize
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.TopBarForMainPage
 import com.example.newcontrolador.utilitis.getDirectionChar
+import kotlinx.coroutines.delay
 
 @Composable
-fun Indicators(pressedButton: Set<Directions>) {
+private fun Indicators(pressedButton: Set<Directions>) {
 	val colorUp = if (Directions.UP in pressedButton) DarkYellow else Blue
 	val colorDown = if (Directions.DOWN in pressedButton) DarkYellow else Blue
 	val colorLeft = if (Directions.LEFT in pressedButton) DarkYellow else Blue
@@ -92,13 +93,29 @@ fun Indicators(pressedButton: Set<Directions>) {
 }
 
 @Composable
-fun GridButton(
+private fun GridButton(
 	conectionManager: ConnectionViewModel,
 	buttonHeight: Int,
 	buttonWidth: Int,
 	padding: Int
 ) {
 	var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
+	var isPressed by remember { mutableStateOf(false) }
+
+    // Este efecto se ejecuta mientras el botón esté presionado
+    LaunchedEffect(isPressed, directionsPressed) {
+        if (isPressed && directionsPressed.isNotEmpty()) {
+            while (isPressed) {
+                conectionManager.sendChar(getDirectionChar(directionsPressed))
+                delay(50L) // cada 50 ms
+            }
+        } else {
+			while (!isPressed) {
+				conectionManager.sendChar(Directions.STOP.char)
+				delay(50L)
+			}
+        }
+    }
 
 	Row(
 		Modifier.fillMaxSize(),
@@ -111,12 +128,14 @@ fun GridButton(
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-					conectionManager.sendChar(getDirectionChar(directionsPressed))
+					isPressed = true
 				},
 				onRelease = {
 					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-					conectionManager.sendChar(Directions.STOP.char)
+					if (directionsPressed.isEmpty()) {
+						isPressed = false
+					}
 				},
 				height = buttonHeight,
 				width = buttonWidth
@@ -128,12 +147,14 @@ fun GridButton(
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-					conectionManager.sendChar(getDirectionChar(directionsPressed))
+					isPressed = true
 				},
 				onRelease = {
 					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-					conectionManager.sendChar(Directions.STOP.char)
+					if (directionsPressed.isEmpty()) {
+						isPressed = false
+					}
 				},
 				height = buttonHeight,
 				width = buttonWidth
@@ -148,12 +169,14 @@ fun GridButton(
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-					conectionManager.sendChar(getDirectionChar(directionsPressed))
+					isPressed = true
 				},
 				onRelease = {
 					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-					conectionManager.sendChar(Directions.STOP.char)
+					if (directionsPressed.isEmpty()) {
+						isPressed = false
+					}
 				},
 				height = buttonHeight,
 				width = buttonWidth
@@ -165,12 +188,14 @@ fun GridButton(
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-					conectionManager.sendChar(getDirectionChar(directionsPressed))
+					isPressed = true
 				},
 				onRelease = {
 					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-					conectionManager.sendChar(Directions.STOP.char)
+					if (directionsPressed.isEmpty()) {
+						isPressed = false
+					}
 				},
 				height = buttonHeight,
 				width = buttonWidth
@@ -231,7 +256,7 @@ fun MainScreen(
 				snackbarHostState,
 				modifier = Modifier
 					.wrapContentWidth()
-            		.wrapContentHeight()
+					.wrapContentHeight()
 			) { data ->
 				CustomSnackbar(data)
 			}
