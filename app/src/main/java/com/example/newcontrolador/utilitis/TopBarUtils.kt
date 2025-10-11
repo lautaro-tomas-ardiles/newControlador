@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.pm.PackageManager
 import android.os.Build
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -126,13 +125,7 @@ private fun TopBarForMainPageStart(
 					text = "Conecte a el robot :",
 					isBluetooth = true
 				) {
-					if (pairedDevices.isEmpty()) {
-						Toast.makeText(
-							context,
-							"No se encontraron dispositivos",
-							Toast.LENGTH_SHORT
-						).show()
-					} else {
+					if (connectionManager.proveBluetoothDevices(pairedDevices)) {
 						menuDevicesState = !menuDevicesState
 					}
 				}
@@ -232,7 +225,6 @@ private fun TopBarForMainPageEnd(
 					)
 				}
 			)
-
 		}
 		Spacer(Modifier.width(10.dp))
 
@@ -247,9 +239,11 @@ private fun TopBarForMainPageEnd(
 					DiagramaItem("ESP 32") {
 						navController.navigate(AppScreen.ESP32Page.route)
 					}
+					/*
 					DiagramaItem("ESP 8622") {
 						navController.navigate(AppScreen.ESP8622Page.route)
 					}
+					*/
 					DiagramaItem("Ardiuno y hc-05") {
 						navController.navigate(AppScreen.ArduinoOneAndHC05Page.route)
 					}
@@ -267,6 +261,7 @@ private fun TopBarForMainPageEnd(
 				state = menuSettingState,
 				onStateChange = { menuSettingState = it },
 				content = {
+					// items para cambiar los tamaños de los botones y padding
 					SliderForConfiguration(
 						value = buttonWidth,
 						onValueChange = {
@@ -296,6 +291,7 @@ private fun TopBarForMainPageEnd(
 						valueRange = 0f..50f,
 						ruta = painterResource(id = R.drawable.group_4__1_)
 					)
+					// items para cambiar los caracteres de las direcciones y modos
 					allDirectionsAndModes.forEach { it ->
 						SettingsItem(it)
 					}

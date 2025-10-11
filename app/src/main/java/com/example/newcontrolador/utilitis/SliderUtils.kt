@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -87,22 +85,12 @@ fun SliderForConfiguration(
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.width(5.dp))
 
-			Button(
-				onClick = {
-					when (typeForReset) {
-						ButtonSize.WIDTH -> onValueChange(defaultButtonSize.width)
-						ButtonSize.HEIGHT -> onValueChange(defaultButtonSize.height)
-						ButtonSize.PADDING -> onValueChange(defaultButtonSize.padding)
-					}
-				},
-				colors = ButtonDefaults.buttonColors(
-					containerColor = LightYellow
-				),
-			) {
-				Text(
-					text = textForReset,
-					color = Black
-				)
+			SimpleButton(textForReset) {
+				when (typeForReset) {
+					ButtonSize.WIDTH -> onValueChange(defaultButtonSize.width)
+					ButtonSize.HEIGHT -> onValueChange(defaultButtonSize.height)
+					ButtonSize.PADDING -> onValueChange(defaultButtonSize.padding)
+				}
 			}
 		}
 	}
