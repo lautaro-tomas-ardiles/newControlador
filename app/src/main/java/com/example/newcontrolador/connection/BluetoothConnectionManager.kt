@@ -48,7 +48,6 @@ class BluetoothConnectionManager {
 			val socket = device.createRfcommSocketToServiceRecord(uuid)
 			socket.connect()
 			sockets[device.address] = socket
-			true
 		} catch (_: SecurityException) {
 			throw BluetoothSecurityException("Falta de permisos")
 		} catch (_: IOException) {
