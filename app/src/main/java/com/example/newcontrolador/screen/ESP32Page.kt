@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
 import com.example.newcontrolador.ui.theme.LightYellow
-import com.example.newcontrolador.utilitis.CodigoArduino
+import com.example.newcontrolador.utilitis.ArduinoCode
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.TopBar2
 
@@ -58,7 +58,7 @@ fun MainESP32Page(navController: NavController) {
 			)
 			Spacer(Modifier.height(10.dp))
 
-			CodigoArduino(
+			ArduinoCode(
 				"""
                     #include <BluetoothSerial.h>
 

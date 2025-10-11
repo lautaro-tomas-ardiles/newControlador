@@ -2,6 +2,7 @@ package com.example.newcontrolador.utilitis
 
 import android.Manifest
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,22 +26,33 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.R
-import com.example.newcontrolador.connection.Directions
+import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.DarkGreen
 import com.example.newcontrolador.ui.theme.DarkYellow
 import com.example.newcontrolador.ui.theme.LightGreen
 import com.example.newcontrolador.ui.theme.LightYellow
 
-fun getDirectionChar(directionsPressed: Set<Directions>): Char {
-	return Directions.fromSet(directionsPressed).char
-}
-
+/**
+ * Menú desplegable de dispositivos Bluetooth.
+ *
+ * Muestra un menú con la lista de dispositivos Bluetooth disponibles para conexión.
+ * Al seleccionar un dispositivo, se intenta establecer la conexión.
+ *
+ * @param state Estado del menú. Si es `true`, el menú se muestra; de lo contrario, se oculta.
+ * @param onStateChange cambio de estado del menu. Cambia el estado del menu si se preciona fuera
+ * del menu o si se termina la conecxion con el dispocitivo.
+ * @param setOfDevices Conjunto de dispositivos Bluetooth disponibles para conexión.
+ * @param connectionManager ViewModel encargado de gestionar la conexión.
+ * @param context el contexto de la aplicacion en el momento dado.
+ */
 @Composable
 fun BluetoothDropMenu(
 	state: Boolean,
 	onStateChange: (Boolean) -> Unit,
-	content: @Composable () -> Unit
+	setOfDevices: Set<BluetoothDevice>,
+	connectionManager: ConnectionViewModel,
+	context: Context
 ) {
 	DropdownMenu(
 		expanded = state,
@@ -49,12 +61,26 @@ fun BluetoothDropMenu(
 			.background(DarkGreen)
 			.wrapContentSize()
 	) {
-		content()
+		setOfDevices.forEach { device ->
+			DeviceItem(device) {
+				connectionManager.connectToBluetooth(device, context)
+				connectionManager.listenForBluetoothMessages()
+				onStateChange(false)
+			}
+		}
 	}
 }
 
+/**
+ * Elemento visual de dispositivo Bluetooth dentro del menú.
+ *
+ * Muestra el nombre y dirección del dispositivo Bluetooth. Si se presiona, ejecuta la acción indicada.
+ *
+ * @param device Dispositivo Bluetooth a mostrar.
+ * @param onClick Acción a ejecutar al presionar el elemento.
+ */
 @Composable
-fun DeviceItem(
+private fun DeviceItem(
 	device: BluetoothDevice,
 	onClick: () -> Unit
 ) {
@@ -102,6 +128,14 @@ fun DeviceItem(
 	}
 }
 
+/**
+ * Interruptor para seleccionar el modo de conexión (Bluetooth o Wi-Fi).
+ *
+ * Muestra un `Switch` que cambia entre Bluetooth y Wi-Fi, mostrando un ícono representativo.
+ *
+ * @param bluetooth Estado actual del interruptor (`true` si Bluetooth está activo).
+ * @param onBluetoothChange Función que se ejecuta al cambiar el valor del interruptor.
+ */
 @Composable
 fun BluetoothSwitch(
 	bluetooth: Boolean,

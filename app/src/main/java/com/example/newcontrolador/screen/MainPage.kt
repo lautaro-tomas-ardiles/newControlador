@@ -35,18 +35,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.connection.BluetoothConnectionManager
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.Directions
-import com.example.newcontrolador.connection.Modes
+import com.example.newcontrolador.connection.data.Directions
+import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.connection.WiFiConnectionManager
+import com.example.newcontrolador.connection.data.DefaultButtonSize
 import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.Blue
 import com.example.newcontrolador.ui.theme.DarkYellow
-import com.example.newcontrolador.utilitis.Button
+import com.example.newcontrolador.utilitis.DirectionButton
 import com.example.newcontrolador.utilitis.CustomSnackbar
-import com.example.newcontrolador.utilitis.DefaultButtonSize
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.TopBarForMainPage
-import com.example.newcontrolador.utilitis.getDirectionChar
 import kotlinx.coroutines.delay
 
 @Composable
@@ -106,7 +105,7 @@ private fun GridButton(
     LaunchedEffect(isPressed, directionsPressed) {
         if (isPressed && directionsPressed.isNotEmpty()) {
             while (isPressed) {
-                conectionManager.sendChar(getDirectionChar(directionsPressed))
+                conectionManager.sendChar(Directions.charFromSet(directionsPressed))
                 delay(50L) // cada 50 ms
             }
         } else {
@@ -123,7 +122,7 @@ private fun GridButton(
 		horizontalArrangement = Arrangement.SpaceBetween
 	) {
 		Column {
-			Button(
+			DirectionButton(
 				direction = Directions.UP,
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
@@ -142,7 +141,7 @@ private fun GridButton(
 			)
 			Spacer(Modifier.padding(padding.dp))
 
-			Button(
+			DirectionButton(
 				direction = Directions.DOWN,
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
@@ -164,7 +163,7 @@ private fun GridButton(
 		Indicators(directionsPressed)
 
 		Row {
-			Button(
+			DirectionButton(
 				direction = Directions.LEFT,
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
@@ -183,7 +182,7 @@ private fun GridButton(
 			)
 			Spacer(Modifier.padding(padding.dp))
 
-			Button(
+			DirectionButton(
 				direction = Directions.RIGHT,
 				onPress = {
 					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }

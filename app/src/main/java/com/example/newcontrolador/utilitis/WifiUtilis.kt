@@ -9,7 +9,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.WiFiConnectionManager
 import com.example.newcontrolador.ui.theme.Black
 import com.example.newcontrolador.ui.theme.DarkYellow
 
@@ -26,9 +25,9 @@ fun WifiTextField(
 			Text("ingrese la IP", color = Black)
 		},
 		trailingIcon = {
-			IconsButtons(
+			IconsButtonsCustom(
 				onClick = {
-					connectionManager.conectToWifi(ip)
+					connectionManager.connectToWifi(ip)
 				},
 				tintColor = Black,
 				imageVector = Icons.AutoMirrored.Filled.Send
