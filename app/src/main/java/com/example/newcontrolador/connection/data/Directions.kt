@@ -1,4 +1,4 @@
-package com.example.newcontrolador.connection
+package com.example.newcontrolador.connection.data
 
 enum class Directions(var char: Char) {
 	UP('F'),
@@ -12,7 +12,7 @@ enum class Directions(var char: Char) {
 	STOP('S');
 
 	companion object {
-		fun fromSet(directions: Set<Directions>): Directions {
+		private fun fromSet(directions: Set<Directions>): Directions {
 			return when {
 				directions.contains(UP) && directions.contains(LEFT) -> UP_LEFT
 				directions.contains(UP) && directions.contains(RIGHT) -> UP_RIGHT
@@ -23,6 +23,24 @@ enum class Directions(var char: Char) {
 				directions.contains(LEFT) -> LEFT
 				directions.contains(RIGHT) -> RIGHT
 				else -> STOP
+			}
+		}
+
+		fun charFromSet(directions: Set<Directions>): Char {
+			return Directions.fromSet(directions).char
+		}
+
+		fun getDirectionsName(directions: Directions): String {
+			return when (directions) {
+				UP -> "Arriba"
+				DOWN -> "Abajo"
+				LEFT -> "Izquierda"
+				RIGHT -> "Derecha"
+				UP_LEFT -> "Arriba Izquierda"
+				UP_RIGHT -> "Arriba Derecha"
+				DOWN_LEFT -> "Abajo Izquierda"
+				DOWN_RIGHT -> "Abajo Derecha"
+				STOP -> "Detener"
 			}
 		}
 	}
