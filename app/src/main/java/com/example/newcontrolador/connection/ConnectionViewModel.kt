@@ -18,21 +18,22 @@ class ConnectionViewModel (
     private val wifiConnectionManager: WiFiConnectionManager
 ) : ViewModel() {
 
+	// indica si se está usando bluetooth o wifi
 	var isBluetooth by mutableStateOf(true)
 
+	// mensajes de error y de cumplimiento? (no sé escribir)
 	var message by mutableStateOf<String?>(null)
 		private set // solo se puede cambiar su valor aca dentro
 
-	fun sendChar(char: Char) {
-        if (isBluetooth) {
-            sendBluetoothChar(char)
-        } else {
-            sendWifiChar(char)
-        }
-    }
-
-	//bluetooth
-	@SuppressLint("MissingPermission")
+	//* Bluetooth
+	/**
+	 * Conect to bluetoth: se le pasa la informacion de un dispocitivo bluetooth,
+	 * e intenta conectarse a ese dispositivo.
+	 *
+	 * @param device dispositivo bluetooth al que se quiere conectar
+	 * @param context contexto de la aplicacion al momento de la conexion. Se usa para
+	 * verificar permisos.
+	 */
 	fun conectToBluetoth(device: BluetoothDevice, context: Context) {
 		// Verificar permisos
 		val hasPermission =
@@ -49,16 +50,12 @@ class ConnectionViewModel (
 			}
 
 		if (!hasPermission) {
-			val permiso =
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-					"BLUETOOTH_CONNECT"
-				} else {
-					"BLUETOOTH"
-				}
+			val permiso = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "BLUETOOTH_CONNECT" else "BLUETOOTH"
 
 			message = "Permiso $permiso denegado"
 			return
 		}
+
 		try {
 			bluetoothConnectionManager.connectToDevice(device, context)
 			message = "Conectado a ${device.name ?: device.address ?: "Dispositivo desconocido"}"
@@ -73,6 +70,11 @@ class ConnectionViewModel (
 		}
 	}
 
+	/**
+	 * Send bluetooth char: envia un caracter por bluetooth al dispositivo conectado.
+	 *
+	 * @param char caracter a enviar
+	 */
 	private fun sendBluetoothChar(char: Char) {
 		try {
 			bluetoothConnectionManager.sendCharBluetooth(char)
@@ -85,6 +87,11 @@ class ConnectionViewModel (
 		}
 	}
 
+	/**
+	 * Listen for bluetooth messages: comienza a escuchar mensajes entrantes. Se usa para detectar
+	 * mensajes entrantes por controles bluetooth para despues traducirlos a comandos de movimiento
+	 * para el robot conectado.
+	 */
 	fun listenForBluetoothMessages() {
 		try {
 			bluetoothConnectionManager.listenForAllDevices()
@@ -95,7 +102,27 @@ class ConnectionViewModel (
 		}
 	}
 
-	//wifi
+	/**
+	 * Prove bluetooth devices: verifica si el conjunto de dispositivos bluetooth tiene dispocitivos
+	 * o esta vacio
+	 *
+	 * @param setOfDevices set de dispocitivos bluetooth a verificar
+	 * @return retorna un boolean true si la lista tiene dispocitivos y false en caso contrario
+	 */
+	fun proveBluetoothDevices(setOfDevices: Set<BluetoothDevice>): Boolean {
+		if (setOfDevices.isEmpty()){
+			message = "No hay dispositivos Bluetooth disponibles"
+			return false
+		}
+		return true
+	}
+
+	//* wifi
+	/**
+	 * Conect to wifi: resivé una ip y se intenta conectar a la misama
+	 *
+	 * @param ip ip en formato string a la que se esta intentando conectar
+	 */
 	fun conectToWifi(ip: String) {
 		try {
 			wifiConnectionManager.connectToIp(ip)
@@ -115,6 +142,11 @@ class ConnectionViewModel (
 		}
 	}
 
+	/**
+	 * Send wifi char: se resive un caracter y se lo envia a el dispocitivo al que se conecto por ip
+	 *
+	 * @param char caracter a enviar
+	 */
 	private fun sendWifiChar(char: Char) {
 		try {
 			wifiConnectionManager.sendCharWifi(char)
@@ -132,8 +164,24 @@ class ConnectionViewModel (
 			message = "Error desconocido"
 		}
 	}
-
+	//* general
+	/**
+	 * Clean message: se limpia el mensaje de error
+	 */
 	fun cleanMessage() {
-        message = null
-    }
+		message = null
+	}
+
+	/**
+	 * Send char: se resivé un char y se envia por bluetooth o wifi dependiendo el caso
+	 *
+	 * @param char caracter a enviar
+	 */
+	fun sendChar(char: Char) {
+		if (isBluetooth) {
+			sendBluetoothChar(char)
+		} else {
+			sendWifiChar(char)
+		}
+	}
 }
