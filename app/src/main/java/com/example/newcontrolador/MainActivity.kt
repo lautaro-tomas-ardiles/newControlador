@@ -11,24 +11,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.ViewModelProvider
+import com.example.newcontrolador.data.DataStoreManager
+import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.data.DataStoreViewModelFactory
 import com.example.newcontrolador.navigation.AppNavigation
 import com.example.newcontrolador.ui.theme.NewControladorTheme
-import com.example.newcontrolador.ui.theme.ThemeType
-import androidx.core.content.edit
-
-val ThemeTypeStateSaver = Saver<MutableState<ThemeType>, String>(
-    save = { state -> state.value.name },
-    restore = { saved ->
-        mutableStateOf(ThemeType.valueOf(saved))
-    }
-)
 
 class MainActivity : ComponentActivity() {
 	private lateinit var bluetoothManager: BluetoothManager
@@ -77,25 +70,17 @@ class MainActivity : ComponentActivity() {
 			WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
 		//enableEdgeToEdge()
+		val viewModel =
+			ViewModelProvider(
+				this,
+				DataStoreViewModelFactory(DataStoreManager(this))
+			)[DataStoreViewModel::class.java]
+
 		setContent {
-			// leer tema guardado
-			val prefs = this@MainActivity.getSharedPreferences("newcontrolador_prefs", MODE_PRIVATE)
-			val savedName =
-				prefs.getString("theme", ThemeType.DEFAULT.name) ?: ThemeType.DEFAULT.name
+			val theme by viewModel.theme.collectAsState()
 
-			// estado del tema inicializado desde prefs
-			val currentThemeState = rememberSaveable(saver = ThemeTypeStateSaver) {
-				mutableStateOf(ThemeType.valueOf(savedName))
-			}
-
-			NewControladorTheme(
-				themeType = currentThemeState.value,
-			) {
-				AppNavigation(bluetoothAdapter) { themeType ->
-					currentThemeState.value = themeType
-					// guardar la selección para que otras pantallas/activities la puedan leer
-					prefs.edit { putString("theme", themeType.name) }
-				}
+			NewControladorTheme(themeType = theme) {
+				AppNavigation(bluetoothAdapter, viewModel)
 			}
 		}
 	}

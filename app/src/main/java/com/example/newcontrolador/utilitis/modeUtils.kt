@@ -60,10 +60,10 @@ private fun ModeItem(
  */
 @Composable
 fun ModeDropMenu(
-	state: Boolean ,
-	onStateChange: (Boolean) -> Unit ,
-	setOfModes: Set<Modes> ,
-	onClick: (Modes) -> Unit ,
+	state: Boolean,
+	onStateChange: (Boolean) -> Unit,
+	setOfModes: Set<Modes>,
+	onClick: (Modes) -> Unit,
 	modeSelect: Modes
 ) {
 	DropdownMenu(

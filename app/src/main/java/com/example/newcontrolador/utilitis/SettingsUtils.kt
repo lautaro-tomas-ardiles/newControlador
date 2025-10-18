@@ -2,12 +2,14 @@ package com.example.newcontrolador.utilitis
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -17,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
-import com.example.newcontrolador.connection.data.SliderConfig
+import com.example.newcontrolador.data.DataStoreViewModel
 
 /**
  * Elemento de configuración para un carácter asociado a una dirección.
@@ -35,12 +38,30 @@ import com.example.newcontrolador.connection.data.SliderConfig
  * `OutlinedTextField`. Valida que solo se ingrese un carácter y muestra error en caso contrario.
  *
  * @param directions Dirección a configurar.
+ * @param viewModel ViewModel para manejar el estado y las actualizaciones de los caracteres.
  */
 @Composable
-private fun SettingsItemForDirections(directions: Directions) {
+fun SettingsItemForDirections(
+	directions: Directions,
+	viewModel: DataStoreViewModel
+) {
 	val text = Directions.getDirectionsName(directions)
 
-	var newDirection by remember { mutableStateOf("") }
+	// Observa los valores actuales desde el ViewModel
+	val directionsState by viewModel.directionChars.collectAsState()
+	val currentChar = when (directions) {
+		Directions.UP -> directionsState.upChar
+		Directions.DOWN -> directionsState.downChar
+		Directions.LEFT -> directionsState.leftChar
+		Directions.RIGHT -> directionsState.rightChar
+		Directions.UP_LEFT -> directionsState.upLeftChar
+		Directions.UP_RIGHT -> directionsState.upRightChar
+		Directions.DOWN_LEFT -> directionsState.downLeftChar
+		Directions.DOWN_RIGHT -> directionsState.downRightChar
+		Directions.STOP -> directionsState.stopChar
+	}
+
+	var newDirection by remember { mutableStateOf(currentChar.toString()) }
 	var isError by remember { mutableStateOf(false) }
 
 	Card(
@@ -67,25 +88,17 @@ private fun SettingsItemForDirections(directions: Directions) {
 					newDirection = it
 
 					if (it.length == 1) {
-						val newChar = it[0]
-						when (directions) {
-							Directions.UP -> Directions.UP.char = newChar
-							Directions.DOWN -> Directions.DOWN.char = newChar
-							Directions.LEFT -> Directions.LEFT.char = newChar
-							Directions.RIGHT -> Directions.RIGHT.char = newChar
-							Directions.UP_LEFT -> Directions.UP_LEFT.char = newChar
-							Directions.UP_RIGHT -> Directions.UP_RIGHT.char = newChar
-							Directions.DOWN_LEFT -> Directions.DOWN_LEFT.char = newChar
-							Directions.DOWN_RIGHT -> Directions.DOWN_RIGHT.char = newChar
-							Directions.STOP -> Directions.STOP.char = newChar
-						}
+						viewModel.setDirectionChar(directions, it[0])
 						isError = false
 					} else {
 						isError = true
 					}
 				},
 				placeholder = {
-					Text(text = "${directions.char}", color = MaterialTheme.colorScheme.primary)
+					Text(
+						text = currentChar.toString(),
+						color = MaterialTheme.colorScheme.primary
+					)
 				},
 				singleLine = true,
 				colors = OutlinedTextFieldDefaults.colors(
@@ -110,12 +123,23 @@ private fun SettingsItemForDirections(directions: Directions) {
  * `OutlinedTextField`. Valida que solo se ingrese un carácter y muestra error en caso contrario.
  *
  * @param modes Modo a configurar.
+ * @param viewModel ViewModel para manejar el estado y las actualizaciones de los caracteres.
  */
 @Composable
-private fun SettingsItemForModes(modes: Modes) {
+fun SettingsItemForModes(
+	modes: Modes,
+	viewModel: DataStoreViewModel
+) {
 	val text = Modes.getModeName(modes)
 
-	var newMode by remember { mutableStateOf("") }
+	// Observa los valores actuales desde el ViewModel
+	val modesState by viewModel.modeChars.collectAsState()
+	val currentChar = when (modes) {
+		Modes.MANUAL -> modesState.modeManualChar
+		Modes.AUTOMATA -> modesState.modeAutomataChar
+	}
+
+	var newMode by remember { mutableStateOf(currentChar.toString()) }
 	var isError by remember { mutableStateOf(false) }
 
 	Card(
@@ -132,9 +156,11 @@ private fun SettingsItemForModes(modes: Modes) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.padding(5.dp))
 
-			Text(text = text, color = MaterialTheme.colorScheme.background)
-
-			Spacer(Modifier.padding(10.dp))
+			Text(
+				text = text,
+				color = MaterialTheme.colorScheme.background
+			)
+			Spacer(modifier = Modifier.width(10.dp))
 
 			OutlinedTextField(
 				value = newMode,
@@ -142,11 +168,7 @@ private fun SettingsItemForModes(modes: Modes) {
 					newMode = it
 
 					if (it.length == 1) {
-						val newChar = it[0]
-						when (modes) {
-							Modes.MANUAL -> Modes.MANUAL.char = newChar
-							Modes.AUTOMATA -> Modes.AUTOMATA.char = newChar
-						}
+						viewModel.setModeChar(modes, it[0])
 						isError = false
 					} else {
 						isError = true
@@ -154,7 +176,7 @@ private fun SettingsItemForModes(modes: Modes) {
 				},
 				placeholder = {
 					Text(
-						text = "${modes.char}",
+						text = currentChar.toString(),
 						color = MaterialTheme.colorScheme.primary
 					)
 				},
@@ -188,32 +210,51 @@ private fun SettingsItemForModes(modes: Modes) {
 @Composable
 fun SettingsDropMenu(
 	state: Boolean,
+	viewModel: DataStoreViewModel,
 	onStateChange: (Boolean) -> Unit,
 	setOfDirections: Set<Directions>,
 	setOfModes: Set<Modes>,
-	listOfSliders: List<SliderConfig>
+	listOfSliders: List<SliderConfig>,
+	listOfThemes: List<ThemeConfig>
 ) {
-    DropdownMenu(
-        expanded = state,
-        onDismissRequest = { onStateChange(false) },
-        modifier = Modifier
+	val scroll = rememberScrollState()
+
+	DropdownMenu(
+		expanded = state,
+		onDismissRequest = { onStateChange(false) },
+		modifier = Modifier
 			.background(MaterialTheme.colorScheme.tertiary)
 			.wrapContentSize()
-    ) {
-        listOfSliders.forEach { config ->
-            SliderForConfiguration(
-                value = config.value,
-                onValueChange = config.onValueChange,
-                valueRange = config.valueRange,
-                ruta = config.ruta,
-                typeForReset = config.typeForReset
-            )
-        }
-        setOfModes.forEach { mode ->
-            SettingsItemForModes(mode)
-        }
-        setOfDirections.forEach { direction ->
-            SettingsItemForDirections(direction)
-        }
-    }
+	) {
+		Row(
+			modifier = Modifier
+				.horizontalScroll(scroll)
+				.padding(horizontal = 10.dp, vertical = 5.dp),
+			verticalAlignment = Alignment.CenterVertically
+		) {
+			listOfThemes.forEach { themeConfig ->
+				ThemeItem(
+					isColorSelected = themeConfig.isColorSelected,
+					onClick = { themeConfig.onClick() },
+					theme = themeConfig.theme
+				)
+				Spacer(Modifier.width(5.dp))
+			}
+		}
+		listOfSliders.forEach { config ->
+			SliderForConfiguration(
+				value = config.value,
+				onValueChange = config.onValueChange,
+				valueRange = config.valueRange,
+				ruta = config.ruta,
+				typeForReset = config.typeForReset
+			)
+		}
+		setOfModes.forEach { mode ->
+			SettingsItemForModes(mode, viewModel)
+		}
+		setOfDirections.forEach { direction ->
+			SettingsItemForDirections(direction, viewModel)
+		}
+	}
 }

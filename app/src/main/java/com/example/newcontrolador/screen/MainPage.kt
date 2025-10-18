@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -24,8 +22,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,13 +34,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.connection.BluetoothConnectionManager
 import com.example.newcontrolador.connection.ConnectionViewModel
+import com.example.newcontrolador.connection.WiFiConnectionManager
+import com.example.newcontrolador.connection.data.ConfigButton
+import com.example.newcontrolador.connection.data.ConfigDirections
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
-import com.example.newcontrolador.connection.WiFiConnectionManager
-import com.example.newcontrolador.connection.data.DefaultButtonSize
-import com.example.newcontrolador.ui.theme.ThemeType
-import com.example.newcontrolador.utilitis.DirectionButton
+import com.example.newcontrolador.data.DataStoreViewModel
 import com.example.newcontrolador.utilitis.CustomSnackbar
+import com.example.newcontrolador.utilitis.DirectionButton
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.TopBarForMainPage
 import kotlinx.coroutines.delay
@@ -111,28 +110,36 @@ private fun Indicators(pressedButton: Set<Directions>) {
 
 @Composable
 private fun GridButton(
-	conectionManager: ConnectionViewModel,
-	buttonHeight: Int,
-	buttonWidth: Int,
-	padding: Int
+	connectionManager: ConnectionViewModel,
+	buttonConfig: ConfigButton,
+	directionChars: ConfigDirections
 ) {
+	val buttonHeight = buttonConfig.height.toInt()
+	val buttonWidth = buttonConfig.width.toInt()
+	val padding = buttonConfig.padding.toInt()
+
 	var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
 	var isPressed by remember { mutableStateOf(false) }
 
-    // Este efecto se ejecuta mientras el botón esté presionado
-    LaunchedEffect(isPressed, directionsPressed) {
-        if (isPressed && directionsPressed.isNotEmpty()) {
-            while (isPressed) {
-                conectionManager.sendChar(Directions.charFromSet(directionsPressed))
-                delay(50L) // cada 50 ms
-            }
-        } else {
+	// Efecto para enviar continuamente los caracteres mientras el botón esté presionado
+	LaunchedEffect(isPressed, directionsPressed) {
+		if (isPressed && directionsPressed.isNotEmpty()) {
+			while (isPressed) {
+				connectionManager.sendChar(
+					Directions.charFromSet(
+						directionsPressed,
+						directionChars
+					)
+				)
+				delay(50L) // cada 50 ms
+			}
+		} else {
 			while (!isPressed) {
-				conectionManager.sendChar(Directions.STOP.char)
+				connectionManager.sendChar(directionChars.stopChar)
 				delay(50L)
 			}
-        }
-    }
+		}
+	}
 
 	Row(
 		Modifier.fillMaxSize(),
@@ -221,19 +228,19 @@ private fun GridButton(
 	}
 }
 
+
 @Composable
 fun MainScreen(
 	bluetoothAdapter: BluetoothAdapter,
 	navController: NavController,
-	selectThemeType: (ThemeType) -> Unit
+	viewModel: DataStoreViewModel
 ) {
-	val defaultButtonSize = DefaultButtonSize()
-
-	var buttonHeight by remember { mutableIntStateOf(defaultButtonSize.height.toInt()) }
-	var buttonWidth by remember { mutableIntStateOf(defaultButtonSize.width.toInt()) }
-	var paddings by remember { mutableIntStateOf(defaultButtonSize.padding.toInt()) }
-
 	val snackbarHostState = remember { SnackbarHostState() }
+
+	// Observa configuración desde DataStore
+	val buttonConfig by viewModel.buttonConfig.collectAsState()
+	val directions by viewModel.directionChars.collectAsState()
+	val modes by viewModel.modeChars.collectAsState()
 
 	var modeSelected by remember { mutableStateOf(Modes.MANUAL) }
 
@@ -247,7 +254,12 @@ fun MainScreen(
 	}
 
 	LaunchedEffect(modeSelected) {
-		connectionManager.sendChar(modeSelected.char)
+		connectionManager.sendChar(
+			when (modeSelected) {
+				Modes.MANUAL -> modes.modeManualChar
+				Modes.AUTOMATA -> modes.modeAutomataChar
+			}
+		)
 	}
 	LaunchedEffect(connectionManager.message) {
 		connectionManager.message?.let {
@@ -255,6 +267,7 @@ fun MainScreen(
 			connectionManager.cleanMessage()
 		}
 	}
+
 	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, LocalContext.current)
 
 	Scaffold(
@@ -263,20 +276,13 @@ fun MainScreen(
 				bluetoothAdapter = bluetoothAdapter,
 				connectionManager = connectionManager,
 				navController = navController,
+				viewModel = viewModel,
 				modeSelected = { modeSelected = it },
-				buttonWidthValue = { buttonWidth = it },
-				buttonHeightValue = { buttonHeight = it },
-				paddingValues = { paddings = it },
-				themeType = { selectThemeType(it) }
+				configDirections = directions
 			)
 		},
 		snackbarHost = {
-			SnackbarHost(
-				snackbarHostState,
-				modifier = Modifier
-					.wrapContentWidth()
-					.wrapContentHeight()
-			) { data ->
+			SnackbarHost(snackbarHostState) { data ->
 				CustomSnackbar(data)
 			}
 		},
@@ -289,10 +295,9 @@ fun MainScreen(
 			contentAlignment = Alignment.Center
 		) {
 			GridButton(
-				conectionManager = connectionManager,
-				buttonHeight = buttonHeight,
-				buttonWidth = buttonWidth,
-				padding = paddings
+				connectionManager = connectionManager,
+				buttonConfig = buttonConfig,
+				directionChars = directions
 			)
 		}
 	}

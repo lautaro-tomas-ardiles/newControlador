@@ -5,16 +5,29 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
-import com.example.newcontrolador.exceptions.*
+import com.example.newcontrolador.connection.data.ConfigDirections
+import com.example.newcontrolador.exceptions.BluetoothConnectionFailedException
+import com.example.newcontrolador.exceptions.BluetoothDeviceNotFoundException
+import com.example.newcontrolador.exceptions.BluetoothPermissionException
+import com.example.newcontrolador.exceptions.BluetoothReadException
+import com.example.newcontrolador.exceptions.BluetoothSecurityException
+import com.example.newcontrolador.exceptions.BluetoothSendFailedException
+import com.example.newcontrolador.exceptions.ConnectionFailedException
+import com.example.newcontrolador.exceptions.ConnectionTimeoutException
+import com.example.newcontrolador.exceptions.DeviceNotFoundException
+import com.example.newcontrolador.exceptions.InvalidIpException
+import com.example.newcontrolador.exceptions.SendCharFailedException
+import com.example.newcontrolador.exceptions.UnexpectedResponseException
 
-class ConnectionViewModel (
+class ConnectionViewModel(
 	private val bluetoothConnectionManager: BluetoothConnectionManager,
-    private val wifiConnectionManager: WiFiConnectionManager
+	private val wifiConnectionManager: WiFiConnectionManager
 ) : ViewModel() {
 
 	// Indica si actualmente se está usando Bluetooth o Wi-Fi.
@@ -35,7 +48,7 @@ class ConnectionViewModel (
 	 * @param device Dispositivo Bluetooth al que se desea conectar.
 	 * @param context Contexto de la aplicación al momento de la conexión (usado para verificar permisos).
 	 */
-	fun connectToBluetooth(device: BluetoothDevice , context: Context) {
+	fun connectToBluetooth(device: BluetoothDevice, context: Context) {
 		// Verificar permisos
 		val hasPermission =
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -79,8 +92,8 @@ class ConnectionViewModel (
 	private fun sendBluetoothChar(char: Char) {
 		try {
 			bluetoothConnectionManager.sendCharBluetooth(char)
-		} catch (e: BluetoothDeviceNotFoundException) {
-			message = e.message
+		} catch (_: BluetoothDeviceNotFoundException) {
+			Log.e("ConnectionViewModel", "No hay dispositivos Bluetooth conectados")
 		} catch (e: BluetoothSendFailedException) {
 			message = e.message
 		} catch (_: Exception) {
@@ -94,9 +107,9 @@ class ConnectionViewModel (
 	 * Esta funcion se usa para detectar mensajes recibidos desde controles Bluetooth
 	 * y traducirlos en comandos de movimiento para el robot conectado.
 	 */
-	fun listenForBluetoothMessages() {
+	fun listenForBluetoothMessages(configDirections: ConfigDirections) {
 		try {
-			bluetoothConnectionManager.listenForAllDevices()
+			bluetoothConnectionManager.listenForAllDevices(configDirections)
 		} catch (e: BluetoothReadException) {
 			message = e.message
 		} catch (_: Exception) {
@@ -155,8 +168,8 @@ class ConnectionViewModel (
 			message = e.message
 		} catch (e: ConnectionTimeoutException) {
 			message = e.message
-		} catch (e: DeviceNotFoundException) {
-			message = e.message
+		} catch (_: DeviceNotFoundException) {
+			Log.e("ConnectionViewModel", "No hay dispositivo Wi-Fi conectado")
 		} catch (e: ConnectionFailedException) {
 			message = e.message
 		} catch (e: InvalidIpException) {

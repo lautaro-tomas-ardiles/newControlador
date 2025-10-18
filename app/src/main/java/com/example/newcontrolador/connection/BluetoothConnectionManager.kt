@@ -7,8 +7,14 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
+import com.example.newcontrolador.connection.data.ConfigDirections
 import com.example.newcontrolador.connection.data.Directions
-import com.example.newcontrolador.exceptions.*
+import com.example.newcontrolador.exceptions.BluetoothConnectionFailedException
+import com.example.newcontrolador.exceptions.BluetoothDeviceNotFoundException
+import com.example.newcontrolador.exceptions.BluetoothPermissionException
+import com.example.newcontrolador.exceptions.BluetoothReadException
+import com.example.newcontrolador.exceptions.BluetoothSecurityException
+import com.example.newcontrolador.exceptions.BluetoothSendFailedException
 import java.io.IOException
 import java.util.UUID
 
@@ -18,25 +24,25 @@ import java.util.UUID
  */
 class BluetoothConnectionManager {
 
-    // * Mapa de direcciones MAC a sockets Bluetooth activos. *
-    private val sockets = mutableMapOf<String, BluetoothSocket>()
+	// * Mapa de direcciones MAC a sockets Bluetooth activos. *
+	private val sockets = mutableMapOf<String, BluetoothSocket>()
 
-    // * UUID estándar para comunicación SPP (Serial Port Profile). *
-    private val defaultUuid: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+	// * UUID estándar para comunicación SPP (Serial Port Profile). *
+	private val defaultUuid: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
-    /**
-     * Intenta conectar con un dispositivo Bluetooth.
-     *
-     * @param device Dispositivo Bluetooth destino.
-     * @param context Contexto necesario para verificar permisos.
-     * @throws BluetoothPermissionException Si no se tienen los permisos necesarios.
-     * @throws BluetoothSecurityException Si ocurre un error de seguridad.
-     * @throws BluetoothConnectionFailedException Si no se logra conectar al dispositivo.
-     */
-    @Throws(Exception::class)
-    fun connectToDevice(device: BluetoothDevice, context: Context) {
+	/**
+	 * Intenta conectar con un dispositivo Bluetooth.
+	 *
+	 * @param device Dispositivo Bluetooth destino.
+	 * @param context Contexto necesario para verificar permisos.
+	 * @throws BluetoothPermissionException Si no se tienen los permisos necesarios.
+	 * @throws BluetoothSecurityException Si ocurre un error de seguridad.
+	 * @throws BluetoothConnectionFailedException Si no se logra conectar al dispositivo.
+	 */
+	@Throws(Exception::class)
+	fun connectToDevice(device: BluetoothDevice, context: Context) {
 
-        // Verificación de permisos dinámica según versión de Android
+		// Verificación de permisos dinámica según versión de Android
 		val hasPermission =
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 				ActivityCompat.checkSelfPermission(
@@ -101,29 +107,29 @@ class BluetoothConnectionManager {
 	/**
 	 * Traduce caracteres de entrada en comandos definidos por el enum [Directions].
 	 */
-	private fun translateChar(c: Char): Char {
+	private fun translateChar(c: Char, configDirections: ConfigDirections): Char {
 		return when (c) {
-			'u' -> Directions.UP.char
-			'd' -> Directions.DOWN.char
-			'l' -> Directions.LEFT.char
-			'r' -> Directions.RIGHT.char
-			'g' -> Directions.UP_LEFT.char
-			'i' -> Directions.UP_RIGHT.char
-			'h' -> Directions.DOWN_LEFT.char
-			'j' -> Directions.DOWN_RIGHT.char
-			's' -> Directions.STOP.char
-			else -> Directions.STOP.char
+			'u' -> configDirections.upChar
+			'd' -> configDirections.downChar
+			'l' -> configDirections.leftChar
+			'r' -> configDirections.rightChar
+			'g' -> configDirections.upLeftChar
+			'i' -> configDirections.upRightChar
+			'h' -> configDirections.downLeftChar
+			'j' -> configDirections.downRightChar
+			's' -> configDirections.stopChar
+			else -> configDirections.stopChar
 		}
 	}
 
-    /**
-     * Escucha datos entrantes de todos los dispositivos conectados en hilos separados.
-     * Cada dato recibido se traduce y reenvía mediante [sendCharBluetooth].
-     *
-     * @throws BluetoothReadException Si ocurre un error al leer los datos.
-     */
+	/**
+	 * Escucha datos entrantes de todos los dispositivos conectados en hilos separados.
+	 * Cada dato recibido se traduce y reenvía mediante [sendCharBluetooth].
+	 *
+	 * @throws BluetoothReadException Si ocurre un error al leer los datos.
+	 */
 	@Throws(Exception::class)
-	fun listenForAllDevices() {
+	fun listenForAllDevices(configDirections: ConfigDirections) {
 		for ((_, socket) in sockets) {
 			Thread {
 				try {
@@ -134,7 +140,7 @@ class BluetoothConnectionManager {
 						if (bytesRead > 0) {
 							val data = String(buffer, 0, bytesRead)
 							for (char in data.lowercase()) {
-								val translatedChar = translateChar(char)
+								val translatedChar = translateChar(char, configDirections)
 								if (translatedChar != ' ') {
 									sendCharBluetooth(translatedChar)
 								}

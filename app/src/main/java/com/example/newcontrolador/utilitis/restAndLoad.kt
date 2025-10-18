@@ -13,24 +13,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun RestAndLoad(context: Context){
-    val scope = rememberCoroutineScope()
+fun RestAndLoad(context: Context) {
+	rememberCoroutineScope()
 
-    Column {
-        Spacer(Modifier.height(5.dp))
+	Column {
+		Spacer(Modifier.height(5.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SimpleButton("guardar") {
+		Row(
+			verticalAlignment = Alignment.CenterVertically
+		) {
+			SimpleButton("guardar") {
 
-            }
-            Spacer(Modifier.width(10.dp))
+			}
+			Spacer(Modifier.width(10.dp))
 
-            SimpleButton("resetear") {
+			SimpleButton("resetear") {
 
-            }
-        }
-        Spacer(Modifier.height(5.dp))
-    }
+			}
+		}
+		Spacer(Modifier.height(5.dp))
+	}
 }

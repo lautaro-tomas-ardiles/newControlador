@@ -1,6 +1,11 @@
 package com.example.newcontrolador.connection
 
-import com.example.newcontrolador.exceptions.*
+import com.example.newcontrolador.exceptions.ConnectionFailedException
+import com.example.newcontrolador.exceptions.ConnectionTimeoutException
+import com.example.newcontrolador.exceptions.DeviceNotFoundException
+import com.example.newcontrolador.exceptions.InvalidIpException
+import com.example.newcontrolador.exceptions.SendCharFailedException
+import com.example.newcontrolador.exceptions.UnexpectedResponseException
 import java.io.IOException
 import java.net.ConnectException
 import java.net.HttpURLConnection

@@ -67,6 +67,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // navegacion
     implementation(libs.navigation.compose)
-    // save
-    implementation(libs.androidx.compose.runtime.saveable)
+    // data store
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
 }
