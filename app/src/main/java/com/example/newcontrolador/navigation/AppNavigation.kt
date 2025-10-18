@@ -9,16 +9,22 @@ import com.example.newcontrolador.screen.MainArduinoOneAndHC05Page
 import com.example.newcontrolador.screen.MainESP32Page
 import com.example.newcontrolador.screen.MainESP8622Page
 import com.example.newcontrolador.screen.MainScreen
+import com.example.newcontrolador.ui.theme.ThemeType
 
 @Composable
-fun AppNavigation(bluetoothAdapter: BluetoothAdapter) {
+fun AppNavigation(
+	bluetoothAdapter: BluetoothAdapter,
+	themeType: (ThemeType) -> Unit
+) {
 	val navController = rememberNavController()
 
 	NavHost(navController, AppScreen.MainPage.route) {
 		composable(
 			AppScreen.MainPage.route
 		) {
-			MainScreen(bluetoothAdapter, navController)
+			MainScreen(bluetoothAdapter, navController) {
+				themeType(it)
+			}
 		}
 		composable(
 			AppScreen.ESP8622Page.route

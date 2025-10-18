@@ -10,33 +10,41 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-	primary = Purple80,
-	secondary = PurpleGrey80,
-	tertiary = Pink80
+private val Default = darkColorScheme(
+	primary = DarckThemeBlue,
+	secondary = DarckThemeLightYellow,
+	tertiary = DarckThemeLightGreen,
+	onSecondary = DarckThemeDarkYellow,
+	onTertiary = DarckThemeDarkGreen,
+	background = DarckThemeBlack,
+	onBackground = DarckThemeLightBlack
+)
+private val BlueScheme = lightColorScheme(
+	primary = LightThemeBlue,
+	secondary = LightThemeLightRed,
+	tertiary = LightThemeDarckGreen,
+	onSecondary = LightThemeDarckRed,
+	onTertiary = LightThemeLigthGreen,
+	background = LightThemeDarckWhite,
+	onBackground = LightThemeLightWhite
+)
+private val Scheme = lightColorScheme(
+	primary = LightThemeLightRed,
+	secondary = LightThemeDarckGreen,
+	tertiary = LightThemeDarckRed,
+	onSecondary = LightThemeLigthGreen,
+	onTertiary = LightThemeDarckWhite,
+	background = LightThemeLightWhite,
+	onBackground = LightThemeBlue
 )
 
-private val LightColorScheme = lightColorScheme(
-	primary = Purple40,
-	secondary = PurpleGrey40,
-	tertiary = Pink40
-
-	/* Other default colors to override
-	background = Color(0xFFFFFBFE),
-	surface = Color(0xFFFFFBFE),
-	onPrimary = Color.White,
-	onSecondary = Color.White,
-	onTertiary = Color.White,
-	onBackground = Color(0xFF1C1B1F),
-	onSurface = Color(0xFF1C1B1F),
-	*/
-)
 
 @Composable
 fun NewControladorTheme(
+	themeType: ThemeType = ThemeType.DEFAULT,
 	darkTheme: Boolean = isSystemInDarkTheme(),
 	// Dynamic color is available on Android 12+
-	dynamicColor: Boolean = true,
+	dynamicColor: Boolean = false,
 	content: @Composable () -> Unit
 ) {
 	val colorScheme = when {
@@ -45,8 +53,9 @@ fun NewControladorTheme(
 			if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 		}
 
-		darkTheme -> DarkColorScheme
-		else -> LightColorScheme
+		themeType == ThemeType.BLUE -> BlueScheme
+		themeType == ThemeType.GREEN -> Scheme
+		else -> Default
 	}
 
 	MaterialTheme(

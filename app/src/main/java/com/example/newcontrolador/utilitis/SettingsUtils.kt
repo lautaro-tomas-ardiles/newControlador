@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -26,11 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.connection.data.SliderConfig
-import com.example.newcontrolador.ui.theme.Black
-import com.example.newcontrolador.ui.theme.Blue
-import com.example.newcontrolador.ui.theme.DarkYellow
-import com.example.newcontrolador.ui.theme.LightGreen
-import com.example.newcontrolador.ui.theme.LightYellow
 
 /**
  * Elemento de configuración para un carácter asociado a una dirección.
@@ -52,16 +48,16 @@ private fun SettingsItemForDirections(directions: Directions) {
 			.wrapContentWidth()
 			.padding(horizontal = 10.dp, vertical = 5.dp),
 		shape = RoundedCornerShape(10),
-		colors = CardDefaults.cardColors(containerColor = LightGreen),
+		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
 		elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-		border = BorderStroke(2.dp, LightYellow)
+		border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary)
 	) {
 		Spacer(Modifier.padding(5.dp))
 
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.padding(5.dp))
 
-			Text(text = text, color = Black)
+			Text(text = text, color = MaterialTheme.colorScheme.background)
 
 			Spacer(Modifier.padding(10.dp))
 
@@ -89,14 +85,14 @@ private fun SettingsItemForDirections(directions: Directions) {
 					}
 				},
 				placeholder = {
-					Text(text = "${directions.char}", color = Blue)
+					Text(text = "${directions.char}", color = MaterialTheme.colorScheme.primary)
 				},
 				singleLine = true,
 				colors = OutlinedTextFieldDefaults.colors(
-					unfocusedBorderColor = LightYellow,
-					focusedBorderColor = DarkYellow,
-					focusedTextColor = Black,
-					unfocusedLabelColor = Black
+					unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+					focusedBorderColor = MaterialTheme.colorScheme.onSecondary,
+					focusedTextColor = MaterialTheme.colorScheme.background,
+					unfocusedLabelColor = MaterialTheme.colorScheme.background
 				),
 				modifier = Modifier.width(50.dp),
 				isError = isError
@@ -127,16 +123,16 @@ private fun SettingsItemForModes(modes: Modes) {
 			.wrapContentWidth()
 			.padding(horizontal = 10.dp, vertical = 5.dp),
 		shape = RoundedCornerShape(10),
-		colors = CardDefaults.cardColors(containerColor = LightGreen),
+		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
 		elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-		border = BorderStroke(2.dp, LightYellow)
+		border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary)
 	) {
 		Spacer(Modifier.padding(5.dp))
 
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.padding(5.dp))
 
-			Text(text = text, color = Black)
+			Text(text = text, color = MaterialTheme.colorScheme.background)
 
 			Spacer(Modifier.padding(10.dp))
 
@@ -159,15 +155,15 @@ private fun SettingsItemForModes(modes: Modes) {
 				placeholder = {
 					Text(
 						text = "${modes.char}",
-						color = Blue
+						color = MaterialTheme.colorScheme.primary
 					)
 				},
 				singleLine = true,
 				colors = OutlinedTextFieldDefaults.colors(
-					unfocusedBorderColor = LightYellow,
-					focusedBorderColor = DarkYellow,
-					focusedTextColor = Black,
-					unfocusedLabelColor = Black
+					unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+					focusedBorderColor = MaterialTheme.colorScheme.onSecondary,
+					focusedTextColor = MaterialTheme.colorScheme.background,
+					unfocusedLabelColor = MaterialTheme.colorScheme.background
 				),
 				modifier = Modifier.width(50.dp),
 				isError = isError
@@ -201,8 +197,8 @@ fun SettingsDropMenu(
         expanded = state,
         onDismissRequest = { onStateChange(false) },
         modifier = Modifier
-            .background(LightGreen)
-            .wrapContentSize()
+			.background(MaterialTheme.colorScheme.tertiary)
+			.wrapContentSize()
     ) {
         listOfSliders.forEach { config ->
             SliderForConfiguration(

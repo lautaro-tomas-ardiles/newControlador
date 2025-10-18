@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +21,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
-import com.example.newcontrolador.ui.theme.LightYellow
 import com.example.newcontrolador.utilitis.ArduinoCode
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.TopBar2
@@ -32,8 +32,9 @@ fun MainESP32Page(navController: NavController) {
 
 	Scaffold(
 		topBar = {
-			TopBar2("diagrama para esp 32", navController)
-		}
+			TopBar2("ESP 32", navController)
+		},
+		containerColor = MaterialTheme.colorScheme.background
 	) { padding ->
 		Column(
 			Modifier
@@ -47,14 +48,14 @@ fun MainESP32Page(navController: NavController) {
 			Spacer(Modifier.height(10.dp))
 
 			Image(
-				painter = painterResource(id = R.drawable.captura_desde_2025_09_18_18_45_14),
+				painter = painterResource(id = R.drawable.esp_32),
 				contentDescription = "ESP 32 Diagram"
 			)
 			Spacer(Modifier.height(10.dp))
 
 			Text(
 				text = "Codigo de ejemplo para ESP 32",
-				color = LightYellow
+				color = MaterialTheme.colorScheme.secondary
 			)
 			Spacer(Modifier.height(10.dp))
 

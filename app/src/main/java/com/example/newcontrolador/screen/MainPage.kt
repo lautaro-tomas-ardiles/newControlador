@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -39,9 +40,7 @@ import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.connection.WiFiConnectionManager
 import com.example.newcontrolador.connection.data.DefaultButtonSize
-import com.example.newcontrolador.ui.theme.Black
-import com.example.newcontrolador.ui.theme.Blue
-import com.example.newcontrolador.ui.theme.DarkYellow
+import com.example.newcontrolador.ui.theme.ThemeType
 import com.example.newcontrolador.utilitis.DirectionButton
 import com.example.newcontrolador.utilitis.CustomSnackbar
 import com.example.newcontrolador.utilitis.SetOrientation
@@ -50,10 +49,29 @@ import kotlinx.coroutines.delay
 
 @Composable
 private fun Indicators(pressedButton: Set<Directions>) {
-	val colorUp = if (Directions.UP in pressedButton) DarkYellow else Blue
-	val colorDown = if (Directions.DOWN in pressedButton) DarkYellow else Blue
-	val colorLeft = if (Directions.LEFT in pressedButton) DarkYellow else Blue
-	val colorRight = if (Directions.RIGHT in pressedButton) DarkYellow else Blue
+	val colorUp =
+		if (Directions.UP in pressedButton)
+			MaterialTheme.colorScheme.onSecondary
+		else
+			MaterialTheme.colorScheme.primary
+
+	val colorDown =
+		if (Directions.DOWN in pressedButton)
+			MaterialTheme.colorScheme.onSecondary
+		else
+			MaterialTheme.colorScheme.primary
+
+	val colorLeft =
+		if (Directions.LEFT in pressedButton)
+			MaterialTheme.colorScheme.onSecondary
+		else
+			MaterialTheme.colorScheme.primary
+
+	val colorRight =
+		if (Directions.RIGHT in pressedButton)
+			MaterialTheme.colorScheme.onSecondary
+		else
+			MaterialTheme.colorScheme.primary
 
 	Row(
 		verticalAlignment = Alignment.CenterVertically,
@@ -206,7 +224,8 @@ private fun GridButton(
 @Composable
 fun MainScreen(
 	bluetoothAdapter: BluetoothAdapter,
-	navController: NavController
+	navController: NavController,
+	selectThemeType: (ThemeType) -> Unit
 ) {
 	val defaultButtonSize = DefaultButtonSize()
 
@@ -247,7 +266,8 @@ fun MainScreen(
 				modeSelected = { modeSelected = it },
 				buttonWidthValue = { buttonWidth = it },
 				buttonHeightValue = { buttonHeight = it },
-				paddingValues = { paddings = it }
+				paddingValues = { paddings = it },
+				themeType = { selectThemeType(it) }
 			)
 		},
 		snackbarHost = {
@@ -260,7 +280,7 @@ fun MainScreen(
 				CustomSnackbar(data)
 			}
 		},
-		containerColor = Black
+		containerColor = MaterialTheme.colorScheme.background
 	) { padding ->
 		Box(
 			Modifier

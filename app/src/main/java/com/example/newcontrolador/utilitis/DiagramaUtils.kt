@@ -4,11 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.newcontrolador.ui.theme.Black
-import com.example.newcontrolador.ui.theme.LightGreen
 
 /**
  * Elemento individual de un menú desplegable para diagramas.
@@ -25,7 +24,7 @@ fun DiagramaItem(
 ) {
 	DropdownMenuItem(
 		text = {
-			Text(text = text, color = Black)
+			Text(text = text, color = MaterialTheme.colorScheme.background)
 		},
 		onClick = { onClick() }
 	)
@@ -51,7 +50,7 @@ fun DiagramaDropMenu(
 		expanded = state,
 		onDismissRequest = { onStateChange(false) },
 		modifier = Modifier
-			.background(LightGreen)
+			.background(MaterialTheme.colorScheme.tertiary)
 			.wrapContentSize()
 	) {
 		content()
