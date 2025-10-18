@@ -1,17 +1,31 @@
 package com.example.newcontrolador.connection.data
 
-enum class Directions(var char: Char) {
-	UP('F'),
-	DOWN('B'),
-	LEFT('L'),
-	RIGHT('R'),
-	UP_LEFT('G'),
-	UP_RIGHT('I'),
-	DOWN_LEFT('H'),
-	DOWN_RIGHT('J'),
-	STOP('S');
+enum class Directions() {
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
+	UP_LEFT,
+	UP_RIGHT,
+	DOWN_LEFT,
+	DOWN_RIGHT,
+	STOP;
 
 	companion object {
+		fun getChar(directions: Directions, config: ConfigDirections): Char {
+			return when (directions) {
+				UP -> config.upChar
+				DOWN -> config.downChar
+				LEFT -> config.leftChar
+				RIGHT -> config.rightChar
+				UP_LEFT -> config.upLeftChar
+				UP_RIGHT -> config.upRightChar
+				DOWN_LEFT -> config.downLeftChar
+				DOWN_RIGHT -> config.downRightChar
+				STOP -> config.stopChar
+			}
+		}
+
 		private fun fromSet(directions: Set<Directions>): Directions {
 			return when {
 				directions.contains(UP) && directions.contains(LEFT) -> UP_LEFT
@@ -26,8 +40,8 @@ enum class Directions(var char: Char) {
 			}
 		}
 
-		fun charFromSet(directions: Set<Directions>): Char {
-			return Directions.fromSet(directions).char
+		fun charFromSet(directions: Set<Directions>, configDirections: ConfigDirections): Char {
+			return getChar(Directions.fromSet(directions), configDirections)
 		}
 
 		fun getDirectionsName(directions: Directions): String {

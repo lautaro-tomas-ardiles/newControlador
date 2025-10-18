@@ -17,13 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,12 +39,12 @@ import androidx.navigation.NavController
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.connection.data.Buttons
-import com.example.newcontrolador.connection.data.DefaultButtonSize
+import com.example.newcontrolador.connection.data.ConfigDirections
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
-import com.example.newcontrolador.connection.data.SliderConfig
+import com.example.newcontrolador.connection.data.ThemeType
+import com.example.newcontrolador.data.DataStoreViewModel
 import com.example.newcontrolador.navigation.AppScreen
-import com.example.newcontrolador.ui.theme.ThemeType
 
 /**
  * TopBar genérica con título y botón de navegación.
@@ -54,7 +54,7 @@ import com.example.newcontrolador.ui.theme.ThemeType
  */
 @Composable
 fun TopBar2(text: String, navController: NavController) {
-	TopAppBar(
+	CenterAlignedTopAppBar(
 		title = { Text(text = text) },
 		navigationIcon = {
 			Row {
@@ -87,7 +87,8 @@ fun TopBar2(text: String, navController: NavController) {
 private fun TopBarForMainPageStart(
 	onBluetoothChange: (Boolean) -> Unit,
 	connectionManager: ConnectionViewModel,
-	bluetoothAdapter: BluetoothAdapter
+	bluetoothAdapter: BluetoothAdapter,
+	configDirections: ConfigDirections
 ) {
 	var ip by remember { mutableStateOf("") }
 
@@ -147,9 +148,10 @@ private fun TopBarForMainPageStart(
 				BluetoothDropMenu(
 					state = menuDevicesState,
 					onStateChange = { menuDevicesState = it },
-					setOfDevices = bluetoothAdapter.bondedDevices,
+					setOfDevices = pairedDevices,
 					connectionManager = connectionManager,
-					context = context
+					context = context,
+					configDirections = configDirections
 				)
 			} else {
 				WifiTextField(
@@ -179,15 +181,15 @@ private fun TopBarForMainPageStart(
 private fun TopBarForMainPageEnd(
 	modeSelected: (Modes) -> Unit,
 	navController: NavController,
-	onChangeButtonHeight: (Int) -> Unit,
-	onChangeButtonWidth: (Int) -> Unit,
-	onChangePadding: (Int) -> Unit,
-	selectedThemeType: (ThemeType) -> Unit
+	viewModel: DataStoreViewModel
 ) {
-	val defaultButtonSize = DefaultButtonSize()
-	var buttonHeight by remember { mutableFloatStateOf(defaultButtonSize.height) }
-	var buttonWidth by remember { mutableFloatStateOf(defaultButtonSize.width) }
-	var paddings by remember { mutableFloatStateOf(defaultButtonSize.padding) }
+	val configButton by viewModel.buttonConfig.collectAsState()
+
+	val selectedTheme by viewModel.theme.collectAsState()
+
+	var buttonHeight by remember { mutableFloatStateOf(configButton.height) }
+	var buttonWidth by remember { mutableFloatStateOf(configButton.width) }
+	var paddings by remember { mutableFloatStateOf(configButton.padding) }
 
 	var menuModeState by remember { mutableStateOf(false) }
 	var modeSelect by remember { mutableStateOf(Modes.MANUAL) }
@@ -218,7 +220,7 @@ private fun TopBarForMainPageEnd(
 			value = buttonHeight,
 			onValueChange = {
 				buttonHeight = it
-				onChangeButtonHeight(it.toInt())
+				viewModel.setButtonHeight(it)
 			},
 			valueRange = 100f..300f,
 			ruta = painterResource(id = R.drawable.height)
@@ -227,7 +229,7 @@ private fun TopBarForMainPageEnd(
 			value = buttonWidth,
 			onValueChange = {
 				buttonWidth = it
-				onChangeButtonWidth(it.toInt())
+				viewModel.setButtonWidth(it)
 			},
 			valueRange = 100f..300f,
 			typeForReset = Buttons.WIDTH,
@@ -237,11 +239,35 @@ private fun TopBarForMainPageEnd(
 			value = paddings,
 			onValueChange = {
 				paddings = it
-				onChangePadding(it.toInt())
+				viewModel.setButtonPadding(it)
 			},
 			valueRange = 0f..50f,
 			typeForReset = Buttons.PADDING,
 			ruta = painterResource(id = R.drawable.padding)
+		)
+	)
+
+	val themesList = listOf(
+		ThemeConfig(
+			isColorSelected = selectedTheme == ThemeType.DEFAULT,
+			onClick = {
+				viewModel.setTheme(ThemeType.DEFAULT)
+			},
+			theme = ThemeType.DEFAULT
+		),
+		ThemeConfig(
+			isColorSelected = selectedTheme == ThemeType.WHITE,
+			onClick = {
+				viewModel.setTheme(ThemeType.WHITE)
+			},
+			theme = ThemeType.WHITE
+		),
+		ThemeConfig(
+			isColorSelected = selectedTheme == ThemeType.WHITE_2,
+			onClick = {
+				viewModel.setTheme(ThemeType.WHITE_2)
+			},
+			theme = ThemeType.WHITE_2
 		)
 	)
 
@@ -289,15 +315,6 @@ private fun TopBarForMainPageEnd(
 					DiagramaItem("Ardiuno y hc-05") {
 						navController.navigate(AppScreen.ArduinoOneAndHC05Page.route)
 					}
-					Button(onClick = { selectedThemeType(ThemeType.BLUE) }) {
-                        Text("Tema claro")
-                    }
-					Button(onClick = { selectedThemeType(ThemeType.GREEN) }) {
-                        Text("Tema gren")
-                    }
-                    Button(onClick = { selectedThemeType(ThemeType.DEFAULT) }) {
-                        Text("Tema Default")
-                    }
 				}
 			)
 		}
@@ -310,10 +327,12 @@ private fun TopBarForMainPageEnd(
 			)
 			SettingsDropMenu(
 				state = menuSettingState,
+				viewModel = viewModel,
 				onStateChange = { menuSettingState = it },
 				setOfDirections = directions,
 				setOfModes = modes,
-				listOfSliders = slidersList
+				listOfSliders = slidersList,
+				listOfThemes = themesList,
 			)
 		}
 	}
@@ -339,11 +358,9 @@ fun TopBarForMainPage(
 	bluetoothAdapter: BluetoothAdapter,
 	connectionManager: ConnectionViewModel,
 	navController: NavController,
+	viewModel: DataStoreViewModel,
 	modeSelected: (Modes) -> Unit,
-	buttonWidthValue: (Int) -> Unit,
-	buttonHeightValue: (Int) -> Unit,
-	paddingValues: (Int) -> Unit,
-	themeType: (ThemeType) -> Unit
+	configDirections: ConfigDirections
 ) {
 	Box(
 		contentAlignment = Alignment.Center,
@@ -355,16 +372,14 @@ fun TopBarForMainPage(
 		TopBarForMainPageStart(
 			onBluetoothChange = { connectionManager.isBluetooth = it },
 			connectionManager = connectionManager,
-			bluetoothAdapter = bluetoothAdapter
+			bluetoothAdapter = bluetoothAdapter,
+			configDirections = configDirections
 		)
 
 		TopBarForMainPageEnd(
 			modeSelected = { modeSelected(it) },
 			navController = navController,
-			onChangeButtonHeight = { buttonHeightValue(it) },
-			onChangeButtonWidth = { buttonWidthValue(it) },
-			onChangePadding = { paddingValues(it) },
-			selectedThemeType = { themeType(it) }
+			viewModel = viewModel
 		)
 	}
 }

@@ -17,10 +17,10 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -198,7 +198,7 @@ fun SimpleButton(
 	onClick: () -> Unit
 ) {
 	Button(
-		onClick = {	onClick() },
+		onClick = { onClick() },
 		colors = ButtonDefaults.buttonColors(
 			containerColor = MaterialTheme.colorScheme.secondary
 		)

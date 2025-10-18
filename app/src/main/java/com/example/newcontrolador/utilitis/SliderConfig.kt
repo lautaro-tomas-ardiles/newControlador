@@ -1,6 +1,7 @@
-package com.example.newcontrolador.connection.data
+package com.example.newcontrolador.utilitis
 
 import androidx.compose.ui.graphics.painter.Painter
+import com.example.newcontrolador.connection.data.Buttons
 
 data class SliderConfig(
 	val value: Float,

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -17,10 +18,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.connection.data.Buttons
-import com.example.newcontrolador.connection.data.DefaultButtonSize
+import com.example.newcontrolador.connection.data.ConfigButton
 
 /**
  * Componente de slider para configuración de propiedades de botones u otros elementos.
@@ -44,20 +46,24 @@ fun SliderForConfiguration(
 	valueRange: ClosedFloatingPointRange<Float>,
 	ruta: Painter
 ) {
-	val defaultButtonSize = DefaultButtonSize()
+	val configButton = ConfigButton()
 
-	Column {
+	Column(
+		modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+	) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.width(5.dp))
 
 			Image(
 				painter = ruta,
 				contentDescription = null,
+				colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.background)
 			)
 			Spacer(Modifier.width(5.dp))
 
 			Slider(
 				value = value,
+				steps = ((valueRange.endInclusive - valueRange.start) / 5).toInt() - 1,
 				onValueChange = { onValueChange(it) },
 				valueRange = valueRange,
 				colors = SliderDefaults.colors(
@@ -98,9 +104,9 @@ fun SliderForConfiguration(
 
 			SimpleButton(textForReset) {
 				when (typeForReset) {
-					Buttons.WIDTH -> onValueChange(defaultButtonSize.width)
-					Buttons.HEIGHT -> onValueChange(defaultButtonSize.height)
-					Buttons.PADDING -> onValueChange(defaultButtonSize.padding)
+					Buttons.WIDTH -> onValueChange(configButton.width)
+					Buttons.HEIGHT -> onValueChange(configButton.height)
+					Buttons.PADDING -> onValueChange(configButton.padding)
 				}
 			}
 		}
