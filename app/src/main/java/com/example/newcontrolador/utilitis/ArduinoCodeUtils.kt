@@ -4,13 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.example.newcontrolador.ui.theme.Black2
 
 /**
  * Componente que muestra código de Arduino con formato de bloque.
@@ -24,13 +24,13 @@ import com.example.newcontrolador.ui.theme.Black2
 fun ArduinoCode(text: String) {
 	Box(
 		Modifier
-			.background(Black2)
+			.background(MaterialTheme.colorScheme.onBackground)
 			.padding(16.dp)
 	) {
 		SelectionContainer {
 			Text(
 				text = text.trimIndent(),
-				color = Color.White,
+				color = MaterialTheme.colorScheme.tertiary,
 				fontFamily = FontFamily.Monospace
 			)
 		}

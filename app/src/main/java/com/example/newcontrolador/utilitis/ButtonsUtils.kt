@@ -34,10 +34,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.data.Directions
-import com.example.newcontrolador.ui.theme.Black
-import com.example.newcontrolador.ui.theme.DarkGreen
-import com.example.newcontrolador.ui.theme.LightGreen
-import com.example.newcontrolador.ui.theme.LightYellow
 
 /**
  * Botón direccional para control de movimiento.
@@ -71,8 +67,8 @@ fun DirectionButton(
 		modifier = Modifier
 			.height(height.dp)
 			.width(width.dp)
-			.background(DarkGreen)
-			.border(2.dp, LightYellow)
+			.background(MaterialTheme.colorScheme.onTertiary)
+			.border(2.dp, MaterialTheme.colorScheme.secondary)
 			.pointerInput(Unit) {
 				detectTapGestures(
 					onPress = {
@@ -89,8 +85,8 @@ fun DirectionButton(
 			contentDescription = "Flecha de dirección $direction",
 			modifier = Modifier
 				.size(70.dp)
-				.background(LightYellow, CircleShape),
-			tint = Black
+				.background(MaterialTheme.colorScheme.secondary, CircleShape),
+			tint = MaterialTheme.colorScheme.background
 		)
 	}
 }
@@ -114,27 +110,35 @@ fun IconsButtonsCustom(
 	isSolidColor: Boolean = false,
 	isBluetooth: Boolean = false,
 	border: Boolean = false,
-	tintColor: Color = LightGreen,
+	tintColor: Color = MaterialTheme.colorScheme.tertiary,
 	imageVector: ImageVector = Icons.Default.Settings
 ) {
 	IconButton(
 		onClick = { onClick() },
 		colors = IconButtonDefaults.iconButtonColors(
-			containerColor = if (isSolidColor) LightYellow else Color.Transparent,
+			containerColor =
+				if (isSolidColor)
+					MaterialTheme.colorScheme.secondary
+				else
+					Color.Transparent,
 		),
 		modifier = Modifier
 			.size(45.dp)
 			.border(
 				width = 3.dp,
-				color = if (border) LightYellow else Color.Transparent,
+				color =
+					if (border)
+						MaterialTheme.colorScheme.secondary
+					else
+						Color.Transparent,
 				shape = CircleShape
 			)
 	) {
 		if (isBluetooth) {
 			Icon(
-				painter = painterResource(R.drawable.group_11),
+				painter = painterResource(R.drawable.bluetooth),
 				contentDescription = "Ícono de Bluetooth",
-				tint = Black
+				tint = MaterialTheme.colorScheme.background
 			)
 		} else {
 			Icon(
@@ -166,7 +170,7 @@ fun TextAndButton(
 ) {
 	Text(
 		text = text,
-		color = Black,
+		color = MaterialTheme.colorScheme.background,
 		fontSize = MaterialTheme.typography.bodyMedium.fontSize
 	)
 	Spacer(modifier = Modifier.padding(3.dp))
@@ -196,12 +200,12 @@ fun SimpleButton(
 	Button(
 		onClick = {	onClick() },
 		colors = ButtonDefaults.buttonColors(
-			containerColor = LightYellow
+			containerColor = MaterialTheme.colorScheme.secondary
 		)
 	) {
 		Text(
 			text = text,
-			color = Black
+			color = MaterialTheme.colorScheme.background
 		)
 	}
 }

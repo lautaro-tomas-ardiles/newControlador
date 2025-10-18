@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,8 +21,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
-import com.example.newcontrolador.ui.theme.Black
-import com.example.newcontrolador.ui.theme.LightYellow
 import com.example.newcontrolador.utilitis.ArduinoCode
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.TopBar2
@@ -33,9 +32,9 @@ fun MainArduinoOneAndHC05Page(navController: NavController) {
 
 	Scaffold(
 		topBar = {
-			TopBar2("diagrama de un robot con arduino uno y hc-05", navController)
+			TopBar2("Arduino one y hc-05", navController)
 		},
-		containerColor = Black
+		containerColor = MaterialTheme.colorScheme.background
 	) { padding ->
 		Column(
 			Modifier
@@ -49,14 +48,14 @@ fun MainArduinoOneAndHC05Page(navController: NavController) {
 			Spacer(Modifier.height(10.dp))
 
 			Image(
-				painter = painterResource(id = R.drawable.captura_desde_2025_09_18_17_18_04),
+				painter = painterResource(id = R.drawable.arduino_one_hc_05),
 				contentDescription = "Arduino Uno and HC-05 Diagram"
 			)
 			Spacer(Modifier.height(10.dp))
 
 			Text(
 				text = "Codigo de ejemplo para Arduino Uno y HC-05",
-				color = LightYellow
+				color = MaterialTheme.colorScheme.secondary
 			)
 			Spacer(Modifier.height(10.dp))
 

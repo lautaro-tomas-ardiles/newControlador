@@ -4,15 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.newcontrolador.connection.data.Modes
-import com.example.newcontrolador.ui.theme.Black
-import com.example.newcontrolador.ui.theme.Blue
-import com.example.newcontrolador.ui.theme.LightGreen
 
 /**
  * Elemento individual de un menú desplegable para seleccionar un modo.
@@ -32,7 +30,7 @@ private fun ModeItem(
 ) {
 	DropdownMenuItem(
 		text = {
-			Text(text = text, color = Black)
+			Text(text = text, color = MaterialTheme.colorScheme.background)
 		},
 		onClick = { onClick() },
 		trailingIcon = {
@@ -40,8 +38,8 @@ private fun ModeItem(
 				selected = stateOfItem,
 				onClick = { onClick() },
 				colors = RadioButtonDefaults.colors(
-					selectedColor = Blue,
-					unselectedColor = Blue
+					selectedColor = MaterialTheme.colorScheme.primary,
+					unselectedColor = MaterialTheme.colorScheme.primary
 				)
 			)
 		}
@@ -72,7 +70,7 @@ fun ModeDropMenu(
 		expanded = state,
 		onDismissRequest = { onStateChange(false) },
 		modifier = Modifier
-			.background(LightGreen)
+			.background(MaterialTheme.colorScheme.tertiary)
 			.wrapContentSize()
 	) {
 		setOfModes.forEach { modes ->

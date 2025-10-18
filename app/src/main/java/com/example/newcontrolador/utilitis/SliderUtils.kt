@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -20,9 +21,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.connection.data.Buttons
 import com.example.newcontrolador.connection.data.DefaultButtonSize
-import com.example.newcontrolador.ui.theme.Blue
-import com.example.newcontrolador.ui.theme.DarkYellow
-import com.example.newcontrolador.ui.theme.LightYellow
 
 /**
  * Componente de slider para configuración de propiedades de botones u otros elementos.
@@ -55,8 +53,7 @@ fun SliderForConfiguration(
 			Image(
 				painter = ruta,
 				contentDescription = null,
-
-				)
+			)
 			Spacer(Modifier.width(5.dp))
 
 			Slider(
@@ -64,9 +61,9 @@ fun SliderForConfiguration(
 				onValueChange = { onValueChange(it) },
 				valueRange = valueRange,
 				colors = SliderDefaults.colors(
-					thumbColor = Blue,
-					activeTrackColor = Blue,
-					inactiveTrackColor = LightYellow
+					thumbColor = MaterialTheme.colorScheme.primary,
+					activeTrackColor = MaterialTheme.colorScheme.primary,
+					inactiveTrackColor = MaterialTheme.colorScheme.secondary
 				),
 				modifier = Modifier.weight(1f)
 			)
@@ -77,11 +74,11 @@ fun SliderForConfiguration(
 					.height(40.dp)
 					.width(40.dp)
 					.background(
-						color = Blue,
+						color = MaterialTheme.colorScheme.primary,
 						shape = RoundedCornerShape(25)
 					)
 					.border(
-						color = DarkYellow,
+						color = MaterialTheme.colorScheme.onSecondary,
 						width = 2.dp,
 						shape = RoundedCornerShape(25)
 					),
@@ -89,7 +86,7 @@ fun SliderForConfiguration(
 			) {
 				Text(
 					text = "${value.toInt()}",
-					color = LightYellow
+					color = MaterialTheme.colorScheme.secondary
 				)
 			}
 			Spacer(Modifier.width(5.dp))
