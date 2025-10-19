@@ -29,9 +29,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -46,8 +43,8 @@ class ConnectionViewModel(
 
 	// Mensaje de error o de cumplimiento? (no sé escribir)
 	// (solo puede modificarse dentro del ViewModel).
-	private val _message = MutableStateFlow<String?>(null)
-	val message: StateFlow<String?> = _message.asStateFlow()
+	var message by mutableStateOf<String?>(null)
+		private set
 
 
 	// * Bluetooth *
@@ -61,7 +58,7 @@ class ConnectionViewModel(
 	 * @param context Contexto de la aplicación al momento de la conexión (usado para verificar permisos).
 	 */
 	fun connectToBluetooth(device: BluetoothDevice, context: Context) {
-		CoroutineScope(Dispatchers.IO).launch {
+		viewModelScope.launch(Dispatchers.IO) {
 			// Verificar permisos
 			val hasPermission =
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -85,15 +82,21 @@ class ConnectionViewModel(
 				return@launch
 			}
 
-			// Iniciar animación "Conectando..."
-			val connectingJob = launch(Dispatchers.Main) {
-				var dots = 0
-				while (isActive) {
-					_message.value = "Conectando" + ".".repeat(dots)
-					dots = (dots + 1) % 4 // Cicla entre 0, 1, 2, 3 puntos
-					delay(500L) // cada 0.5 segundos
+			// Iniciar "Conectando..."
+			val connectingJob = viewModelScope.launch(Dispatchers.Main) {
+				message = "Conectando ..."
+				// Este job quedará activo hasta que lo canceles en caso de éxito o error
+				try {
+					// Solo mantiene el mensaje hasta que se cancele
+					while (isActive) {
+						delay(500L)
+					}
+				} finally {
+					message = null // Limpiamos el mensaje si se cancela
 				}
 			}
+
+
 
 			try {
 				bluetoothConnectionManager.connectToDevice(device, context)
@@ -120,7 +123,6 @@ class ConnectionViewModel(
 			}
 		}
 	}
-
 
 	/**
 	 * Envía un carácter por Bluetooth al dispositivo conectado.
@@ -221,13 +223,13 @@ class ConnectionViewModel(
 	/**
 	 * Limpia el mensaje actual de error o confirmación.
 	 */
-	private fun cleanMessage() {
-		_message.value = null
+	fun cleanMessage() {
+		message = null
 	}
 
 	private fun showTempMessage(text: String, durationMs: Long = 2500L) {
 		viewModelScope.launch {
-			_message.value = text
+			message = text
 			delay(durationMs)
 			cleanMessage()
 		}
