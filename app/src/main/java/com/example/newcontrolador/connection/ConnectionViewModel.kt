@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.newcontrolador.connection.data.ConfigDirections
 import com.example.newcontrolador.exceptions.BluetoothConnectionFailedException
 import com.example.newcontrolador.exceptions.BluetoothDeviceNotFoundException
@@ -79,7 +80,7 @@ class ConnectionViewModel(
 				val permissionName =
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "BLUETOOTH_CONNECT" else "BLUETOOTH"
 				withContext(Dispatchers.Main) {
-					_message.value = "Permiso $permissionName denegado"
+					showTempMessage("Permiso $permissionName denegado")
 				}
 				return@launch
 			}
@@ -99,23 +100,23 @@ class ConnectionViewModel(
 
 				// Si la conexión fue exitosa, detenemos la animación
 				connectingJob.cancelAndJoin()
+				cleanMessage()
 
 				withContext(Dispatchers.Main) {
-					_message.value =
-						"Conectado a ${device.name ?: device.address ?: "Dispositivo desconocido"}"
+					showTempMessage("Conectado a ${device.name ?: device.address ?: "Dispositivo desconocido"}")
 				}
 			} catch (e: BluetoothSecurityException) {
 				connectingJob.cancel()
-				withContext(Dispatchers.Main) { _message.value = e.message }
+				withContext(Dispatchers.Main) { showTempMessage(e.message ?: "Error desconocido") }
 			} catch (e: BluetoothConnectionFailedException) {
 				connectingJob.cancel()
-				withContext(Dispatchers.Main) { _message.value = e.message }
+				withContext(Dispatchers.Main) { showTempMessage(e.message ?: "Error desconocido")  }
 			} catch (e: BluetoothPermissionException) {
 				connectingJob.cancel()
-				withContext(Dispatchers.Main) { _message.value = e.message }
+				withContext(Dispatchers.Main) { showTempMessage(e.message ?: "Error desconocido")  }
 			} catch (_: Exception) {
 				connectingJob.cancel()
-				withContext(Dispatchers.Main) { _message.value = "Error desconocido" }
+				withContext(Dispatchers.Main) { showTempMessage("Error desconocido") }
 			}
 		}
 	}
@@ -132,9 +133,9 @@ class ConnectionViewModel(
 		} catch (_: BluetoothDeviceNotFoundException) {
 			Log.e("ConnectionViewModel", "No hay dispositivos Bluetooth conectados")
 		} catch (e: BluetoothSendFailedException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (_: Exception) {
-			_message.value = "Error desconocido"
+			showTempMessage("Error desconocido")
 		}
 	}
 
@@ -148,9 +149,9 @@ class ConnectionViewModel(
 		try {
 			bluetoothConnectionManager.listenForAllDevices(configDirections)
 		} catch (e: BluetoothReadException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (_: Exception) {
-			_message.value = "Error desconocido"
+			showTempMessage("Error desconocido")
 		}
 	}
 
@@ -162,7 +163,7 @@ class ConnectionViewModel(
 	 */
 	fun verifyBluetoothDevices(setOfDevices: Set<BluetoothDevice>): Boolean {
 		if (setOfDevices.isEmpty()) {
-			_message.value = "No hay dispositivos Bluetooth disponibles"
+			showTempMessage("No hay dispositivos Bluetooth disponibles")
 			return false
 		}
 		return true
@@ -177,19 +178,19 @@ class ConnectionViewModel(
 	fun connectToWifi(ip: String) {
 		try {
 			wifiConnectionManager.connectToIp(ip)
-			_message.value = "Conectado a $ip"
+			showTempMessage("Conectado a $ip")
 		} catch (e: ConnectionTimeoutException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (e: DeviceNotFoundException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (e: ConnectionFailedException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (e: UnexpectedResponseException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (e: InvalidIpException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (_: Exception) {
-			_message.value = "Error desconocido"
+			showTempMessage("Error desconocido")
 		}
 	}
 
@@ -202,17 +203,17 @@ class ConnectionViewModel(
 		try {
 			wifiConnectionManager.sendCharWifi(char)
 		} catch (e: SendCharFailedException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (e: ConnectionTimeoutException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (_: DeviceNotFoundException) {
 			Log.e("ConnectionViewModel", "No hay dispositivo Wi-Fi conectado")
 		} catch (e: ConnectionFailedException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (e: InvalidIpException) {
-			_message.value = e.message
+			showTempMessage(e.message ?: "Error desconocido")
 		} catch (_: Exception) {
-			_message.value = "Error desconocido"
+			showTempMessage("Error desconocido")
 		}
 	}
 
@@ -222,6 +223,14 @@ class ConnectionViewModel(
 	 */
 	private fun cleanMessage() {
 		_message.value = null
+	}
+
+	private fun showTempMessage(text: String, durationMs: Long = 2500L) {
+		viewModelScope.launch {
+			_message.value = text
+			delay(durationMs)
+			cleanMessage()
+		}
 	}
 
 	/**
