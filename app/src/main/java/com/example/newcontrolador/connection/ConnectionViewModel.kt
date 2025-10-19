@@ -24,6 +24,16 @@ import com.example.newcontrolador.exceptions.DeviceNotFoundException
 import com.example.newcontrolador.exceptions.InvalidIpException
 import com.example.newcontrolador.exceptions.SendCharFailedException
 import com.example.newcontrolador.exceptions.UnexpectedResponseException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ConnectionViewModel(
 	private val bluetoothConnectionManager: BluetoothConnectionManager,
@@ -35,8 +45,9 @@ class ConnectionViewModel(
 
 	// Mensaje de error o de cumplimiento? (no sé escribir)
 	// (solo puede modificarse dentro del ViewModel).
-	var message by mutableStateOf<String?>(null)
-		private set
+	private val _message = MutableStateFlow<String?>(null)
+	val message: StateFlow<String?> = _message.asStateFlow()
+
 
 	// * Bluetooth *
 	/**
@@ -49,40 +60,66 @@ class ConnectionViewModel(
 	 * @param context Contexto de la aplicación al momento de la conexión (usado para verificar permisos).
 	 */
 	fun connectToBluetooth(device: BluetoothDevice, context: Context) {
-		// Verificar permisos
-		val hasPermission =
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-				ActivityCompat.checkSelfPermission(
-					context,
-					Manifest.permission.BLUETOOTH_CONNECT
-				) == PackageManager.PERMISSION_GRANTED
-			} else {
-				ActivityCompat.checkSelfPermission(
-					context,
-					Manifest.permission.BLUETOOTH
-				) == PackageManager.PERMISSION_GRANTED
+		CoroutineScope(Dispatchers.IO).launch {
+			// Verificar permisos
+			val hasPermission =
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+					ActivityCompat.checkSelfPermission(
+						context,
+						Manifest.permission.BLUETOOTH_CONNECT
+					) == PackageManager.PERMISSION_GRANTED
+				} else {
+					ActivityCompat.checkSelfPermission(
+						context,
+						Manifest.permission.BLUETOOTH
+					) == PackageManager.PERMISSION_GRANTED
+				}
+
+			if (!hasPermission) {
+				val permissionName =
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "BLUETOOTH_CONNECT" else "BLUETOOTH"
+				withContext(Dispatchers.Main) {
+					_message.value = "Permiso $permissionName denegado"
+				}
+				return@launch
 			}
 
-		if (!hasPermission) {
-			val permissionName =
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "BLUETOOTH_CONNECT" else "BLUETOOTH"
-			message = "Permiso $permissionName denegado"
-			return
-		}
+			// Iniciar animación "Conectando..."
+			val connectingJob = launch(Dispatchers.Main) {
+				var dots = 0
+				while (isActive) {
+					_message.value = "Conectando" + ".".repeat(dots)
+					dots = (dots + 1) % 4 // Cicla entre 0, 1, 2, 3 puntos
+					delay(500L) // cada 0.5 segundos
+				}
+			}
 
-		try {
-			bluetoothConnectionManager.connectToDevice(device, context)
-			message = "Conectado a ${device.name ?: device.address ?: "Dispositivo desconocido"}"
-		} catch (e: BluetoothSecurityException) {
-			message = e.message
-		} catch (e: BluetoothConnectionFailedException) {
-			message = e.message
-		} catch (e: BluetoothPermissionException) {
-			message = e.message
-		} catch (_: Exception) {
-			message = "Error desconocido"
+			try {
+				bluetoothConnectionManager.connectToDevice(device, context)
+
+				// Si la conexión fue exitosa, detenemos la animación
+				connectingJob.cancelAndJoin()
+
+				withContext(Dispatchers.Main) {
+					_message.value =
+						"Conectado a ${device.name ?: device.address ?: "Dispositivo desconocido"}"
+				}
+			} catch (e: BluetoothSecurityException) {
+				connectingJob.cancel()
+				withContext(Dispatchers.Main) { _message.value = e.message }
+			} catch (e: BluetoothConnectionFailedException) {
+				connectingJob.cancel()
+				withContext(Dispatchers.Main) { _message.value = e.message }
+			} catch (e: BluetoothPermissionException) {
+				connectingJob.cancel()
+				withContext(Dispatchers.Main) { _message.value = e.message }
+			} catch (_: Exception) {
+				connectingJob.cancel()
+				withContext(Dispatchers.Main) { _message.value = "Error desconocido" }
+			}
 		}
 	}
+
 
 	/**
 	 * Envía un carácter por Bluetooth al dispositivo conectado.
@@ -95,9 +132,9 @@ class ConnectionViewModel(
 		} catch (_: BluetoothDeviceNotFoundException) {
 			Log.e("ConnectionViewModel", "No hay dispositivos Bluetooth conectados")
 		} catch (e: BluetoothSendFailedException) {
-			message = e.message
+			_message.value = e.message
 		} catch (_: Exception) {
-			message = "Error desconocido"
+			_message.value = "Error desconocido"
 		}
 	}
 
@@ -111,9 +148,9 @@ class ConnectionViewModel(
 		try {
 			bluetoothConnectionManager.listenForAllDevices(configDirections)
 		} catch (e: BluetoothReadException) {
-			message = e.message
+			_message.value = e.message
 		} catch (_: Exception) {
-			message = "Error desconocido"
+			_message.value = "Error desconocido"
 		}
 	}
 
@@ -125,7 +162,7 @@ class ConnectionViewModel(
 	 */
 	fun verifyBluetoothDevices(setOfDevices: Set<BluetoothDevice>): Boolean {
 		if (setOfDevices.isEmpty()) {
-			message = "No hay dispositivos Bluetooth disponibles"
+			_message.value = "No hay dispositivos Bluetooth disponibles"
 			return false
 		}
 		return true
@@ -140,19 +177,19 @@ class ConnectionViewModel(
 	fun connectToWifi(ip: String) {
 		try {
 			wifiConnectionManager.connectToIp(ip)
-			message = "Conectado a $ip"
+			_message.value = "Conectado a $ip"
 		} catch (e: ConnectionTimeoutException) {
-			message = e.message
+			_message.value = e.message
 		} catch (e: DeviceNotFoundException) {
-			message = e.message
+			_message.value = e.message
 		} catch (e: ConnectionFailedException) {
-			message = e.message
+			_message.value = e.message
 		} catch (e: UnexpectedResponseException) {
-			message = e.message
+			_message.value = e.message
 		} catch (e: InvalidIpException) {
-			message = e.message
+			_message.value = e.message
 		} catch (_: Exception) {
-			message = "Error desconocido"
+			_message.value = "Error desconocido"
 		}
 	}
 
@@ -165,17 +202,17 @@ class ConnectionViewModel(
 		try {
 			wifiConnectionManager.sendCharWifi(char)
 		} catch (e: SendCharFailedException) {
-			message = e.message
+			_message.value = e.message
 		} catch (e: ConnectionTimeoutException) {
-			message = e.message
+			_message.value = e.message
 		} catch (_: DeviceNotFoundException) {
 			Log.e("ConnectionViewModel", "No hay dispositivo Wi-Fi conectado")
 		} catch (e: ConnectionFailedException) {
-			message = e.message
+			_message.value = e.message
 		} catch (e: InvalidIpException) {
-			message = e.message
+			_message.value = e.message
 		} catch (_: Exception) {
-			message = "Error desconocido"
+			_message.value = "Error desconocido"
 		}
 	}
 
@@ -183,8 +220,8 @@ class ConnectionViewModel(
 	/**
 	 * Limpia el mensaje actual de error o confirmación.
 	 */
-	fun cleanMessage() {
-		message = null
+	private fun cleanMessage() {
+		_message.value = null
 	}
 
 	/**

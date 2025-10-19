@@ -253,6 +253,8 @@ fun MainScreen(
 		)
 	}
 
+	val message by connectionManager.message.collectAsState()
+
 	LaunchedEffect(modeSelected) {
 		connectionManager.sendChar(
 			when (modeSelected) {
@@ -260,12 +262,6 @@ fun MainScreen(
 				Modes.AUTOMATA -> modes.modeAutomataChar
 			}
 		)
-	}
-	LaunchedEffect(connectionManager.message) {
-		connectionManager.message?.let {
-			snackbarHostState.showSnackbar(it)
-			connectionManager.cleanMessage()
-		}
 	}
 
 	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, LocalContext.current)
@@ -282,8 +278,10 @@ fun MainScreen(
 			)
 		},
 		snackbarHost = {
-			SnackbarHost(snackbarHostState) { data ->
-				CustomSnackbar(data)
+			SnackbarHost(hostState = snackbarHostState) {
+				message?.let { text ->
+					CustomSnackbar(text)
+				}
 			}
 		},
 		containerColor = MaterialTheme.colorScheme.background
