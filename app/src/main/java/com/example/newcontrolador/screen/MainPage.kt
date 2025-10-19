@@ -1,5 +1,6 @@
 package com.example.newcontrolador.screen
 
+import android.R.id.message
 import android.bluetooth.BluetoothAdapter
 import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -18,6 +21,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -125,12 +129,7 @@ private fun GridButton(
 	LaunchedEffect(isPressed, directionsPressed) {
 		if (isPressed && directionsPressed.isNotEmpty()) {
 			while (isPressed) {
-				connectionManager.sendChar(
-					Directions.charFromSet(
-						directionsPressed,
-						directionChars
-					)
-				)
+				connectionManager.sendChar(Directions.charFromSet(directionsPressed, directionChars))
 				delay(50L) // cada 50 ms
 			}
 		} else {
@@ -231,72 +230,77 @@ private fun GridButton(
 
 @Composable
 fun MainScreen(
-	bluetoothAdapter: BluetoothAdapter,
-	navController: NavController,
-	viewModel: DataStoreViewModel
+    bluetoothAdapter: BluetoothAdapter,
+    navController: NavController,
+    viewModel: DataStoreViewModel
 ) {
-	val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-	// Observa configuración desde DataStore
-	val buttonConfig by viewModel.buttonConfig.collectAsState()
-	val directions by viewModel.directionChars.collectAsState()
-	val modes by viewModel.modeChars.collectAsState()
+    val buttonConfig by viewModel.buttonConfig.collectAsState()
+    val directions by viewModel.directionChars.collectAsState()
+    val modes by viewModel.modeChars.collectAsState()
 
-	var modeSelected by remember { mutableStateOf(Modes.MANUAL) }
+    var modeSelected by remember { mutableStateOf(Modes.MANUAL) }
 
-	val bluetoothConnectionManager = remember { BluetoothConnectionManager() }
-	val wifiManager = remember { WiFiConnectionManager() }
-	val connectionManager = remember {
-		ConnectionViewModel(
-			bluetoothConnectionManager = bluetoothConnectionManager,
-			wifiConnectionManager = wifiManager
-		)
-	}
+    val bluetoothConnectionManager = remember { BluetoothConnectionManager() }
+    val wifiManager = remember { WiFiConnectionManager() }
+    val connectionManager = remember {
+        ConnectionViewModel(
+            bluetoothConnectionManager = bluetoothConnectionManager,
+            wifiConnectionManager = wifiManager
+        )
+    }
 
-	val message by connectionManager.message.collectAsState()
-
-	LaunchedEffect(modeSelected) {
-		connectionManager.sendChar(
-			when (modeSelected) {
-				Modes.MANUAL -> modes.modeManualChar
-				Modes.AUTOMATA -> modes.modeAutomataChar
-			}
-		)
-	}
-
-	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, LocalContext.current)
-
-	Scaffold(
-		topBar = {
-			TopBarForMainPage(
-				bluetoothAdapter = bluetoothAdapter,
-				connectionManager = connectionManager,
-				navController = navController,
-				viewModel = viewModel,
-				modeSelected = { modeSelected = it },
-				configDirections = directions
-			)
-		},
-		snackbarHost = {
-			SnackbarHost(hostState = snackbarHostState) {
-				message?.let { text ->
-					CustomSnackbar(text)
-				}
-			}
-		},
-		containerColor = MaterialTheme.colorScheme.background
-	) { padding ->
-		Box(
-			Modifier
-				.padding(padding)
-				.fillMaxSize(),
-			contentAlignment = Alignment.Center
-		) {
-			GridButton(
-				connectionManager = connectionManager,
-				buttonConfig = buttonConfig,
-				directionChars = directions
-			)
+    LaunchedEffect(modeSelected) {
+        connectionManager.sendChar(
+            when (modeSelected) {
+                Modes.MANUAL -> modes.modeManualChar
+                Modes.AUTOMATA -> modes.modeAutomataChar
+            }
+        )
+    }
+    LaunchedEffect(connectionManager.message) {
+		connectionManager.message?.let {
+			snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Indefinite)
 		}
 	}
+    SetOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, LocalContext.current)
+
+    Scaffold(
+        topBar = {
+            TopBarForMainPage(
+                bluetoothAdapter = bluetoothAdapter,
+                connectionManager = connectionManager,
+                navController = navController,
+                viewModel = viewModel,
+                modeSelected = { modeSelected = it },
+                configDirections = directions
+            )
+        },
+        snackbarHost = {
+			SnackbarHost(
+				snackbarHostState,
+				modifier = Modifier
+					.wrapContentWidth()
+					.wrapContentHeight()
+			) { data ->
+				CustomSnackbar(data)
+			}
+		},
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Box(
+            Modifier
+				.padding(padding)
+				.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            GridButton(
+                connectionManager = connectionManager,
+                buttonConfig = buttonConfig,
+                directionChars = directions
+            )
+        }
+    }
 }
+
