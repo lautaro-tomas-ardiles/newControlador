@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.data.ConfigDirections
+import com.example.newcontrolador.connection.data.DirectionsConfig
 
 /**
  * Menú desplegable de dispositivos Bluetooth.
@@ -49,7 +49,7 @@ fun BluetoothDropMenu(
 	onStateChange: (Boolean) -> Unit,
 	setOfDevices: Set<BluetoothDevice>,
 	connectionManager: ConnectionViewModel,
-	configDirections: ConfigDirections,
+	directionsConfig: DirectionsConfig,
 	context: Context
 ) {
 	DropdownMenu(
@@ -62,7 +62,7 @@ fun BluetoothDropMenu(
 		setOfDevices.forEach { device ->
 			DeviceItem(device) {
 				connectionManager.connectToBluetooth(device, context)
-				connectionManager.listenForBluetoothMessages(configDirections)
+				connectionManager.listenForBluetoothMessages(directionsConfig)
 				onStateChange(false)
 			}
 		}

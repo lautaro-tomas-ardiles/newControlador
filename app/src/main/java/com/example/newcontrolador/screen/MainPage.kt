@@ -1,6 +1,5 @@
 package com.example.newcontrolador.screen
 
-import android.R.id.message
 import android.bluetooth.BluetoothAdapter
 import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Arrangement
@@ -39,8 +38,8 @@ import androidx.navigation.NavController
 import com.example.newcontrolador.connection.BluetoothConnectionManager
 import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.connection.WiFiConnectionManager
-import com.example.newcontrolador.connection.data.ConfigButton
-import com.example.newcontrolador.connection.data.ConfigDirections
+import com.example.newcontrolador.connection.data.ButtonConfig
+import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.data.DataStoreViewModel
@@ -115,8 +114,8 @@ private fun Indicators(pressedButton: Set<Directions>) {
 @Composable
 private fun GridButton(
 	connectionManager: ConnectionViewModel,
-	buttonConfig: ConfigButton,
-	directionChars: ConfigDirections
+	buttonConfig: ButtonConfig,
+	directionChars: DirectionsConfig
 ) {
 	val buttonHeight = buttonConfig.height.toInt()
 	val buttonWidth = buttonConfig.width.toInt()
@@ -274,7 +273,7 @@ fun MainScreen(
                 navController = navController,
                 viewModel = viewModel,
                 modeSelected = { modeSelected = it },
-                configDirections = directions
+                directionsConfig = directions
             )
         },
         snackbarHost = {

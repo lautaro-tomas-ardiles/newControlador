@@ -1,6 +1,6 @@
 package com.example.newcontrolador.connection.data
 
-data class ConfigDirections(
+data class DirectionsConfig(
 	val upChar: Char = 'F',
 	val downChar: Char = 'B',
 	val leftChar: Char = 'L',

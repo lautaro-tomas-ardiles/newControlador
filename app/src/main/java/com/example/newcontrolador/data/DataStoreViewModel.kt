@@ -2,9 +2,9 @@ package com.example.newcontrolador.data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newcontrolador.connection.data.ConfigButton
-import com.example.newcontrolador.connection.data.ConfigDirections
-import com.example.newcontrolador.connection.data.ConfigModes
+import com.example.newcontrolador.connection.data.ButtonConfig
+import com.example.newcontrolador.connection.data.DirectionsConfig
+import com.example.newcontrolador.connection.data.ModesConfig
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.connection.data.ThemeType
@@ -15,6 +15,19 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
+
+	object DefaultConfigs {
+		val directions = DirectionsConfig(
+			upChar = 'F', downChar = 'B', leftChar = 'L', rightChar = 'R',
+			upLeftChar = 'G', upRightChar = 'I', downLeftChar = 'H',
+			downRightChar = 'J', stopChar = 'S'
+		)
+
+		val modes = ModesConfig(
+			modeManualChar = 'C',
+			modeAutomataChar = 'A'
+		)
+	}
 
 	// Theme
 	val theme: StateFlow<ThemeType> = dataStoreManager.loadTheme.map { str ->
@@ -32,8 +45,8 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 	}
 
 	// Button
-	val buttonConfig: StateFlow<ConfigButton> = dataStoreManager.loadButtonConfig
-		.stateIn(viewModelScope, SharingStarted.Eagerly, ConfigButton())
+	val buttonConfig: StateFlow<ButtonConfig> = dataStoreManager.loadButtonConfig
+		.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonConfig())
 
 	fun setButtonWidth(width: Float) = viewModelScope.launch {
 		dataStoreManager.saveButtonWidth(width)
@@ -48,18 +61,26 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 	}
 
 	// Directions
-	val directionChars: StateFlow<ConfigDirections> = dataStoreManager.loadDirectionChars
-		.stateIn(viewModelScope, SharingStarted.Eagerly, ConfigDirections())
+	val directionChars: StateFlow<DirectionsConfig> = dataStoreManager.loadDirectionChars
+		.stateIn(viewModelScope, SharingStarted.Eagerly, DirectionsConfig())
 
 	fun setDirectionChar(direction: Directions, char: Char) = viewModelScope.launch {
 		dataStoreManager.saveDirectionChar(direction, char)
 	}
 
+	fun resetDirectionChars() = viewModelScope.launch {
+		dataStoreManager.saveAllDirectionChars(DefaultConfigs.directions)
+	}
+
 	// Modes
-	val modeChars: StateFlow<ConfigModes> = dataStoreManager.loadModeChars
-		.stateIn(viewModelScope, SharingStarted.Eagerly, ConfigModes())
+	val modeChars: StateFlow<ModesConfig> = dataStoreManager.loadModeChars
+		.stateIn(viewModelScope, SharingStarted.Eagerly, ModesConfig())
 
 	fun setModeChar(mode: Modes, char: Char) = viewModelScope.launch {
 		dataStoreManager.saveModeChar(mode, char)
+	}
+
+	fun resetModesToDefault() = viewModelScope.launch {
+		dataStoreManager.saveAllModeChars(DefaultConfigs.modes)
 	}
 }

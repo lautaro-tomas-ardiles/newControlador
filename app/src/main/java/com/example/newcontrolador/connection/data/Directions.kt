@@ -12,7 +12,7 @@ enum class Directions() {
 	STOP;
 
 	companion object {
-		fun getChar(directions: Directions, config: ConfigDirections): Char {
+		fun getChar(directions: Directions, config: DirectionsConfig): Char {
 			return when (directions) {
 				UP -> config.upChar
 				DOWN -> config.downChar
@@ -40,8 +40,8 @@ enum class Directions() {
 			}
 		}
 
-		fun charFromSet(directions: Set<Directions>, configDirections: ConfigDirections): Char {
-			return getChar(Directions.fromSet(directions), configDirections)
+		fun charFromSet(directions: Set<Directions>, directionsConfig: DirectionsConfig): Char {
+			return getChar(Directions.fromSet(directions), directionsConfig)
 		}
 
 		fun getDirectionsName(directions: Directions): String {
