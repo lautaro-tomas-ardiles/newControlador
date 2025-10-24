@@ -5,9 +5,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.newcontrolador.connection.data.ConfigButton
-import com.example.newcontrolador.connection.data.ConfigDirections
-import com.example.newcontrolador.connection.data.ConfigModes
+import com.example.newcontrolador.connection.data.ButtonConfig
+import com.example.newcontrolador.connection.data.DirectionsConfig
+import com.example.newcontrolador.connection.data.ModesConfig
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
 import kotlinx.coroutines.flow.Flow
@@ -57,8 +57,8 @@ class DataStoreManager(private val context: Context) {
 	}
 
 	//* cargar los datos de button */
-	val loadButtonConfig: Flow<ConfigButton> = context.dataStore.data.map { prefs ->
-		ConfigButton(
+	val loadButtonConfig: Flow<ButtonConfig> = context.dataStore.data.map { prefs ->
+		ButtonConfig(
 			width = prefs[WIDTH_KEY] ?: 165f,
 			height = prefs[HEIGHT_KEY] ?: 150f,
 			padding = prefs[PADDING_KEY] ?: 0f
@@ -94,8 +94,29 @@ class DataStoreManager(private val context: Context) {
 		}
 	}
 
-	val loadDirectionChars: Flow<ConfigDirections> = context.dataStore.data.map { prefs ->
-		ConfigDirections(
+	suspend fun saveAllDirectionChars(directions: DirectionsConfig) {
+		context.dataStore.edit { preferences ->
+			preferences[UP_CHAR_KEY] = directions.upChar.toString()
+			preferences[DOWN_CHAR_KEY] = directions.downChar.toString()
+			preferences[LEFT_CHAR_KEY] = directions.leftChar.toString()
+			preferences[RIGHT_CHAR_KEY] = directions.rightChar.toString()
+			preferences[UP_LEFT_CHAR_KEY] = directions.upLeftChar.toString()
+			preferences[UP_RIGHT_CHAR_KEY] = directions.upRightChar.toString()
+			preferences[DOWN_LEFT_CHAR_KEY] = directions.downLeftChar.toString()
+			preferences[DOWN_RIGHT_CHAR_KEY] = directions.downRightChar.toString()
+			preferences[STOP_CHAR_KEY] = directions.stopChar.toString()
+		}
+	}
+
+	suspend fun saveAllModeChars(modes: ModesConfig) {
+		context.dataStore.edit { preferences ->
+			preferences[MODE_MANUAL_KEY] = modes.modeManualChar.toString()
+			preferences[MODE_AUTOMATA_KEY] = modes.modeAutomataChar.toString()
+		}
+	}
+
+	val loadDirectionChars: Flow<DirectionsConfig> = context.dataStore.data.map { prefs ->
+		DirectionsConfig(
 			upChar = (prefs[UP_CHAR_KEY]?.get(0)) ?: 'F',
 			downChar = (prefs[DOWN_CHAR_KEY]?.get(0)) ?: 'B',
 			leftChar = (prefs[LEFT_CHAR_KEY]?.get(0)) ?: 'L',
@@ -108,8 +129,8 @@ class DataStoreManager(private val context: Context) {
 		)
 	}
 
-	val loadModeChars: Flow<ConfigModes> = context.dataStore.data.map { prefs ->
-		ConfigModes(
+	val loadModeChars: Flow<ModesConfig> = context.dataStore.data.map { prefs ->
+		ModesConfig(
 			modeManualChar = (prefs[MODE_MANUAL_KEY]?.get(0)) ?: 'C',
 			modeAutomataChar = (prefs[MODE_AUTOMATA_KEY]?.get(0)) ?: 'A'
 		)

@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newcontrolador.connection.data.ConfigDirections
+import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.exceptions.BluetoothConnectionFailedException
 import com.example.newcontrolador.exceptions.BluetoothDeviceNotFoundException
 import com.example.newcontrolador.exceptions.BluetoothPermissionException
@@ -25,7 +25,6 @@ import com.example.newcontrolador.exceptions.DeviceNotFoundException
 import com.example.newcontrolador.exceptions.InvalidIpException
 import com.example.newcontrolador.exceptions.SendCharFailedException
 import com.example.newcontrolador.exceptions.UnexpectedResponseException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
@@ -147,9 +146,9 @@ class ConnectionViewModel(
 	 * Esta funcion se usa para detectar mensajes recibidos desde controles Bluetooth
 	 * y traducirlos en comandos de movimiento para el robot conectado.
 	 */
-	fun listenForBluetoothMessages(configDirections: ConfigDirections) {
+	fun listenForBluetoothMessages(directionsConfig: DirectionsConfig) {
 		try {
-			bluetoothConnectionManager.listenForAllDevices(configDirections)
+			bluetoothConnectionManager.listenForAllDevices(directionsConfig)
 		} catch (e: BluetoothReadException) {
 			showTempMessage(e.message ?: "Error desconocido")
 		} catch (_: Exception) {
@@ -208,12 +207,12 @@ class ConnectionViewModel(
 			showTempMessage(e.message ?: "Error desconocido")
 		} catch (e: ConnectionTimeoutException) {
 			showTempMessage(e.message ?: "Error desconocido")
-		} catch (_: DeviceNotFoundException) {
-			Log.e("ConnectionViewModel", "No hay dispositivo Wi-Fi conectado")
+		} catch (e: DeviceNotFoundException) {
+			Log.e("ConnectionViewModel",  e.message ?: "Error desconocido")
 		} catch (e: ConnectionFailedException) {
 			showTempMessage(e.message ?: "Error desconocido")
 		} catch (e: InvalidIpException) {
-			showTempMessage(e.message ?: "Error desconocido")
+			Log.e("ConnectionViewModel", e.message ?: "Error desconocido")
 		} catch (_: Exception) {
 			showTempMessage("Error desconocido")
 		}

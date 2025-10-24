@@ -39,8 +39,7 @@ import androidx.navigation.NavController
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.connection.data.Buttons
-import com.example.newcontrolador.connection.data.ConfigDirections
-import com.example.newcontrolador.connection.data.Directions
+import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.connection.data.ThemeType
 import com.example.newcontrolador.data.DataStoreViewModel
@@ -88,7 +87,7 @@ private fun TopBarForMainPageStart(
 	onBluetoothChange: (Boolean) -> Unit,
 	connectionManager: ConnectionViewModel,
 	bluetoothAdapter: BluetoothAdapter,
-	configDirections: ConfigDirections
+	directionsConfig: DirectionsConfig
 ) {
 	var ip by remember { mutableStateOf("") }
 
@@ -151,7 +150,7 @@ private fun TopBarForMainPageStart(
 					setOfDevices = pairedDevices,
 					connectionManager = connectionManager,
 					context = context,
-					configDirections = configDirections
+					directionsConfig = directionsConfig
 				)
 			} else {
 				WifiTextField(
@@ -172,10 +171,7 @@ private fun TopBarForMainPageStart(
  *
  * @param modeSelected Función que se ejecuta al seleccionar un modo.
  * @param navController Controlador de navegación para los diagramas.
- * @param onChangeButtonHeight Función que actualiza la altura de los botones.
- * @param onChangeButtonWidth Función que actualiza el ancho de los botones.
- * @param onChangePadding Función que actualiza el padding de los botones.
- * @param selectedThemeType Función que actualiza el tema seleccionado.
+ * @param viewModel ViewModel para manejar la configuración almacenada.
  */
 @Composable
 private fun TopBarForMainPageEnd(
@@ -202,19 +198,6 @@ private fun TopBarForMainPageEnd(
 		Modes.AUTOMATA,
 		Modes.MANUAL
 	)
-
-	val directions = setOf(
-		Directions.UP,
-		Directions.DOWN,
-		Directions.LEFT,
-		Directions.RIGHT,
-		Directions.UP_LEFT,
-		Directions.UP_RIGHT,
-		Directions.DOWN_LEFT,
-		Directions.DOWN_RIGHT,
-		Directions.STOP
-	)
-
 	val slidersList = listOf(
 		SliderConfig(
 			value = buttonHeight,
@@ -246,7 +229,6 @@ private fun TopBarForMainPageEnd(
 			ruta = painterResource(id = R.drawable.padding)
 		)
 	)
-
 	val themesList = listOf(
 		ThemeConfig(
 			isColorSelected = selectedTheme == ThemeType.DEFAULT,
@@ -261,13 +243,6 @@ private fun TopBarForMainPageEnd(
 				viewModel.setTheme(ThemeType.WHITE)
 			},
 			theme = ThemeType.WHITE
-		),
-		ThemeConfig(
-			isColorSelected = selectedTheme == ThemeType.WHITE_2,
-			onClick = {
-				viewModel.setTheme(ThemeType.WHITE_2)
-			},
-			theme = ThemeType.WHITE_2
 		)
 	)
 
@@ -327,12 +302,10 @@ private fun TopBarForMainPageEnd(
 			)
 			SettingsDropMenu(
 				state = menuSettingState,
-				viewModel = viewModel,
 				onStateChange = { menuSettingState = it },
-				setOfDirections = directions,
-				setOfModes = modes,
 				listOfSliders = slidersList,
 				listOfThemes = themesList,
+				navController = navController
 			)
 		}
 	}
@@ -349,9 +322,8 @@ private fun TopBarForMainPageEnd(
  * @param connectionManager Manager de conexión Bluetooth/WiFi.
  * @param navController Controlador de navegación.
  * @param modeSelected Función que se ejecuta al seleccionar un modo.
- * @param buttonWidthValue Función que actualiza el ancho de los botones.
- * @param buttonHeightValue Función que actualiza la altura de los botones.
- * @param paddingValues Función que actualiza el padding de los botones.
+ * @param viewModel ViewModel para manejar la configuración almacenada.
+ * @param directionsConfig Direcciones de configuración para la conexión.
  */
 @Composable
 fun TopBarForMainPage(
@@ -360,7 +332,7 @@ fun TopBarForMainPage(
 	navController: NavController,
 	viewModel: DataStoreViewModel,
 	modeSelected: (Modes) -> Unit,
-	configDirections: ConfigDirections
+	directionsConfig: DirectionsConfig
 ) {
 	Box(
 		contentAlignment = Alignment.Center,
@@ -373,7 +345,7 @@ fun TopBarForMainPage(
 			onBluetoothChange = { connectionManager.isBluetooth = it },
 			connectionManager = connectionManager,
 			bluetoothAdapter = bluetoothAdapter,
-			configDirections = configDirections
+			directionsConfig = directionsConfig
 		)
 
 		TopBarForMainPageEnd(

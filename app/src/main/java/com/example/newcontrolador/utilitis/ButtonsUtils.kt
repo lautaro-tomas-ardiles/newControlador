@@ -4,12 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -28,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
@@ -110,8 +113,10 @@ fun IconsButtonsCustom(
 	isSolidColor: Boolean = false,
 	isBluetooth: Boolean = false,
 	border: Boolean = false,
+	isPainter: Boolean = false,
 	tintColor: Color = MaterialTheme.colorScheme.tertiary,
-	imageVector: ImageVector = Icons.Default.Settings
+	imageVector: ImageVector = Icons.Default.Settings,
+	painter: Painter = painterResource(R.drawable.external_link)
 ) {
 	IconButton(
 		onClick = { onClick() },
@@ -140,7 +145,16 @@ fun IconsButtonsCustom(
 				contentDescription = "Ícono de Bluetooth",
 				tint = MaterialTheme.colorScheme.background
 			)
-		} else {
+		}
+		if (isPainter && !isBluetooth) {
+			Icon(
+				painter = painter,
+				contentDescription = "Ícono de acción",
+				tint = tintColor,
+				modifier = Modifier.size(30.dp)
+			)
+		}
+		if (!isBluetooth && !isPainter) {
 			Icon(
 				imageVector = imageVector,
 				contentDescription = "Ícono de acción",
@@ -165,23 +179,41 @@ fun IconsButtonsCustom(
 fun TextAndButton(
 	text: String,
 	imageVector: ImageVector = Icons.Default.MoreVert,
+	painter: Painter = painterResource(R.drawable.external_link),
 	isBluetooth: Boolean = false,
+	isPainter: Boolean = false,
+	tintColor: Color = MaterialTheme.colorScheme.tertiary,
 	onClick: () -> Unit
 ) {
-	Text(
-		text = text,
-		color = MaterialTheme.colorScheme.background,
-		fontSize = MaterialTheme.typography.bodyMedium.fontSize
-	)
-	Spacer(modifier = Modifier.padding(3.dp))
+	Row (
+		verticalAlignment = Alignment.CenterVertically
+	) {
+		Text(
+			text = text,
+			color = MaterialTheme.colorScheme.background,
+			fontSize = MaterialTheme.typography.bodyMedium.fontSize
+		)
+		Spacer(modifier = Modifier.padding(3.dp))
 
-	IconsButtonsCustom(
-		onClick = { onClick() },
-		border = !isBluetooth, // si es bluetooth no debe tener borde
-		imageVector = imageVector,
-		isBluetooth = isBluetooth,
-		isSolidColor = isBluetooth // si es el boton de bluetooth tiene que ser solido
-	)
+		if (isPainter) {
+			IconsButtonsCustom(
+				onClick = { onClick() },
+				border = !isBluetooth,
+				painter = painter,
+				isPainter = true,
+				isSolidColor = isBluetooth,
+				tintColor = tintColor
+			)
+		} else {
+			IconsButtonsCustom(
+				onClick = { onClick() },
+				border = !isBluetooth, // si es bluetooth no debe tener borde
+				imageVector = imageVector,
+				isBluetooth = isBluetooth,
+				isSolidColor = isBluetooth // si es el boton de bluetooth tiene que ser solido
+			)
+		}
+	}
 }
 
 /**
@@ -201,7 +233,8 @@ fun SimpleButton(
 		onClick = { onClick() },
 		colors = ButtonDefaults.buttonColors(
 			containerColor = MaterialTheme.colorScheme.secondary
-		)
+		),
+		shape = RoundedCornerShape(30)
 	) {
 		Text(
 			text = text,

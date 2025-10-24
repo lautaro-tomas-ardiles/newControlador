@@ -12,31 +12,31 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.newcontrolador.connection.data.ThemeType
 
 val DarckDefault = darkColorScheme(
-	primary = DarckThemeBlue,
-	secondary = DarckThemeLightYellow,
-	tertiary = DarckThemeLightGreen,
-	onSecondary = DarckThemeDarkYellow,
-	onTertiary = DarckThemeDarkGreen,
-	background = DarckThemeBlack,
-	onBackground = DarckThemeLightBlack
+	primary = blue10,
+	secondary = yellow20,
+	tertiary = green20,
+	onSecondary = yellow10,
+	onTertiary = green10,
+	background = black10,
+	onBackground = black20
 )
 val LightDefault = lightColorScheme(
-	primary = LightThemeBlue,
-	secondary = LightThemeLightRed,
-	tertiary = LightThemeDarckGreen,
-	onSecondary = LightThemeDarckRed,
-	onTertiary = LightThemeLigthGreen,
-	background = LightThemeDarckWhite,
-	onBackground = LightThemeLightWhite
+	primary = blue20,
+	secondary = yellow30,
+	tertiary = green40,
+	onSecondary = yellow40,
+	onTertiary = green30,
+	background = white10,
+	onBackground = red10
 )
 val Scheme = lightColorScheme(
-	primary = LightThemeLightRed,
-	secondary = LightThemeDarckGreen,
-	tertiary = LightThemeDarckRed,
-	onSecondary = LightThemeLigthGreen,
-	onTertiary = LightThemeDarckWhite,
-	background = LightThemeLightWhite,
-	onBackground = LightThemeBlue
+	primary = yellow30,
+	secondary = green40,
+	tertiary = yellow40,
+	onSecondary = green30,
+	onTertiary = red10,
+	background = white10,
+	onBackground = blue20
 )
 
 @Composable
@@ -55,7 +55,7 @@ fun NewControladorTheme(
 
 		themeType == ThemeType.DEFAULT -> DarckDefault
 		themeType == ThemeType.WHITE -> LightDefault
-		themeType == ThemeType.WHITE_2 -> Scheme
+		//themeType == ThemeType.WHITE_2 -> Scheme
 		else -> DarckDefault
 	}
 

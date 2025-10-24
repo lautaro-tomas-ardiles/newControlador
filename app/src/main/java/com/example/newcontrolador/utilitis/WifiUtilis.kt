@@ -1,6 +1,6 @@
 package com.example.newcontrolador.utilitis
 
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.MaterialTheme
@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.connection.ConnectionViewModel
 
 @Composable
@@ -39,8 +40,9 @@ fun WifiTextField(
 			focusedTrailingIconColor = MaterialTheme.colorScheme.background,
 			unfocusedTrailingIconColor = MaterialTheme.colorScheme.background,
 			focusedTextColor = MaterialTheme.colorScheme.background,
-			unfocusedTextColor = MaterialTheme.colorScheme.background
+			unfocusedTextColor = MaterialTheme.colorScheme.background,
+			errorTextColor = MaterialTheme.colorScheme.primary
 		),
-		modifier = Modifier.wrapContentSize()
+		modifier = Modifier.width(170.dp)
 	)
 }

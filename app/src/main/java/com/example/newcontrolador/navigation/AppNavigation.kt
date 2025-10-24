@@ -10,6 +10,7 @@ import com.example.newcontrolador.screen.MainArduinoOneAndHC05Page
 import com.example.newcontrolador.screen.MainESP32Page
 import com.example.newcontrolador.screen.MainESP8622Page
 import com.example.newcontrolador.screen.MainScreen
+import com.example.newcontrolador.screen.MainSettingsPage
 
 @Composable
 fun AppNavigation(
@@ -20,24 +21,29 @@ fun AppNavigation(
 
 	NavHost(navController, AppScreen.MainPage.route) {
 		composable(
-			AppScreen.MainPage.route
+			route = AppScreen.MainPage.route
 		) {
 			MainScreen(bluetoothAdapter, navController, viewModel)
 		}
 		composable(
-			AppScreen.ESP8622Page.route
+			route = AppScreen.ESP8622Page.route
 		) {
 			MainESP8622Page(navController)
 		}
 		composable(
-			AppScreen.ESP32Page.route
+			route = AppScreen.ESP32Page.route
 		) {
 			MainESP32Page(navController)
 		}
 		composable(
-			AppScreen.ArduinoOneAndHC05Page.route
+			route = AppScreen.ArduinoOneAndHC05Page.route
 		) {
 			MainArduinoOneAndHC05Page(navController)
+		}
+		composable(
+			route = AppScreen.SettingsPage.route
+		) {
+			MainSettingsPage(navController, viewModel)
 		}
 	}
 }

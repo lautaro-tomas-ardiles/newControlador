@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
-import com.example.newcontrolador.connection.data.ConfigDirections
+import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.exceptions.BluetoothConnectionFailedException
 import com.example.newcontrolador.exceptions.BluetoothDeviceNotFoundException
@@ -107,18 +107,18 @@ class BluetoothConnectionManager {
 	/**
 	 * Traduce caracteres de entrada en comandos definidos por el enum [Directions].
 	 */
-	private fun translateChar(c: Char, configDirections: ConfigDirections): Char {
+	private fun translateChar(c: Char, directionsConfig: DirectionsConfig): Char {
 		return when (c) {
-			'u' -> configDirections.upChar
-			'd' -> configDirections.downChar
-			'l' -> configDirections.leftChar
-			'r' -> configDirections.rightChar
-			'g' -> configDirections.upLeftChar
-			'i' -> configDirections.upRightChar
-			'h' -> configDirections.downLeftChar
-			'j' -> configDirections.downRightChar
-			's' -> configDirections.stopChar
-			else -> configDirections.stopChar
+			'u' -> directionsConfig.upChar
+			'd' -> directionsConfig.downChar
+			'l' -> directionsConfig.leftChar
+			'r' -> directionsConfig.rightChar
+			'g' -> directionsConfig.upLeftChar
+			'i' -> directionsConfig.upRightChar
+			'h' -> directionsConfig.downLeftChar
+			'j' -> directionsConfig.downRightChar
+			's' -> directionsConfig.stopChar
+			else -> directionsConfig.stopChar
 		}
 	}
 
@@ -129,7 +129,7 @@ class BluetoothConnectionManager {
 	 * @throws BluetoothReadException Si ocurre un error al leer los datos.
 	 */
 	@Throws(Exception::class)
-	fun listenForAllDevices(configDirections: ConfigDirections) {
+	fun listenForAllDevices(directionsConfig: DirectionsConfig) {
 		for ((_, socket) in sockets) {
 			Thread {
 				try {
@@ -140,7 +140,7 @@ class BluetoothConnectionManager {
 						if (bytesRead > 0) {
 							val data = String(buffer, 0, bytesRead)
 							for (char in data.lowercase()) {
-								val translatedChar = translateChar(char, configDirections)
+								val translatedChar = translateChar(char, directionsConfig)
 								if (translatedChar != ' ') {
 									sendCharBluetooth(translatedChar)
 								}
