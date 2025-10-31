@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
  *
  * @param text Código fuente de Arduino que se mostrará en el componente.
  */
+// cosas
 @Composable
 fun ArduinoCode(text: String) {
 	Box(
