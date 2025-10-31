@@ -1,11 +1,7 @@
 package com.example.newcontrolador.screen
 
-import android.Manifest
 import android.bluetooth.BluetoothAdapter
-import android.content.pm.PackageManager
-import android.icu.text.RelativeDateTimeFormatter.Direction
-import android.os.Build
-import android.widget.Toast
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,15 +10,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,312 +33,273 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
+import androidx.navigation.NavController
 import com.example.newcontrolador.connection.BluetoothConnectionManager
-import com.example.newcontrolador.connection.Directions
+import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.connection.WiFiConnectionManager
-import com.example.newcontrolador.ui.theme.Black
-import com.example.newcontrolador.ui.theme.Blue
-import com.example.newcontrolador.ui.theme.DarkYellow
-import com.example.newcontrolador.ui.theme.NewControladorTheme
-import com.example.newcontrolador.utilitis.BluetoothDevices
-import com.example.newcontrolador.utilitis.Button
-import com.example.newcontrolador.utilitis.SettingsItem
-import com.example.newcontrolador.utilitis.TopBar
-import com.example.newcontrolador.utilitis.getDirectionChar
+import com.example.newcontrolador.connection.data.ButtonConfig
+import com.example.newcontrolador.connection.data.DirectionsConfig
+import com.example.newcontrolador.connection.data.Directions
+import com.example.newcontrolador.connection.data.Modes
+import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.utilitis.CustomSnackbar
+import com.example.newcontrolador.utilitis.DirectionButton
+import com.example.newcontrolador.utilitis.SetOrientation
+import com.example.newcontrolador.utilitis.TopBarForMainPage
+import kotlinx.coroutines.delay
 
 @Composable
-fun Indicators(pressedButton: Set<Directions>) {
-    val colorUp = if (Directions.UP in pressedButton) DarkYellow else Blue
-    val colorDown = if (Directions.DOWN in pressedButton) DarkYellow else Blue
-    val colorLeft = if (Directions.LEFT in pressedButton) DarkYellow else Blue
-    val colorRight = if (Directions.RIGHT in pressedButton) DarkYellow else Blue
+private fun Indicators(pressedButton: Set<Directions>) {
+	val colorUp =
+		if (Directions.UP in pressedButton)
+			MaterialTheme.colorScheme.onSecondary
+		else
+			MaterialTheme.colorScheme.primary
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-            contentDescription = null,
-            modifier = Modifier.size(65.dp),
-            tint = colorLeft
-        )
-        Column {
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowUp,
-                contentDescription = null,
-                modifier = Modifier.size(65.dp),
-                tint = colorUp
-            )
-            Spacer(Modifier.padding(25.dp))
+	val colorDown =
+		if (Directions.DOWN in pressedButton)
+			MaterialTheme.colorScheme.onSecondary
+		else
+			MaterialTheme.colorScheme.primary
 
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = null,
-                modifier = Modifier.size(65.dp),
-                tint = colorDown
-            )
-        }
+	val colorLeft =
+		if (Directions.LEFT in pressedButton)
+			MaterialTheme.colorScheme.onSecondary
+		else
+			MaterialTheme.colorScheme.primary
 
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            modifier = Modifier.size(65.dp),
-            tint = colorRight
-        )
-    }
+	val colorRight =
+		if (Directions.RIGHT in pressedButton)
+			MaterialTheme.colorScheme.onSecondary
+		else
+			MaterialTheme.colorScheme.primary
+
+	Row(
+		verticalAlignment = Alignment.CenterVertically,
+		horizontalArrangement = Arrangement.Center
+	) {
+		Icon(
+			imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+			contentDescription = "indicador izquierdo",
+			modifier = Modifier.size(65.dp),
+			tint = colorLeft
+		)
+		Column {
+			Icon(
+				imageVector = Icons.Default.KeyboardArrowUp,
+				contentDescription = "indicador superior",
+				modifier = Modifier.size(65.dp),
+				tint = colorUp
+			)
+			Spacer(Modifier.padding(25.dp))
+
+			Icon(
+				imageVector = Icons.Default.KeyboardArrowDown,
+				contentDescription = "indicador inferior",
+				modifier = Modifier.size(65.dp),
+				tint = colorDown
+			)
+		}
+
+		Icon(
+			imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+			contentDescription = "indicador derecho",
+			modifier = Modifier.size(65.dp),
+			tint = colorRight
+		)
+	}
 }
 
 @Composable
-fun GridButton(
-    managerBluetooth: BluetoothConnectionManager,
-    managerWiFi: WiFiConnectionManager,
-    widthButton: Int,
-    heightButton: Int,
-    paddings: Int
+private fun GridButton(
+	connectionManager: ConnectionViewModel,
+	buttonConfig: ButtonConfig,
+	directionChars: DirectionsConfig
 ) {
-    var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
-    val context = LocalContext.current
+	val buttonHeight = buttonConfig.height.toInt()
+	val buttonWidth = buttonConfig.width.toInt()
+	val padding = buttonConfig.padding.toInt()
 
-    Row(
-        Modifier.fillMaxSize(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        Column {
-            Button(
-                direction = Directions.UP,
-                onPress = {
-                    //lista de teclas presionadas
-                    directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+	var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
+	var isPressed by remember { mutableStateOf(false) }
 
-                    val directionChar = getDirectionChar(directionsPressed)
+	// Efecto para enviar continuamente los caracteres mientras el botón esté presionado
+	LaunchedEffect(isPressed, directionsPressed) {
+		if (isPressed && directionsPressed.isNotEmpty()) {
+			while (isPressed) {
+				connectionManager.sendChar(Directions.charFromSet(directionsPressed, directionChars))
+				delay(50L) // cada 50 ms
+			}
+		} else {
+			while (!isPressed) {
+				connectionManager.sendChar(directionChars.stopChar)
+				delay(50L)
+			}
+		}
+	}
 
-                    managerBluetooth.sendChar(directionChar, context)
+	Row(
+		Modifier.fillMaxSize(),
+		verticalAlignment = Alignment.CenterVertically,
+		horizontalArrangement = Arrangement.SpaceBetween
+	) {
+		Column {
+			DirectionButton(
+				direction = Directions.UP,
+				onPress = {
+					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-                    managerWiFi.sendChar(directionChar, context)
-                },
-                onRelease = {
-                    directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
+					isPressed = true
+				},
+				onRelease = {
+					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    managerBluetooth.sendChar(Directions.STOP.char, context)
+					if (directionsPressed.isEmpty()) {
+						isPressed = false
+					}
+				},
+				height = buttonHeight,
+				width = buttonWidth
+			)
+			Spacer(Modifier.padding(padding.dp))
 
-                    managerWiFi.sendChar(Directions.STOP.char, context)
-                },
-                width = widthButton,
-                height = heightButton
-            )
-            Spacer(Modifier.padding(padding.dp))
+			DirectionButton(
+				direction = Directions.DOWN,
+				onPress = {
+					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-            Button(
-                direction = Directions.DOWN,
-                onPress = {
-                    directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+					isPressed = true
+				},
+				onRelease = {
+					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    val directionChar = getDirectionChar(directionsPressed)
+					if (directionsPressed.isEmpty()) {
+						isPressed = false
+					}
+				},
+				height = buttonHeight,
+				width = buttonWidth
+			)
+		}
 
-                    managerBluetooth.sendChar(directionChar, context)
+		Indicators(directionsPressed)
 
-                    managerWiFi.sendChar(directionChar, context)
-                },
-                onRelease = {
-                    directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
+		Row {
+			DirectionButton(
+				direction = Directions.LEFT,
+				onPress = {
+					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-                    managerBluetooth.sendChar(Directions.STOP.char, context)
+					isPressed = true
+				},
+				onRelease = {
+					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    managerWiFi.sendChar(Directions.STOP.char, context)
-                },
-                width = widthButton,
-                height = heightButton
-            )
-        }
+					if (directionsPressed.isEmpty()) {
+						isPressed = false
+					}
+				},
+				height = buttonHeight,
+				width = buttonWidth
+			)
+			Spacer(Modifier.padding(padding.dp))
 
-        Indicators(directionsPressed)
+			DirectionButton(
+				direction = Directions.RIGHT,
+				onPress = {
+					directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
-        Row {
-            Button(
-                direction = Directions.LEFT,
-                onPress = {
-                    directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+					isPressed = true
+				},
+				onRelease = {
+					directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
 
-                    val directionChar = getDirectionChar(directionsPressed)
-
-                    managerBluetooth.sendChar(directionChar, context)
-
-                    managerWiFi.sendChar(directionChar, context)
-                },
-                onRelease = {
-                    directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
-
-                    managerBluetooth.sendChar(Directions.STOP.char, context)
-
-                    managerWiFi.sendChar(Directions.STOP.char, context)
-                },
-                width = widthButton,
-                height = heightButton
-            )
-            Spacer(Modifier.padding(padding.dp))
-
-            Button(
-                direction = Directions.RIGHT,
-                onPress = {
-                    directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
-
-                    val directionChar = getDirectionChar(directionsPressed)
-
-                    managerBluetooth.sendChar(directionChar, context)
-
-                    managerWiFi.sendChar(directionChar, context)
-                },
-                onRelease = {
-
-                    directionsPressed = directionsPressed.toMutableSet().apply { remove(it) }
-
-                    managerBluetooth.sendChar(Directions.STOP.char, context)
-
-                    managerWiFi.sendChar(Directions.STOP.char, context)
-                },
-                width = widthButton,
-                height = heightButton
-            )
-        }
-    }
+					if (directionsPressed.isEmpty()) {
+						isPressed = false
+					}
+				},
+				height = buttonHeight,
+				width = buttonWidth
+			)
+		}
+	}
 }
+
 
 @Composable
 fun MainScreen(
-    bluetoothAdapter: BluetoothAdapter
+    bluetoothAdapter: BluetoothAdapter,
+    navController: NavController,
+    viewModel: DataStoreViewModel
 ) {
-    var padding by remember { mutableIntStateOf() }
-    var width by remember { mutableIntStateOf() }
-    var height by remember { mutableIntStateOf() }
-    
-    var devices by remember { mutableStateOf(false) }
-    var bluetooth by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val buttonConfig by viewModel.buttonConfig.collectAsState()
+    val directions by viewModel.directionChars.collectAsState()
+    val modes by viewModel.modeChars.collectAsState()
+
+    var modeSelected by remember { mutableStateOf(Modes.MANUAL) }
 
     val bluetoothConnectionManager = remember { BluetoothConnectionManager() }
     val wifiManager = remember { WiFiConnectionManager() }
+    val connectionManager = remember {
+        ConnectionViewModel(
+            bluetoothConnectionManager = bluetoothConnectionManager,
+            wifiConnectionManager = wifiManager
+        )
+    }
 
-    val context = LocalContext.current
+    LaunchedEffect(modeSelected) {
+        connectionManager.sendChar(
+            when (modeSelected) {
+                Modes.MANUAL -> modes.modeManualChar
+                Modes.AUTOMATA -> modes.modeAutomataChar
+            }
+        )
+    }
+    LaunchedEffect(connectionManager.message) {
+		connectionManager.message?.let {
+			snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Indefinite)
+		}
+	}
+    SetOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, LocalContext.current)
 
     Scaffold(
         topBar = {
-            TopBar(
-                wifiManager,
-                bluetoothAdapter,
-                devicesChange = { devices = it },
-                isBluetoothEnable = { bluetooth = it },
-                buttonWidthValue = { width = it },
-                buttonheightValue = { height = it },
-                paddingValue = { padding = it}
+            TopBarForMainPage(
+                bluetoothAdapter = bluetoothAdapter,
+                connectionManager = connectionManager,
+                navController = navController,
+                viewModel = viewModel,
+                modeSelected = { modeSelected = it },
+                directionsConfig = directions
             )
         },
-        containerColor = Black
+        snackbarHost = {
+			SnackbarHost(
+				snackbarHostState,
+				modifier = Modifier
+					.wrapContentWidth()
+					.wrapContentHeight()
+			) { data ->
+				CustomSnackbar(data)
+			}
+		},
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        Column(
-            Modifier.padding(padding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            Modifier
+				.padding(padding)
+				.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                GridButton(
-                    managerBluetooth = bluetoothConnectionManager,
-                    managerWiFi = wifiManager,
-                    widthButton = width,
-                    heightButton = height,
-                    paddings = padding
-                )
-
-                val hasPermission =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        ActivityCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.BLUETOOTH_CONNECT
-                        ) == PackageManager.PERMISSION_GRANTED
-                    } else {
-                        false
-                    }
-
-                if (devices && hasPermission) {
-                    BluetoothDevices(
-                        pairedDevices = bluetoothAdapter.bondedDevices
-                    ) {
-                        try {
-                            val connectBluetooth = bluetoothConnectionManager.connectToDevice(it, context)
-
-                            if (connectBluetooth) {
-                                Toast.makeText(context, "Conectado a ${it.name}", Toast.LENGTH_SHORT).show()
-                                bluetoothConnectionManager.listenForAllDevices(context)
-                                devices = false
-                            } else {
-                                Toast.makeText(context, "No se pudo conectar a ${it.name}", Toast.LENGTH_SHORT
-                                ).show()
-                                devices = false
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            Toast.makeText(context, "${e.message}", Toast.LENGTH_LONG).show()
-                        }
-                    }
-                }
-            }
+            GridButton(
+                connectionManager = connectionManager,
+                buttonConfig = buttonConfig,
+                directionChars = directions
+            )
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun B() {
-    var padding by remember { mutableIntStateOf(5) }
-    var width by remember { mutableIntStateOf(165) }
-    var height by remember { mutableIntStateOf(150) }
-    
-    NewControladorTheme {
-        Column {
-            Slider(
-                value = padding,
-                onValueChange = { padding = it },
-                valueRange = 0f..50f
-            )
-            Text(text = sliderPosition.toString())
-
-            Spacer(Modifier.padding(10.dp))
-
-            Slider(
-                value = width,
-                onValueChange = { width = it },
-                valueRange = 0f..300f
-            )
-            Text(text = sliderPosition.toString())
-
-            Spacer(Modifier.padding(10.dp))
-
-            Slider(
-                value = height,
-                onValueChange = { heigth = it },
-                valueRange = 0f..300f
-            )
-            Text(text = sliderPosition.toString())
-        }
-        
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = false)
-@Composable
-private fun A() {
-    NewControladorTheme {
-        Column {
-            SettingsItem(Directions.UP)
-            Spacer(Modifier.padding(10.dp))
-
-            SettingsItem(Directions.DOWN)
-        }
-    }
-}

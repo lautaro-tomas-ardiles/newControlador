@@ -9,49 +9,59 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import com.example.newcontrolador.connection.data.ThemeType
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+val DarckDefault = darkColorScheme(
+	primary = blue10,
+	secondary = yellow20,
+	tertiary = green20,
+	onSecondary = yellow10,
+	onTertiary = green10,
+	background = black10,
+	onBackground = black20
 )
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+val LightDefault = lightColorScheme(
+	primary = blue20,
+	secondary = yellow30,
+	tertiary = green40,
+	onSecondary = yellow40,
+	onTertiary = green30,
+	background = white10,
+	onBackground = red10
+)
+val Scheme = lightColorScheme(
+	primary = yellow30,
+	secondary = green40,
+	tertiary = yellow40,
+	onSecondary = green30,
+	onTertiary = red10,
+	background = white10,
+	onBackground = blue20
 )
 
 @Composable
 fun NewControladorTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+	themeType: ThemeType = ThemeType.DEFAULT,
+	darkTheme: Boolean = isSystemInDarkTheme(),
+	// Dynamic color is available on Android 12+
+	dynamicColor: Boolean = false,
+	content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+	val colorScheme = when {
+		dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+			val context = LocalContext.current
+			if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+		}
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+		themeType == ThemeType.DEFAULT -> DarckDefault
+		themeType == ThemeType.WHITE -> LightDefault
+		//themeType == ThemeType.WHITE_2 -> Scheme
+		else -> DarckDefault
+	}
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+	MaterialTheme(
+		colorScheme = colorScheme,
+		typography = Typography,
+		content = content
+	)
 }
