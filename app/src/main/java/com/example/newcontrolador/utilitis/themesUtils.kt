@@ -23,12 +23,10 @@ fun ThemeItem(
 	val backgroundColor = when (theme) {
 		ThemeType.DEFAULT -> DarckDefault.background
 		ThemeType.WHITE -> LightDefault.background
-		ThemeType.WHITE_2 -> Scheme.background
 	}
 	val borderColor = when (theme) {
 		ThemeType.DEFAULT -> DarckDefault.primary
 		ThemeType.WHITE -> LightDefault.primary
-		ThemeType.WHITE_2 -> Scheme.primary
 	}
 
 	Box(
