@@ -64,9 +64,9 @@ fun SliderForConfiguration(
 				value = value,
 				steps =
 				if (typeForReset != null) {
-					(valueRange.endInclusive / 5).toInt() - 1
+					((valueRange.endInclusive - valueRange.start) / 5).toInt() - 1
 				} else {
-					(valueRange.endInclusive / 10).toInt() - 1
+					((valueRange.endInclusive - valueRange.start) / 10).toInt() - 1
 				},
 				onValueChange = { onValueChange(it) },
 				valueRange = valueRange,
