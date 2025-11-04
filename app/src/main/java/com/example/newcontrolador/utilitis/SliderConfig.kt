@@ -8,5 +8,5 @@ data class SliderConfig(
 	val onValueChange: (Float) -> Unit,
 	val valueRange: ClosedFloatingPointRange<Float>,
 	val ruta: Painter,
-	val typeForReset: Buttons = Buttons.HEIGHT
+	val typeForReset: Buttons? = Buttons.HEIGHT
 )

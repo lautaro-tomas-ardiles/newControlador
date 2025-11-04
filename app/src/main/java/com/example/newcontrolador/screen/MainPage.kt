@@ -226,7 +226,6 @@ private fun GridButton(
 	}
 }
 
-
 @Composable
 fun MainScreen(
     bluetoothAdapter: BluetoothAdapter,
@@ -238,6 +237,7 @@ fun MainScreen(
     val buttonConfig by viewModel.buttonConfig.collectAsState()
     val directions by viewModel.directionChars.collectAsState()
     val modes by viewModel.modeChars.collectAsState()
+	val velocity by viewModel.velocityChar.collectAsState()
 
     var modeSelected by remember { mutableStateOf(Modes.MANUAL) }
 
@@ -250,6 +250,9 @@ fun MainScreen(
         )
     }
 
+	LaunchedEffect(Unit) {
+		connectionManager.sendChar(velocity.velocityChar)
+	}
     LaunchedEffect(modeSelected) {
         connectionManager.sendChar(
             when (modeSelected) {

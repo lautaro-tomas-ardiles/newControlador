@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -42,6 +43,7 @@ import com.example.newcontrolador.connection.data.Buttons
 import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.connection.data.ThemeType
+import com.example.newcontrolador.connection.data.VelocityConfig
 import com.example.newcontrolador.data.DataStoreViewModel
 import com.example.newcontrolador.navigation.AppScreen
 
@@ -176,16 +178,25 @@ private fun TopBarForMainPageStart(
 @Composable
 private fun TopBarForMainPageEnd(
 	modeSelected: (Modes) -> Unit,
+	connectionManager: ConnectionViewModel,
 	navController: NavController,
 	viewModel: DataStoreViewModel
 ) {
 	val configButton by viewModel.buttonConfig.collectAsState()
-
 	val selectedTheme by viewModel.theme.collectAsState()
+	val configVelocity by viewModel.velocityChar.collectAsState()
+
+	val value = when (val c = configVelocity.velocityChar) {
+		in '0'..'9' -> (c - '0') * 10f
+		'q' -> 100f
+		else -> 0f
+	}
 
 	var buttonHeight by remember { mutableFloatStateOf(configButton.height) }
 	var buttonWidth by remember { mutableFloatStateOf(configButton.width) }
 	var paddings by remember { mutableFloatStateOf(configButton.padding) }
+
+	var velocity by remember { mutableFloatStateOf(value) }
 
 	var menuModeState by remember { mutableStateOf(false) }
 	var modeSelect by remember { mutableStateOf(Modes.MANUAL) }
@@ -199,6 +210,21 @@ private fun TopBarForMainPageEnd(
 		Modes.MANUAL
 	)
 	val slidersList = listOf(
+		SliderConfig(
+			value = velocity,
+			onValueChange = {
+				velocity = it
+				val char = when {
+					it < 100f -> ('0' + (it / 10).toInt())
+					it == 100f -> 'q'
+					else -> '0'
+				}
+				viewModel.setVelocityChar(char)
+			},
+			valueRange = 0f..100f,
+			typeForReset = null,
+			ruta = painterResource(R.drawable.velocity)
+		),
 		SliderConfig(
 			value = buttonHeight,
 			onValueChange = {
@@ -245,6 +271,10 @@ private fun TopBarForMainPageEnd(
 			theme = ThemeType.WHITE
 		)
 	)
+
+	LaunchedEffect(Unit, configVelocity.velocityChar) {
+		connectionManager.sendChar(configVelocity.velocityChar)
+	}
 
 	Row(
 		horizontalArrangement = Arrangement.End,
@@ -309,7 +339,6 @@ private fun TopBarForMainPageEnd(
 			)
 		}
 	}
-
 }
 
 /**
@@ -351,7 +380,8 @@ fun TopBarForMainPage(
 		TopBarForMainPageEnd(
 			modeSelected = { modeSelected(it) },
 			navController = navController,
-			viewModel = viewModel
+			viewModel = viewModel,
+			connectionManager = connectionManager
 		)
 	}
 }

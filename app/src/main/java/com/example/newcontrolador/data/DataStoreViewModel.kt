@@ -8,6 +8,7 @@ import com.example.newcontrolador.connection.data.ModesConfig
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.connection.data.ThemeType
+import com.example.newcontrolador.connection.data.VelocityConfig
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -82,5 +83,13 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 
 	fun resetModesToDefault() = viewModelScope.launch {
 		dataStoreManager.saveAllModeChars(DefaultConfigs.modes)
+	}
+
+	// Velocity
+	val velocityChar: StateFlow<VelocityConfig> = dataStoreManager.loadVelocityChar
+		.stateIn(viewModelScope, SharingStarted.Eagerly, VelocityConfig())
+
+	fun setVelocityChar(char: Char) = viewModelScope.launch {
+		dataStoreManager.saveVelocityChar(char)
 	}
 }

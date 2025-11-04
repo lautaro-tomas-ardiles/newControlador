@@ -10,6 +10,7 @@ import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.ModesConfig
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
+import com.example.newcontrolador.connection.data.VelocityConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -18,11 +19,14 @@ val Context.dataStore by preferencesDataStore(name = "settings")
 class DataStoreManager(private val context: Context) {
 	companion object {
 		val THEME_KEY = stringPreferencesKey("theme")
+
 		val HEIGHT_KEY = floatPreferencesKey("height")
 		val WIDTH_KEY = floatPreferencesKey("width")
 		val PADDING_KEY = floatPreferencesKey("padding")
+
 		val MODE_MANUAL_KEY = stringPreferencesKey("mode_manual")
 		val MODE_AUTOMATA_KEY = stringPreferencesKey("mode_automata")
+
 		val UP_CHAR_KEY = stringPreferencesKey("up_char")
 		val DOWN_CHAR_KEY = stringPreferencesKey("down_char")
 		val LEFT_CHAR_KEY = stringPreferencesKey("left_char")
@@ -32,24 +36,23 @@ class DataStoreManager(private val context: Context) {
 		val DOWN_LEFT_CHAR_KEY = stringPreferencesKey("down_left_char")
 		val DOWN_RIGHT_CHAR_KEY = stringPreferencesKey("down_right_char")
 		val STOP_CHAR_KEY = stringPreferencesKey("stop_char")
+
+		val VELOCITY_CHAR_KEY = stringPreferencesKey("velocity_char")
 	}
 
 	//* guardar los datos de button */
-	// guardar height
 	suspend fun saveButtonHeight(height: Float) {
 		context.dataStore.edit { preferences ->
 			preferences[HEIGHT_KEY] = height
 		}
 	}
 
-	// guardar width
 	suspend fun saveButtonWidth(width: Float) {
 		context.dataStore.edit { preferences ->
 			preferences[WIDTH_KEY] = width
 		}
 	}
 
-	// guardar padding
 	suspend fun saveButtonPadding(padding: Float) {
 		context.dataStore.edit { preferences ->
 			preferences[PADDING_KEY] = padding
@@ -145,5 +148,18 @@ class DataStoreManager(private val context: Context) {
 
 	val loadTheme: Flow<String> = context.dataStore.data.map { prefs ->
 		prefs[THEME_KEY] ?: "DEFAULT"
+	}
+
+	//* guardar y cargar el caracter de velocidad */
+	suspend fun saveVelocityChar(char: Char) {
+		context.dataStore.edit { preferences ->
+			preferences[VELOCITY_CHAR_KEY] = char.toString()
+		}
+	}
+
+	val loadVelocityChar: Flow<VelocityConfig> = context.dataStore.data.map { prefs ->
+		VelocityConfig(
+			velocityChar = (prefs[VELOCITY_CHAR_KEY]?.get(0)) ?: '5'
+		)
 	}
 }

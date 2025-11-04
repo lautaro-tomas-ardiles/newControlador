@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.connection.data.ThemeType
 import com.example.newcontrolador.ui.theme.DarckDefault
 import com.example.newcontrolador.ui.theme.LightDefault
-import com.example.newcontrolador.ui.theme.Scheme
 
 @Composable
 fun ThemeItem(

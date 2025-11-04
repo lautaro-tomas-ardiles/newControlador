@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.connection.data.Buttons
 import com.example.newcontrolador.connection.data.ButtonConfig
+import com.example.newcontrolador.data.DataStoreViewModel
 
 /**
  * Componente de slider para configuración de propiedades de botones u otros elementos.
@@ -42,12 +43,10 @@ fun SliderForConfiguration(
 	value: Float,
 	onValueChange: (Float) -> Unit,
 	textForReset: String = "Reset",
-	typeForReset: Buttons = Buttons.HEIGHT,
+	typeForReset: Buttons? = Buttons.HEIGHT,
 	valueRange: ClosedFloatingPointRange<Float>,
 	ruta: Painter
 ) {
-	val buttonConfig = ButtonConfig()
-
 	Column(
 		modifier = Modifier.padding(vertical = 5.dp)
 	) {
@@ -63,7 +62,12 @@ fun SliderForConfiguration(
 
 			Slider(
 				value = value,
-				steps = ((valueRange.endInclusive - valueRange.start) / 5).toInt() - 1,
+				steps =
+				if (typeForReset != null) {
+					(valueRange.endInclusive / 5).toInt() - 1
+				} else {
+					(valueRange.endInclusive / 10).toInt() - 1
+				},
 				onValueChange = { onValueChange(it) },
 				valueRange = valueRange,
 				colors = SliderDefaults.colors(
@@ -104,9 +108,10 @@ fun SliderForConfiguration(
 
 			SimpleButton(textForReset) {
 				when (typeForReset) {
-					Buttons.WIDTH -> onValueChange(buttonConfig.width)
-					Buttons.HEIGHT -> onValueChange(buttonConfig.height)
-					Buttons.PADDING -> onValueChange(buttonConfig.padding)
+					Buttons.WIDTH -> onValueChange(165f)
+					Buttons.HEIGHT -> onValueChange(150f)
+					Buttons.PADDING -> onValueChange(0f)
+					else -> onValueChange(50f)
 				}
 			}
 		}
