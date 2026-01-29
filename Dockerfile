@@ -27,9 +27,7 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
 RUN yes | sdkmanager --licenses >/dev/null
 
 # Instalar los paquetes del SDK necesarios.
-# ¡IMPORTANTE! Ajusta 'android-34' a la versión de compileSdk de tu proyecto (la encuentras en build.gradle).
-# Puedes añadir más paquetes si los necesitas (ej: 'build-tools;34.0.0').
-RUN sdkmanager "platforms;android-34" "platform-tools"
+RUN sdkmanager "platforms;android-35" "platform-tools"
 
 # =========================================================================
 # Etapa 2: Construcción de la aplicación usando Gradle
