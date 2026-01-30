@@ -1,71 +1,58 @@
 # =========================================================================
-# Etapa 1: Imagen base con las dependencias necesarias (JDK y Android SDK)
+# Etapa 1: Imagen base con JDK y Android SDK
 # =========================================================================
-# Usamos una imagen que ya tiene JDK. La imagen de eclipse-temurin es una buena opción con OpenJDK.
 FROM eclipse-temurin:21-jdk-jammy AS base
 
-# Variables de entorno para la configuración de Android
-ENV ANDROID_SDK_ROOT=/opt/android-sdk  
-ENV PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools
+ENV ANDROID_SDK_ROOT /opt/android-sdk
+ENV PATH $PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools
 
-# Instalar dependencias necesarias del sistema operativo y aceptar licencias de Android SDK
-# La variable DEBIAN_FRONTEND evita que se pidan configuraciones interactivas durante la instalación.
 RUN apt-get update && \
     export DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y --no-install-recommends wget unzip && \
+    apt-get  install -y --no-install-recommends wget unzip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Descargar e instalar las herramientas de línea de comandos de Android SDK
+# Instalar Command Line Tools
 RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
     wget --quiet --output-document=${ANDROID_SDK_ROOT}/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip && \
     unzip -q ${ANDROID_SDK_ROOT}/cmdline-tools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools && \
     mv ${ANDROID_SDK_ROOT}/cmdline-tools/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest && \
     rm ${ANDROID_SDK_ROOT}/cmdline-tools.zip
 
-# Aceptar las licencias del SDK para evitar problemas durante la compilación
+# Aceptar licencias
 RUN yes | sdkmanager --licenses >/dev/null
 
-# Instalar los paquetes del SDK necesarios.
-RUN sdkmanager "platforms;android-35" "platform-tools"
+# Instalar SDK 35 (según tu build.gradle.kts)
+RUN sdkmanager "platforms;android-35" "platform-tools" "build-tools;35.0.0"
 
 # =========================================================================
-# Etapa 2: Construcción de la aplicación usando Gradle
+# Etapa 2: Construcción (Builder)
 # =========================================================================
 FROM base AS builder
-
-# Etiqueta de autor
-LABEL authors="lardiles"
-
-# Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copiar solo los archivos de Gradle primero para aprovechar la caché de Docker.
-# Si estos archivos no cambian, Docker no volverá a descargar las dependencias.
-COPY build.gradle.kts settings.gradle.kts gradlew gradle.properties ./  
+# Copiar archivos de configuración de Gradle
+COPY build.gradle.kts settings.gradle.kts gradlew gradle.properties ./
 COPY gradle/ gradle/
 
-# Otorgar permisos de ejecución al Gradle Wrapper
 RUN chmod +x ./gradlew
 
-# Descargar las dependencias de Gradle (modo offline para la siguiente etapa)
-RUN ./gradlew --no-daemon dependencies || true
+# Descargar dependencias para aprovechar la caché de capas
+RUN ./gradlew --no-daemon dependencies --stacktrace || true
 
-# Copiar el resto del código fuente de la aplicación
+# Copiar el código fuente
 COPY app/ app/
 
-# Construir la aplicación y generar el APK de release.
-# --no-daemon se recomienda en entornos de CI/Docker.
-RUN ./gradlew --no-daemon :app:assembleRelease
+# Compilar la APK (Debug es más rápido y no requiere firmas)
+# Si necesitas Release, cambia a :app:assembleRelease
+RUN ./gradlew --no-daemon :app:assembleDebug
 
 # =========================================================================
-# Etapa 3: Imagen final (Opcional, para extraer el APK)
+# Etapa 3: Exportador
 # =========================================================================
-# Esta etapa crea una imagen mínima que solo contiene el APK generado.
-FROM scratch AS exporter
+FROM alpine:latest AS exporter
 
-# Copiar el APK desde la etapa de construcción a la imagen final.
-COPY --from=builder /app/app/build/outputs/apk/release/*.apk /newControlador.apk
+# Copiamos la APK generada a la raíz de esta imagen limpia
+COPY --from=builder /app/app/build/outputs/apk/debug/app-debug.apk /newControlador-debug.apk
 
-# ENTRYPOINT para que el contenedor no haga nada más que existir para copiar el archivo.
-ENTRYPOINT ["echo", "APK listo en /newControlador.apk. Usa 'docker cp' para extraerlo."]
+CMD ["echo", "APK generada exitosamente. Puedes extraerla usando: docker cp <container_id>:/newControlador-debug.apk ./"]
