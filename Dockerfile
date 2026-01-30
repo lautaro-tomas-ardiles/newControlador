@@ -5,8 +5,8 @@
 FROM eclipse-temurin:21-jdk-jammy AS base
 
 # Variables de entorno para la configuración de Android
-ENV ANDROID_SDK_ROOT /opt/android-sdk
-ENV PATH $PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools
+ENV ANDROID_SDK_ROOT=/opt/android-sdk  
+ENV PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools
 
 # Instalar dependencias necesarias del sistema operativo y aceptar licencias de Android SDK
 # La variable DEBIAN_FRONTEND evita que se pidan configuraciones interactivas durante la instalación.
@@ -42,7 +42,7 @@ WORKDIR /app
 
 # Copiar solo los archivos de Gradle primero para aprovechar la caché de Docker.
 # Si estos archivos no cambian, Docker no volverá a descargar las dependencias.
-COPY build.gradle.kts settings.gradle.kts gradlew ./
+COPY build.gradle.kts settings.gradle.kts gradlew gradle.properties ./  
 COPY gradle/ gradle/
 
 # Otorgar permisos de ejecución al Gradle Wrapper
@@ -65,7 +65,7 @@ RUN ./gradlew --no-daemon :app:assembleRelease
 FROM scratch AS exporter
 
 # Copiar el APK desde la etapa de construcción a la imagen final.
-COPY --from=builder /app/app/build/outputs/apk/release/app-release.apk /newControlador.apk
+COPY --from=builder /app/app/build/outputs/apk/release/*.apk /newControlador.apk
 
 # ENTRYPOINT para que el contenedor no haga nada más que existir para copiar el archivo.
 ENTRYPOINT ["echo", "APK listo en /newControlador.apk. Usa 'docker cp' para extraerlo."]
