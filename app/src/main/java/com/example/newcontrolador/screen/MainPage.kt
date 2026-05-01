@@ -35,9 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.newcontrolador.connection.BluetoothConnectionManager
-import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.WiFiConnectionManager
+import com.example.newcontrolador.connection.*
 import com.example.newcontrolador.connection.data.ButtonConfig
 import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.Directions
@@ -124,12 +122,12 @@ private fun GridButton(
 	var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
 	var isPressed by remember { mutableStateOf(false) }
 
-	// Efecto para enviar continuamente los caracteres mientras el botón esté presionado
+	//enviar continuamente los caracteres mientras el botón esté presionado
 	LaunchedEffect(isPressed, directionsPressed) {
 		if (isPressed && directionsPressed.isNotEmpty()) {
 			while (isPressed) {
 				connectionManager.sendChar(Directions.charFromSet(directionsPressed, directionChars))
-				delay(50L) // cada 50 ms
+				delay(50L)
 			}
 		} else {
 			while (!isPressed) {
@@ -236,7 +234,7 @@ fun MainScreen(
 
     val buttonConfig by viewModel.buttonConfig.collectAsState()
     val directions by viewModel.directionChars.collectAsState()
-    val modes by viewModel.modeChars.collectAsState()
+	val modes by viewModel.modeChars.collectAsState()
 	val velocity by viewModel.velocityChar.collectAsState()
 
     var modeSelected by remember { mutableStateOf(Modes.MANUAL) }

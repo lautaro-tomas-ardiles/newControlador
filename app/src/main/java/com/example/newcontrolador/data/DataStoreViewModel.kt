@@ -19,9 +19,11 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 
 	object DefaultConfigs {
 		val directions = DirectionsConfig(
-			upChar = 'F', downChar = 'B', leftChar = 'L', rightChar = 'R',
-			upLeftChar = 'G', upRightChar = 'I', downLeftChar = 'H',
-			downRightChar = 'J', stopChar = 'S'
+			upChar = 'F', downChar = 'B',
+			leftChar = 'L', rightChar = 'R',
+			upLeftChar = 'G', upRightChar = 'I',
+			downLeftChar = 'H', downRightChar = 'J',
+			stopChar = 'S'
 		)
 
 		val modes = ModesConfig(

@@ -24,7 +24,10 @@ fun DiagramaItem(
 ) {
 	DropdownMenuItem(
 		text = {
-			Text(text = text, color = MaterialTheme.colorScheme.background)
+			Text(
+				text = text,
+				color = MaterialTheme.colorScheme.background
+			)
 		},
 		onClick = { onClick() }
 	)

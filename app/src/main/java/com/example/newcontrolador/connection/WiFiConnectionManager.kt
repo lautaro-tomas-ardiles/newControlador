@@ -1,11 +1,6 @@
 package com.example.newcontrolador.connection
 
-import com.example.newcontrolador.exceptions.ConnectionFailedException
-import com.example.newcontrolador.exceptions.ConnectionTimeoutException
-import com.example.newcontrolador.exceptions.DeviceNotFoundException
-import com.example.newcontrolador.exceptions.InvalidIpException
-import com.example.newcontrolador.exceptions.SendCharFailedException
-import com.example.newcontrolador.exceptions.UnexpectedResponseException
+import com.example.newcontrolador.exceptions.*
 import java.io.IOException
 import java.net.ConnectException
 import java.net.HttpURLConnection
@@ -21,7 +16,7 @@ import java.net.UnknownHostException
 class WiFiConnectionManager {
 
 	//* IP del dispositivo al que estamos conectados. *
-	private var espIp: String? = null
+	private var generalIp: String? = null
 
 	/**
 	 * Intenta conectar a un dispositivo mediante su IP.
@@ -53,7 +48,7 @@ class WiFiConnectionManager {
 			connection.disconnect()
 
 			if (responseCode == 200) {
-				espIp = ip
+				generalIp = ip
 			} else {
 				throw UnexpectedResponseException("Respondió con código: $responseCode")
 			}
@@ -80,7 +75,7 @@ class WiFiConnectionManager {
 	 */
 	@Throws(Exception::class)
 	fun sendCharWifi(char: Char) {
-		val ip = espIp ?: throw InvalidIpException("No hay una IP configurada")
+		val ip = generalIp ?: throw InvalidIpException("No hay una IP configurada")
 
 		val url = "http://$ip/$char"
 

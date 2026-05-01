@@ -121,21 +121,13 @@ fun IconsButtonsCustom(
 	IconButton(
 		onClick = { onClick() },
 		colors = IconButtonDefaults.iconButtonColors(
-			containerColor =
-				if (isSolidColor)
-					MaterialTheme.colorScheme.secondary
-				else
-					Color.Transparent,
+			containerColor = if (isSolidColor) MaterialTheme.colorScheme.secondary else Color.Transparent,
 		),
 		modifier = Modifier
 			.size(45.dp)
 			.border(
 				width = 3.dp,
-				color =
-					if (border)
-						MaterialTheme.colorScheme.secondary
-					else
-						Color.Transparent,
+				color = if (border) MaterialTheme.colorScheme.secondary else Color.Transparent,
 				shape = CircleShape
 			)
 	) {
@@ -210,7 +202,7 @@ fun TextAndButton(
 				border = !isBluetooth, // si es bluetooth no debe tener borde
 				imageVector = imageVector,
 				isBluetooth = isBluetooth,
-				isSolidColor = isBluetooth // si es el boton de bluetooth tiene que ser solido
+				isSolidColor = isBluetooth
 			)
 		}
 	}
@@ -231,9 +223,7 @@ fun SimpleButton(
 ) {
 	Button(
 		onClick = { onClick() },
-		colors = ButtonDefaults.buttonColors(
-			containerColor = MaterialTheme.colorScheme.secondary
-		),
+		colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
 		shape = RoundedCornerShape(30)
 	) {
 		Text(

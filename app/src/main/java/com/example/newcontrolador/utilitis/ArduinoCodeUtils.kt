@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ArduinoCode(text: String) {
 	Box(
-		Modifier
+		modifier = Modifier
 			.background(MaterialTheme.colorScheme.onBackground)
 			.padding(16.dp)
 	) {

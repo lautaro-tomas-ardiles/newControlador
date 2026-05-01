@@ -22,7 +22,10 @@ fun WifiTextField(
 		value = ip,
 		onValueChange = { onIpChange(it) },
 		label = {
-			Text("ingrese la IP", color = MaterialTheme.colorScheme.background)
+			Text(
+				text = "ingrese la IP",
+				color = MaterialTheme.colorScheme.background
+			)
 		},
 		trailingIcon = {
 			IconsButtonsCustom(

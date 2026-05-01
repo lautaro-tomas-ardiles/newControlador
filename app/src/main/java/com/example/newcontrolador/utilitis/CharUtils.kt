@@ -1,20 +1,14 @@
 package com.example.newcontrolador.utilitis
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -27,20 +21,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import com.example.newcontrolador.R
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.data.DataStoreViewModel
-import com.example.newcontrolador.navigation.AppScreen
 
 /**
  * Tarjeta de configuración para un carácter asociado a una dirección o modo.
  *
  * Muestra un `OutlinedTextField` que permite al usuario cambiar el carácter asignado.
- * Valida que solo se ingrese un carácter y actualiza el ViewModel en consecuencia.
+ * Válida que solo se ingrese un carácter y actualiza el ViewModel en consecuencia.
  *
  * @param text Texto descriptivo para la configuración.
  * @param currentChar Carácter actualmente asignado.
@@ -74,8 +64,10 @@ private fun SettingsCard(
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.padding(5.dp))
 
-			Text(text = text, color = MaterialTheme.colorScheme.tertiary)
-
+			Text(
+				text = text,
+				color = MaterialTheme.colorScheme.tertiary
+			)
 			Spacer(Modifier.padding(10.dp))
 
 			OutlinedTextField(
@@ -117,7 +109,7 @@ private fun SettingsCard(
  * Elemento de configuración para un carácter asociado a una dirección.
  *
  * Permite al usuario cambiar el carácter asignado a la dirección indicada mediante un
- * `OutlinedTextField`. Valida que solo se ingrese un carácter y muestra error en caso contrario.
+ * `OutlinedTextField`. Válida que solo se ingrese un carácter y muestra error en caso contrario.
  *
  * @param directions Dirección a configurar.
  * @param viewModel ViewModel para manejar el estado y las actualizaciones de los caracteres.
@@ -155,7 +147,7 @@ fun SettingsItemForDirections(
  * Elemento de configuración para un carácter asociado a un modo.
  *
  * Permite al usuario cambiar el carácter asignado a un modo específico mediante un
- * `OutlinedTextField`. Valida que solo se ingrese un carácter y muestra error en caso contrario.
+ * `OutlinedTextField`. Válida que solo se ingrese un carácter y muestra error en caso contrario.
  *
  * @param modes Modo a configurar.
  * @param viewModel ViewModel para manejar el estado y las actualizaciones de los caracteres.
@@ -179,7 +171,7 @@ fun SettingsItemForModes(
 		currentChar = currentChar,
 		isMode = true,
 		modes = modes,
-		directions = Directions.STOP, // Valor por defecto, no se usa en este caso
+		directions = Directions.STOP,
 		viewModel = viewModel,
 	)
 }

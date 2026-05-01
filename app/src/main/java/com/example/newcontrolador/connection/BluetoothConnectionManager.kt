@@ -9,12 +9,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.Directions
-import com.example.newcontrolador.exceptions.BluetoothConnectionFailedException
-import com.example.newcontrolador.exceptions.BluetoothDeviceNotFoundException
-import com.example.newcontrolador.exceptions.BluetoothPermissionException
-import com.example.newcontrolador.exceptions.BluetoothReadException
-import com.example.newcontrolador.exceptions.BluetoothSecurityException
-import com.example.newcontrolador.exceptions.BluetoothSendFailedException
+import com.example.newcontrolador.exceptions.*
 import java.io.IOException
 import java.util.UUID
 
@@ -41,7 +36,6 @@ class BluetoothConnectionManager {
 	 */
 	@Throws(Exception::class)
 	fun connectToDevice(device: BluetoothDevice, context: Context) {
-
 		// Verificación de permisos dinámica según versión de Android
 		val hasPermission =
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -58,23 +52,19 @@ class BluetoothConnectionManager {
 
 		if (!hasPermission) {
 			val permiso =
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-					"BLUETOOTH_CONNECT"
-				else
-					"BLUETOOTH"
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "BLUETOOTH_CONNECT" else "BLUETOOTH"
 
-			throw BluetoothPermissionException("Permiso $permiso denegado")
+			throw BluetoothPermissionException("Permiso: $permiso denegado")
 		}
 
 		try {
-			val uuid = device.uuids?.firstOrNull()?.uuid ?: defaultUuid
-			val socket = device.createRfcommSocketToServiceRecord(uuid)
+			val socket = device.createRfcommSocketToServiceRecord(defaultUuid)
 			socket.connect()
 			sockets[device.address] = socket
 		} catch (_: SecurityException) {
 			throw BluetoothSecurityException("Falta de permisos")
 		} catch (_: IOException) {
-			throw BluetoothConnectionFailedException("No se pudo conectar a  ${device.name ?: device.address ?: "Dispositivo desconocido"}")
+			throw BluetoothConnectionFailedException("No se pudo conectar a ${device.name ?: device.address ?: "Dispositivo desconocido"}")
 		}
 	}
 

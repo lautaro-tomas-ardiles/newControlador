@@ -43,7 +43,6 @@ import com.example.newcontrolador.connection.data.Buttons
 import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.connection.data.ThemeType
-import com.example.newcontrolador.connection.data.VelocityConfig
 import com.example.newcontrolador.data.DataStoreViewModel
 import com.example.newcontrolador.navigation.AppScreen
 

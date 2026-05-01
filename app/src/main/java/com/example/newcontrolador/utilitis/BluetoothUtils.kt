@@ -96,11 +96,8 @@ private fun DeviceItem(
 			) == PackageManager.PERMISSION_GRANTED
 		}
 
-	val deviceName = if (hasPermission) {
-		device.name ?: "Dispositivo desconocido"
-	} else {
-		"Permiso requerido"
-	}
+	val deviceName =
+		if (hasPermission) device.name ?: "Dispositivo desconocido" else "Permiso requerido"
 
 	Card(
 		modifier = Modifier

@@ -18,7 +18,6 @@ import androidx.compose.ui.res.painterResource
 import com.example.newcontrolador.R
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.newcontrolador.data.DataStoreViewModel
 import com.example.newcontrolador.navigation.AppScreen
 
 /**
@@ -49,12 +48,7 @@ fun SettingsDropMenu(
 			.background(MaterialTheme.colorScheme.tertiary)
 			.wrapContentSize()
 	) {
-		Column(
-			Modifier.padding(
-				horizontal = 10.dp,
-				vertical = 5.dp
-			)
-		) {
+		Column(Modifier.padding(horizontal = 10.dp, vertical = 5.dp)) {
 			Row(
 				modifier = Modifier
 					.horizontalScroll(scroll)
@@ -70,6 +64,7 @@ fun SettingsDropMenu(
 					Spacer(Modifier.width(5.dp))
 				}
 			}
+
 			TextAndButton(
 				text = "configuracion completa ",
 				isPainter = true,
@@ -78,6 +73,7 @@ fun SettingsDropMenu(
 			) {
 				navController.navigate(AppScreen.SettingsPage.route)
 			}
+
 			listOfSliders.forEach { config ->
 				SliderForConfiguration(
 					value = config.value,

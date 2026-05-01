@@ -22,8 +22,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.connection.data.Buttons
-import com.example.newcontrolador.connection.data.ButtonConfig
-import com.example.newcontrolador.data.DataStoreViewModel
 
 /**
  * Componente de slider para configuración de propiedades de botones u otros elementos.
@@ -47,9 +45,13 @@ fun SliderForConfiguration(
 	valueRange: ClosedFloatingPointRange<Float>,
 	ruta: Painter
 ) {
-	Column(
-		modifier = Modifier.padding(vertical = 5.dp)
-	) {
+	val setps =
+		if (typeForReset != null) {
+			((valueRange.endInclusive - valueRange.start) / 5).toInt() - 1
+		} else {
+			((valueRange.endInclusive - valueRange.start) / 10).toInt() - 1
+		}
+	Column(Modifier.padding(vertical = 5.dp)) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.width(5.dp))
 
@@ -62,12 +64,7 @@ fun SliderForConfiguration(
 
 			Slider(
 				value = value,
-				steps =
-				if (typeForReset != null) {
-					((valueRange.endInclusive - valueRange.start) / 5).toInt() - 1
-				} else {
-					((valueRange.endInclusive - valueRange.start) / 10).toInt() - 1
-				},
+				steps = setps,
 				onValueChange = { onValueChange(it) },
 				valueRange = valueRange,
 				colors = SliderDefaults.colors(

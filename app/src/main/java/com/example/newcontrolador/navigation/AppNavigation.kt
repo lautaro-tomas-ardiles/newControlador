@@ -20,29 +20,19 @@ fun AppNavigation(
 	val navController = rememberNavController()
 
 	NavHost(navController, AppScreen.MainPage.route) {
-		composable(
-			route = AppScreen.MainPage.route
-		) {
+		composable(AppScreen.MainPage.route) {
 			MainScreen(bluetoothAdapter, navController, viewModel)
 		}
-		composable(
-			route = AppScreen.ESP8622Page.route
-		) {
+		composable(AppScreen.ESP8622Page.route) {
 			MainESP8622Page(navController)
 		}
-		composable(
-			route = AppScreen.ESP32Page.route
-		) {
+		composable(AppScreen.ESP32Page.route) {
 			MainESP32Page(navController)
 		}
-		composable(
-			route = AppScreen.ArduinoOneAndHC05Page.route
-		) {
+		composable(AppScreen.ArduinoOneAndHC05Page.route) {
 			MainArduinoOneAndHC05Page(navController)
 		}
-		composable(
-			route = AppScreen.SettingsPage.route
-		) {
+		composable(AppScreen.SettingsPage.route) {
 			MainSettingsPage(navController, viewModel)
 		}
 	}
