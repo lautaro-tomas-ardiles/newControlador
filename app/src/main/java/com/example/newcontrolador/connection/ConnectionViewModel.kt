@@ -11,27 +11,25 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.exceptions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ConnectionViewModel(
-	private val bluetoothConnectionManager: BluetoothConnectionManager,
-	private val wifiConnectionManager: WiFiConnectionManager
-) : ViewModel() {
-
-	//* Indica si actualmente se está usando Bluetooth o Wi-Fi.
-	var isBluetooth by mutableStateOf(true)
+class ConnectionViewModel(private val bluetoothConnectionManager: BluetoothConnectionManager) : ViewModel() {
 
 	//* Mensaje de error o de ¿cumplimiento? (no sé escribir)
 	// (solo puede modificarse dentro del ViewModel).
 	var message by mutableStateOf<String?>(null)
 		private set
 
+	var isScanning by mutableStateOf(false)
+		private set
 
-	// * Bluetooth *
+	//* Dispositivos encontrados *
+	var discoveredDevices by mutableStateOf<Set<BluetoothDevice>>(emptySet())
+		private set
+
 	/**
 	 * Conecta a un dispositivo Bluetooth.
 	 *
@@ -41,7 +39,7 @@ class ConnectionViewModel(
 	 * @param device Dispositivo Bluetooth al que se desea conectar.
 	 * @param context Contexto de la aplicación al momento de la conexión (usado para verificar permisos).
 	 */
-	fun connectToBluetooth(device: BluetoothDevice, context: Context) {
+	fun connect(device: BluetoothDevice, context: Context) {
 		viewModelScope.launch(Dispatchers.IO) {
 			val hasPermission =
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -91,38 +89,47 @@ class ConnectionViewModel(
 	 *
 	 * @param char Carácter a enviar.
 	 */
-	private fun sendBluetoothChar(char: Char) {
+	fun sendChar(char: Char) {
 		viewModelScope.launch(Dispatchers.IO) {
 			try {
 				bluetoothConnectionManager.sendCharBluetooth(char)
-			} catch (e: BluetoothDeviceNotFoundException) {
+			} catch (_: BluetoothDeviceNotFoundException) {
 				//showTempMessage(e.message ?: "Error desconocido")
-			} catch (e: BluetoothSendFailedException) {
+			} catch (_: BluetoothSendFailedException) {
 				//showTempMessage(e.message ?: "Error desconocido")
 			} catch (_: Exception) {
 				showTempMessage("Error desconocido")
 			}
 		}
 	}
-
-	/**
-	 * Comienza a escuchar mensajes entrantes por Bluetooth.
-	 *
-	 * Esta funcion se usa para detectar mensajes recibidos desde controles Bluetooth
-	 * y traducirlos en comandos de movimiento para el robot conectado.
-	 */
-	fun listenForBluetoothMessages(directionsConfig: DirectionsConfig) {
+	/*
+	fun startBluetoothScan(context: Context, bluetoothAdapter: BluetoothAdapter) {
 		viewModelScope.launch(Dispatchers.IO) {
 			try {
-				bluetoothConnectionManager.listenForAllDevices(directionsConfig)
-			} catch (e: BluetoothReadException) {
-				showTempMessage(e.message ?: "Error desconocido")
+				bluetoothConnectionManager.startDeviceScan(context, bluetoothAdapter)
+				isScanning = true
+				showTempMessage("Escaneando dispositivos...")
+			} catch (e: BluetoothPermissionException) {
+				showTempMessage(e.message ?: "Permisos requeridos")
 			} catch (_: Exception) {
-				showTempMessage("Error desconocido")
+				showTempMessage("Error al iniciar escaneo")
 			}
 		}
 	}
 
+	fun stopBluetoothScan(context: Context, bluetoothAdapter: BluetoothAdapter) {
+		viewModelScope.launch(Dispatchers.IO) {
+			bluetoothConnectionManager.stopDeviceScan(context, bluetoothAdapter)
+			isScanning = false
+			discoveredDevices = bluetoothConnectionManager.getDiscoveredDevices()
+			showTempMessage("Escaneo completado")
+		}
+	}
+
+	fun getDevices(): Set<BluetoothDevice> {
+		return bluetoothConnectionManager.getDiscoveredDevices()
+	}
+	*/
 	/**
 	 * Verifica si el conjunto de dispositivos Bluetooth disponibles no está vacío.
 	 *
@@ -135,58 +142,6 @@ class ConnectionViewModel(
 			return false
 		}
 		return true
-	}
-
-	// * Wi-Fi *
-	/**
-	 * Conecta a un dispositivo mediante Wi-Fi usando una dirección IP.
-	 *
-	 * @param ip Dirección IP a la que se intentará conectar.
-	 */
-	fun connectToWifi(ip: String) {
-		viewModelScope.launch(Dispatchers.IO) {
-			try {
-				wifiConnectionManager.connectToIp(ip)
-				showTempMessage("Conectado a $ip")
-			} catch (e: ConnectionTimeoutException) {
-				showTempMessage(e.message ?: "Error desconocido")
-			} catch (e: DeviceNotFoundException) {
-				showTempMessage(e.message ?: "Error desconocido")
-			} catch (e: ConnectionFailedException) {
-				showTempMessage(e.message ?: "Error desconocido")
-			} catch (e: UnexpectedResponseException) {
-				showTempMessage(e.message ?: "Error desconocido")
-			} catch (e: InvalidIpException) {
-				showTempMessage(e.message ?: "Error desconocido")
-			} catch (_: Exception) {
-				showTempMessage("Error desconocido")
-			}
-		}
-	}
-
-	/**
-	 * Envía un carácter por wifi al dispositivo conectado.
-	 *
-	 * @param char Carácter a enviar.
-	 */
-	private fun sendWifiChar(char: Char) {
-		viewModelScope.launch(Dispatchers.IO) {
-			try {
-				wifiConnectionManager.sendCharWifi(char)
-			} catch (e: SendCharFailedException) {
-				showTempMessage(e.message ?: "Error desconocido")
-			} catch (e: ConnectionTimeoutException) {
-				showTempMessage(e.message ?: "Error desconocido")
-			} catch (e: DeviceNotFoundException) {
-				//showTempMessage(e.message ?: "Error desconocido")
-			} catch (e: ConnectionFailedException) {
-				showTempMessage(e.message ?: "Error desconocido")
-			} catch (e: InvalidIpException) {
-				//showTempMessage(e.message ?: "Error desconocido")
-			} catch (_: Exception) {
-				showTempMessage("Error desconocido")
-			}
-		}
 	}
 
 	// * General *
@@ -202,19 +157,6 @@ class ConnectionViewModel(
 			message = text
 			delay(durationMs)
 			cleanMessage()
-		}
-	}
-
-	/**
-	 * Envía un carácter por Bluetooth o Wi-Fi según la conexión activa.
-	 *
-	 * @param char Carácter a enviar.
-	 */
-	fun sendChar(char: Char) {
-		if (isBluetooth) {
-			sendBluetoothChar(char)
-		} else {
-			sendWifiChar(char)
 		}
 	}
 }

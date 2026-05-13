@@ -9,17 +9,12 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.ViewModelProvider
-import com.example.newcontrolador.data.DataStoreManager
-import com.example.newcontrolador.data.DataStoreViewModel
-import com.example.newcontrolador.data.DataStoreViewModelFactory
 import com.example.newcontrolador.navigation.AppNavigation
 import com.example.newcontrolador.ui.theme.NewControladorTheme
 
@@ -35,7 +30,6 @@ class MainActivity : ComponentActivity() {
 		bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
 		bluetoothAdapter = bluetoothManager.adapter
 
-		//revisa si el bluetooth está habilitado
 		enableBtLauncher = registerForActivityResult(
 			ActivityResultContracts.StartActivityForResult()
 		) { result ->
@@ -44,7 +38,6 @@ class MainActivity : ComponentActivity() {
 			}
 		}
 
-		//revisa los permisos de bluetooth
 		permissionLauncher = registerForActivityResult(
 			ActivityResultContracts.RequestPermission()
 		) { isGranted ->
@@ -54,11 +47,8 @@ class MainActivity : ComponentActivity() {
 				Toast.makeText(this, "Faltan los permisos", Toast.LENGTH_SHORT).show()
 			}
 		}
-
-		// Solicita el permission de Bluetooth
 		requestBluetoothPermission()
 
-		// Nueva forma de ocultar solo la barra de navegación
 		WindowCompat.setDecorFitsSystemWindows(window, true)
 		val insetsController = WindowInsetsControllerCompat(window, window.decorView)
 
@@ -69,18 +59,12 @@ class MainActivity : ComponentActivity() {
 		insetsController.systemBarsBehavior =
 			WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-		//enableEdgeToEdge()
-		val viewModel =
-			ViewModelProvider(
-				this,
-				DataStoreViewModelFactory(DataStoreManager(this))
-			)[DataStoreViewModel::class.java]
-
+		enableEdgeToEdge()
 		setContent {
-			val theme by viewModel.theme.collectAsState()
-
-			NewControladorTheme(themeType = theme) {
-				AppNavigation(bluetoothAdapter, viewModel)
+			NewControladorTheme(
+				darkTheme = true
+			) {
+				AppNavigation(bluetoothAdapter)
 			}
 		}
 	}

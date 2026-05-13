@@ -1,13 +1,20 @@
 package com.example.newcontrolador.utilitis
 
+import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -17,218 +24,478 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
-import com.example.newcontrolador.R
+import androidx.core.app.ActivityCompat
+import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.connection.data.Directions
+import com.example.newcontrolador.connection.data.DirectionsConfig
+import kotlinx.coroutines.delay
 
-/**
- * Botón direccional para control de movimiento.
- *
- * Muestra un botón con una flecha que indica la dirección especificada (arriba, abajo, izquierda o derecha).
- * Detecta la presión y liberación del botón para enviar eventos personalizados.
- *
- * @param direction Dirección del botón (UP, DOWN, LEFT o RIGHT).
- * @param onPress Función que se ejecuta cuando el botón es presionado.
- * @param onRelease Función que se ejecuta cuando el botón es liberado.
- * @param width Ancho del botón en dp.
- * @param height Alto del botón en dp.
- */
-@Composable
-fun DirectionButton(
-	direction: Directions,
-	onPress: (Directions) -> Unit,
-	onRelease: (Directions) -> Unit,
-	width: Int,
-	height: Int
-) {
-	val arrowDirection = when (direction) {
-		Directions.UP -> Icons.Default.KeyboardArrowUp
-		Directions.DOWN -> Icons.Default.KeyboardArrowDown
-		Directions.LEFT -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
-		Directions.RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
-		else -> Icons.Default.KeyboardArrowUp
-	}
+class MovementButtons {
+	private var maxButtonHeigthPercent = (1f / 2f)
+	private var maxButtonWidthPercent = (1f / 3f)
 
-	Box(
-		modifier = Modifier
-			.height(height.dp)
-			.width(width.dp)
-			.background(MaterialTheme.colorScheme.onTertiary)
-			.border(2.dp, MaterialTheme.colorScheme.secondary)
-			.pointerInput(Unit) {
-				detectTapGestures(
-					onPress = {
-						onPress(direction)
-						tryAwaitRelease()
-						onRelease(direction)
-					}
-				)
-			},
-		contentAlignment = Alignment.Center
+	private var buttonHeigthPercent = maxButtonHeigthPercent * 0.75f
+	private var buttonWidthPercent = maxButtonWidthPercent * 0.95f
+
+	/**
+	 * Botón direccional para control de movimiento.
+	 *
+	 * Muestra un botón con una flecha que indica la dirección especificada (arriba, abajo, izquierda o derecha).
+	 * Detecta la presión y liberación del botón para enviar eventos personalizados.
+	 *
+	 * @param direction Dirección del botón (UP, DOWN, LEFT o RIGHT).
+	 * @param onPress Función que se ejecuta cuando el botón es presionado.
+	 * @param onRelease Función que se ejecuta cuando el botón es liberado.
+	 */
+	@Composable
+	private fun DirectionButton(
+		direction: Directions,
+		onPress: (Directions) -> Unit,
+		onRelease: (Directions) -> Unit,
+		buttonWidth: Dp,
+		buttonHeight: Dp
 	) {
-		Icon(
-			imageVector = arrowDirection,
-			contentDescription = "Flecha de dirección $direction",
+		val arrowDirection = when (direction) {
+			Directions.UP -> Icons.Default.KeyboardArrowUp
+			Directions.DOWN -> Icons.Default.KeyboardArrowDown
+			Directions.LEFT -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
+			Directions.RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
+			else -> Icons.Default.KeyboardArrowUp
+		}
+
+		Box(
 			modifier = Modifier
-				.size(70.dp)
-				.background(MaterialTheme.colorScheme.secondary, CircleShape),
-			tint = MaterialTheme.colorScheme.background
-		)
-	}
-}
-
-/**
- * Botón icónico configurable.
- *
- * Muestra un botón con un ícono, que puede ser sólido o transparente, con o sin borde.
- * Puede mostrar un ícono especial de Bluetooth según el parámetro.
- *
- * @param onClick Acción que se ejecuta al presionar el botón.
- * @param isSolidColor Indica si el fondo debe ser sólido `true` o transparente `false`.
- * @param isBluetooth Si es `true`, muestra el ícono personalizado de Bluetooth.
- * @param border Si es `true`, muestra un borde alrededor del botón.
- * @param tintColor Color del ícono cuando no es Bluetooth.
- * @param imageVector Ícono a mostrar (por defecto, el ícono de ajustes).
- */
-@Composable
-fun IconsButtonsCustom(
-	onClick: () -> Unit,
-	isSolidColor: Boolean = false,
-	isBluetooth: Boolean = false,
-	border: Boolean = false,
-	isPainter: Boolean = false,
-	tintColor: Color = MaterialTheme.colorScheme.tertiary,
-	imageVector: ImageVector = Icons.Default.Settings,
-	painter: Painter = painterResource(R.drawable.external_link)
-) {
-	IconButton(
-		onClick = { onClick() },
-		colors = IconButtonDefaults.iconButtonColors(
-			containerColor = if (isSolidColor) MaterialTheme.colorScheme.secondary else Color.Transparent,
-		),
-		modifier = Modifier
-			.size(45.dp)
-			.border(
-				width = 3.dp,
-				color = if (border) MaterialTheme.colorScheme.secondary else Color.Transparent,
-				shape = CircleShape
-			)
-	) {
-		if (isBluetooth) {
+				.width(buttonWidth)
+				.height(buttonHeight)
+				.background(MaterialTheme.colorScheme.onTertiary)
+				.border(2.dp, MaterialTheme.colorScheme.secondary)
+				.pointerInput(Unit) {
+					detectTapGestures(
+						onPress = {
+							onPress(direction)
+							tryAwaitRelease()
+							onRelease(direction)
+						}
+					)
+				},
+			contentAlignment = Alignment.Center
+		) {
 			Icon(
-				painter = painterResource(R.drawable.bluetooth),
-				contentDescription = "Ícono de Bluetooth",
+				imageVector = arrowDirection,
+				contentDescription = "Flecha de dirección $direction",
+				modifier = Modifier
+					.size(buttonHeight * 0.6f)
+					.background(MaterialTheme.colorScheme.secondary, CircleShape),
 				tint = MaterialTheme.colorScheme.background
 			)
 		}
-		if (isPainter && !isBluetooth) {
-			Icon(
-				painter = painter,
-				contentDescription = "Ícono de acción",
-				tint = tintColor,
-				modifier = Modifier.size(30.dp)
-			)
+
+	}
+
+	@Composable
+	fun GridButton(
+		connectionManager: ConnectionViewModel,
+		directionChars: DirectionsConfig
+	) {
+		var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
+		var isPressed by remember { mutableStateOf(false) }
+
+		//enviar continuamente los caracteres mientras el botón esté presionado
+		LaunchedEffect(isPressed, directionsPressed) {
+			if (isPressed && directionsPressed.isNotEmpty()) {
+				while (isPressed) {
+					connectionManager.sendChar(
+						Directions.charFromSet(directionsPressed, directionChars)
+					)
+					delay(50L)
+				}
+			} else {
+				while (!isPressed) {
+					connectionManager.sendChar(directionChars.stopChar)
+					delay(50L)
+				}
+			}
 		}
-		if (!isBluetooth && !isPainter) {
-			Icon(
-				imageVector = imageVector,
-				contentDescription = "Ícono de acción",
-				tint = tintColor,
-				modifier = Modifier.size(30.dp)
-			)
+
+		BoxWithConstraints {
+			val height = this.maxHeight
+			val width = this.maxWidth
+
+			val buttonHeight = (height * buttonHeigthPercent)
+				.coerceAtMost(height * maxButtonHeigthPercent)
+			val buttonWidth = (width * buttonWidthPercent)
+				.coerceAtMost(width * maxButtonWidthPercent)
+
+			Row(
+				Modifier.fillMaxSize(),
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceBetween
+			) {
+				Column {
+					DirectionButton(
+						direction = Directions.UP,
+						onPress = {
+							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+
+							isPressed = true
+						},
+						onRelease = {
+							directionsPressed =
+								directionsPressed.toMutableSet().apply { remove(it) }
+
+							if (directionsPressed.isEmpty()) {
+								isPressed = false
+							}
+						},
+						buttonWidth = buttonWidth,
+						buttonHeight = buttonHeight
+					)
+
+					DirectionButton(
+						direction = Directions.DOWN,
+						onPress = {
+							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+
+							isPressed = true
+						},
+						onRelease = {
+							directionsPressed =
+								directionsPressed.toMutableSet().apply { remove(it) }
+
+							if (directionsPressed.isEmpty()) {
+								isPressed = false
+							}
+						},
+						buttonWidth = buttonWidth,
+						buttonHeight = buttonHeight
+					)
+				}
+
+				Row {
+					DirectionButton(
+						direction = Directions.LEFT,
+						onPress = {
+							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+
+							isPressed = true
+						},
+						onRelease = {
+							directionsPressed =
+								directionsPressed.toMutableSet().apply { remove(it) }
+
+							if (directionsPressed.isEmpty()) {
+								isPressed = false
+							}
+						},
+						buttonWidth = buttonWidth,
+						buttonHeight = buttonHeight
+					)
+
+					DirectionButton(
+						direction = Directions.RIGHT,
+						onPress = {
+							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+
+							isPressed = true
+						},
+						onRelease = {
+							directionsPressed =
+								directionsPressed.toMutableSet().apply { remove(it) }
+
+							if (directionsPressed.isEmpty()) {
+								isPressed = false
+							}
+						},
+						buttonWidth = buttonWidth,
+						buttonHeight = buttonHeight
+					)
+				}
+			}
+		}
+	}
+
+	@Composable
+	fun GridButtonA(
+		//* connectionManager: ConnectionViewModel,
+		//* directionChars: DirectionsConfig para despues
+	) {
+		var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
+		var isPressed by remember { mutableStateOf(false) }
+
+		//enviar continuamente los caracteres mientras el botón esté presionado
+		LaunchedEffect(isPressed, directionsPressed) {
+			if (isPressed && directionsPressed.isNotEmpty()) {
+				while (isPressed) {
+//					connectionManager.sendChar(
+//						Directions.charFromSet(
+//							directionsPressed,
+//							directionChars
+//						)
+//					)
+					delay(50L)
+				}
+			} else {
+				while (!isPressed) {
+//					connectionManager.sendChar(directionChars.stopChar)
+//					delay(50L)
+				}
+			}
+		}
+
+		BoxWithConstraints {
+			val height = this.maxHeight
+			val width = this.maxWidth
+
+			val buttonHeight = (height * buttonHeigthPercent)
+				.coerceAtMost(height * maxButtonHeigthPercent)
+			val buttonWidth = (width * buttonWidthPercent)
+				.coerceAtMost(width * maxButtonWidthPercent)
+
+			Row(
+				Modifier.fillMaxSize(),
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceBetween
+			) {
+				Column {
+					DirectionButton(
+						direction = Directions.UP,
+						onPress = {
+							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+
+							isPressed = true
+						},
+						onRelease = {
+							directionsPressed =
+								directionsPressed.toMutableSet().apply { remove(it) }
+
+							if (directionsPressed.isEmpty()) {
+								isPressed = false
+							}
+						},
+						buttonWidth = buttonWidth,
+						buttonHeight = buttonHeight
+					)
+					//Spacer(Modifier.height(10.dp))
+
+					DirectionButton(
+						direction = Directions.DOWN,
+						onPress = {
+							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+
+							isPressed = true
+						},
+						onRelease = {
+							directionsPressed =
+								directionsPressed.toMutableSet().apply { remove(it) }
+
+							if (directionsPressed.isEmpty()) {
+								isPressed = false
+							}
+						},
+						buttonWidth = buttonWidth,
+						buttonHeight = buttonHeight
+					)
+				}
+
+				Row {
+					DirectionButton(
+						direction = Directions.LEFT,
+						onPress = {
+							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+
+							isPressed = true
+						},
+						onRelease = {
+							directionsPressed =
+								directionsPressed.toMutableSet().apply { remove(it) }
+
+							if (directionsPressed.isEmpty()) {
+								isPressed = false
+							}
+						},
+						buttonWidth = buttonWidth,
+						buttonHeight = buttonHeight
+					)
+					//Spacer(Modifier.width(10.dp))
+
+					DirectionButton(
+						direction = Directions.RIGHT,
+						onPress = {
+							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
+
+							isPressed = true
+						},
+						onRelease = {
+							directionsPressed =
+								directionsPressed.toMutableSet().apply { remove(it) }
+
+							if (directionsPressed.isEmpty()) {
+								isPressed = false
+							}
+						},
+						buttonWidth = buttonWidth,
+						buttonHeight = buttonHeight
+					)
+				}
+			}
 		}
 	}
 }
 
-/**
- * Componente combinado de texto y botón.
- *
- * Muestra un texto acompañado de un botón icónico (por ejemplo, configuración o Bluetooth).
- *
- * @param text Texto que se muestra junto al botón.
- * @param imageVector Ícono del botón (por defecto, el ícono de opciones verticales).
- * @param isBluetooth Si es `true`, el botón adopta el estilo especial de Bluetooth.
- * @param onClick Acción que se ejecuta al presionar el botón.
- */
-@Composable
-fun TextAndButton(
-	text: String,
-	imageVector: ImageVector = Icons.Default.MoreVert,
-	painter: Painter = painterResource(R.drawable.external_link),
-	isBluetooth: Boolean = false,
-	isPainter: Boolean = false,
-	tintColor: Color = MaterialTheme.colorScheme.tertiary,
-	onClick: () -> Unit
-) {
-	Row (
-		verticalAlignment = Alignment.CenterVertically
-	) {
-		Text(
-			text = text,
-			color = MaterialTheme.colorScheme.background,
-			fontSize = MaterialTheme.typography.bodyMedium.fontSize
-		)
-		Spacer(modifier = Modifier.padding(3.dp))
+class Buttons {
+	private val shape = RoundedCornerShape(24)
+	private val buttonSize = Modifier.size(38.dp)
+	private val iconSize = Modifier.size(28.dp)
 
-		if (isPainter) {
-			IconsButtonsCustom(
-				onClick = { onClick() },
-				border = !isBluetooth,
-				painter = painter,
-				isPainter = true,
-				isSolidColor = isBluetooth,
-				tintColor = tintColor
-			)
+	@Composable
+	fun Painter(
+		//onClick: () -> Unit,
+		painter: Painter,
+		inverted: Boolean,
+		connectionManager: ConnectionViewModel,
+		bluetoothAdapter: BluetoothAdapter,
+		contentDescription: String
+	) {
+		var menuDevicesState by remember { mutableStateOf(false) }
+		val context = LocalContext.current
+
+		val primary =
+			if (inverted) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+		val secondary =
+			if (inverted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+
+		val hasPermission =
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				ActivityCompat.checkSelfPermission(
+					context,
+					Manifest.permission.BLUETOOTH_CONNECT
+				) == PackageManager.PERMISSION_GRANTED
+			} else {
+				ActivityCompat.checkSelfPermission(
+					context,
+					Manifest.permission.BLUETOOTH
+				) == PackageManager.PERMISSION_GRANTED
+			}
+
+		val pairedDevices: Set<BluetoothDevice>
+
+		if (hasPermission) {
+			pairedDevices = bluetoothAdapter.bondedDevices
 		} else {
-			IconsButtonsCustom(
-				onClick = { onClick() },
-				border = !isBluetooth, // si es bluetooth no debe tener borde
+			pairedDevices = setOf()
+		}
+
+		IconButton(
+			onClick = {
+				menuDevicesState = !menuDevicesState
+			},
+			shape = shape,
+			modifier = buttonSize,
+			colors = IconButtonDefaults.iconButtonColors(
+				containerColor = primary,
+				contentColor = secondary
+			)
+		) {
+			Icon(
+				painter = painter,
+				contentDescription = contentDescription,
+				tint = secondary,
+				modifier = iconSize
+			)
+		}
+		BluetoothDropMenu(
+			state = menuDevicesState,
+			onStateChange = { menuDevicesState = it },
+			setOfDevices = pairedDevices,
+			connectionManager = connectionManager,
+			context = LocalContext.current
+		)
+	}
+
+	@Composable
+	fun ImageVector(
+		onClick: () -> Unit,
+		inverted: Boolean,
+		imageVector: ImageVector,
+		contentDescription: String
+	) {
+		val primary = if (inverted) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+		val secondary = if (inverted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+
+		IconButton(
+			onClick = { onClick() },
+			shape = shape,
+			modifier = buttonSize,
+			colors = IconButtonDefaults.iconButtonColors(
+				containerColor = primary,
+				contentColor = secondary
+			)
+		) {
+			Icon(
 				imageVector = imageVector,
-				isBluetooth = isBluetooth,
-				isSolidColor = isBluetooth
+				contentDescription = contentDescription,
+				tint = secondary,
+				modifier = iconSize
 			)
 		}
 	}
-}
 
-/**
- * Botón simple con texto.
- *
- * Muestra un botón básico con fondo amarillo y texto negro.
- *
- * @param text Texto que se muestra en el botón.
- * @param onClick Acción que se ejecuta al presionar el botón.
- */
-@Composable
-fun SimpleButton(
-	text: String,
-	onClick: () -> Unit
-) {
-	Button(
-		onClick = { onClick() },
-		colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-		shape = RoundedCornerShape(30)
+	@Composable
+	fun Toggle(
+		onClick: () -> Unit,
+		onSecondClick: () -> Unit,
+		isPressed: Boolean,
+		onChangepressed: (Boolean) -> Unit,
+		imageVector: ImageVector,
+		painter: Painter,
+		contentDescription: String
 	) {
-		Text(
-			text = text,
-			color = MaterialTheme.colorScheme.background
-		)
+		val primary = MaterialTheme.colorScheme.primary
+		val tertiary = MaterialTheme.colorScheme.tertiary
+
+		IconButton(
+			onClick = {
+				if (!isPressed) onClick() else onSecondClick()
+				onChangepressed(!isPressed)
+			},
+			shape = shape,
+			modifier = buttonSize,
+			colors = IconButtonDefaults.iconButtonColors(
+				containerColor = if (isPressed) tertiary else primary,
+				contentColor = if (isPressed) primary else tertiary
+			)
+		) {
+			if (isPressed) {
+				Icon(
+					painter = painter,
+					contentDescription = contentDescription
+				)
+			} else {
+				Icon(
+					imageVector = imageVector,
+					contentDescription = contentDescription,
+					modifier = iconSize
+				)
+			}
+		}
 	}
 }

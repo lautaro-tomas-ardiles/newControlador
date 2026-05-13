@@ -1,6 +1,6 @@
 package com.example.newcontrolador.connection.data
 
-enum class Directions() {
+enum class Directions {
 	UP,
 	DOWN,
 	LEFT,

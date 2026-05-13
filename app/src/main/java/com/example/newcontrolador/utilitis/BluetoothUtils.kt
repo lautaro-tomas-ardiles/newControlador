@@ -9,26 +9,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.data.DirectionsConfig
 
 /**
  * Menú desplegable de dispositivos Bluetooth.
@@ -49,7 +42,6 @@ fun BluetoothDropMenu(
 	onStateChange: (Boolean) -> Unit,
 	setOfDevices: Set<BluetoothDevice>,
 	connectionManager: ConnectionViewModel,
-	directionsConfig: DirectionsConfig,
 	context: Context
 ) {
 	DropdownMenu(
@@ -61,8 +53,7 @@ fun BluetoothDropMenu(
 	) {
 		setOfDevices.forEach { device ->
 			DeviceItem(device) {
-				connectionManager.connectToBluetooth(device, context)
-				connectionManager.listenForBluetoothMessages(directionsConfig)
+				connectionManager.connect(device, context)
 				onStateChange(false)
 			}
 		}
@@ -121,49 +112,4 @@ private fun DeviceItem(
 			)
 		}
 	}
-}
-
-/**
- * Interruptor para seleccionar el modo de conexión (Bluetooth o Wi-Fi).
- *
- * Muestra un `Switch` que cambia entre Bluetooth y Wi-Fi, mostrando un ícono representativo.
- *
- * @param bluetooth Estado actual del interruptor (`true` si Bluetooth está activo).
- * @param onBluetoothChange Función que se ejecuta al cambiar el valor del interruptor.
- */
-@Composable
-fun BluetoothSwitch(
-	bluetooth: Boolean,
-	onBluetoothChange: (Boolean) -> Unit
-) {
-	Switch(
-		checked = bluetooth,
-		onCheckedChange = { onBluetoothChange(it) },
-		colors = SwitchDefaults.colors(
-			checkedBorderColor = MaterialTheme.colorScheme.onTertiary,
-			checkedTrackColor = MaterialTheme.colorScheme.tertiary,
-			checkedThumbColor = MaterialTheme.colorScheme.onTertiary,
-			checkedIconColor = MaterialTheme.colorScheme.background,
-
-			uncheckedBorderColor = MaterialTheme.colorScheme.onSecondary,
-			uncheckedTrackColor = MaterialTheme.colorScheme.secondary,
-			uncheckedThumbColor = MaterialTheme.colorScheme.onSecondary,
-			uncheckedIconColor = MaterialTheme.colorScheme.background
-		),
-		thumbContent = {
-			if (bluetooth) {
-				Icon(
-					painter = painterResource(R.drawable.bluetooth),
-					contentDescription = "bluetooth icon",
-					modifier = Modifier.size(20.dp)
-				)
-			} else {
-				Icon(
-					painter = painterResource(R.drawable.wifi),
-					contentDescription = "wifi icon",
-					modifier = Modifier.size(20.dp)
-				)
-			}
-		}
-	)
 }
