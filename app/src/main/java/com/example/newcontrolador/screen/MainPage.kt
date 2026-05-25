@@ -14,6 +14,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,19 +23,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.connection.*
 import com.example.newcontrolador.connection.data.DirectionsConfig
+import com.example.newcontrolador.data.store.DataStoreViewModel
 import com.example.newcontrolador.utilitis.CustomSnackbar
 import com.example.newcontrolador.utilitis.Header
 import com.example.newcontrolador.utilitis.JointSliders
 import com.example.newcontrolador.utilitis.MovementButtons
+import com.example.newcontrolador.utilitis.PrincipalTopBar
 import com.example.newcontrolador.utilitis.SetOrientation
 
 @Composable
 fun MainScreen(
-    bluetoothAdapter: BluetoothAdapter,
-    navController: NavController
+	bluetoothAdapter: BluetoothAdapter,
+	navController: NavController,
+	viewModel: DataStoreViewModel
 ) {
-	/*TODO: navController se va a usar despues*/
-    val movementButtons = MovementButtons()
+	val movementButtons = MovementButtons()
+	val directions by viewModel.directionChars.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val bluetoothConnectionManager = remember { BluetoothConnectionManager() }
     val connectionManager = remember { ConnectionViewModel(bluetoothConnectionManager) }
@@ -44,7 +49,9 @@ fun MainScreen(
 		}
 	}
     SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, LocalContext.current)
+
     Scaffold (
+		topBar = { PrincipalTopBar(navController = navController) },
         snackbarHost = {
             SnackbarHost(
 				snackbarHostState,
@@ -59,17 +66,17 @@ fun MainScreen(
         Column(
             modifier = Modifier
                 .padding(pad)
-                .padding(35.dp),
-            verticalArrangement = Arrangement.Center
+                .padding(horizontal = 25.dp, vertical = 25.dp),
+            verticalArrangement = Arrangement.Center,
         ) {
             Header(connectionManager, bluetoothAdapter)
 
-            Spacer(Modifier.padding(20.dp))
+            Spacer(Modifier.padding(10.dp))
 
             JointSliders(true)
             JointSliders(false)
 
-            movementButtons.GridButton(connectionManager, DirectionsConfig())
+            movementButtons.GridButton(connectionManager, directions, viewModel)
         }
     }
 }

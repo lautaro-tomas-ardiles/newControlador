@@ -15,6 +15,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.ViewModelProvider
+import com.example.newcontrolador.data.store.DataStoreManager
+import com.example.newcontrolador.data.store.DataStoreViewModel
+import com.example.newcontrolador.data.store.DataStoreViewModelFactory
 import com.example.newcontrolador.navigation.AppNavigation
 import com.example.newcontrolador.ui.theme.NewControladorTheme
 
@@ -60,11 +64,16 @@ class MainActivity : ComponentActivity() {
 			WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
 		enableEdgeToEdge()
+
+		val viewModel =
+			ViewModelProvider(
+				this,
+				DataStoreViewModelFactory(DataStoreManager(this))
+			)[DataStoreViewModel::class.java]
+
 		setContent {
-			NewControladorTheme(
-				darkTheme = true
-			) {
-				AppNavigation(bluetoothAdapter)
+			NewControladorTheme(darkTheme = true) {
+				AppNavigation(bluetoothAdapter, viewModel)
 			}
 		}
 	}

@@ -1,6 +1,10 @@
 package com.example.newcontrolador.utilitis
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,9 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -20,8 +28,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -29,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.ui.theme.NewControladorTheme
+import com.example.newcontrolador.connection.data.ButtonsEnum
 
 @Composable
 private fun Slider(isShoulder: Boolean, inverted: Boolean) {
@@ -89,8 +100,16 @@ private fun Slider(isShoulder: Boolean, inverted: Boolean) {
 					}
 				}
 		)
+		val valueForLabel =
+			if (value.toInt() < 10) {
+				"00${value.toInt()}"
+			} else if (value.toInt() < 100) {
+				"0${value.toInt()}"
+			} else {
+				"${value.toInt()}"
+			}
 		Spacer(Modifier.padding(5.dp))
-		Label("${value.toInt()}", inverted)
+		Label(valueForLabel, inverted)
 		Spacer(Modifier.padding(10.dp))
 	}
 }
@@ -129,6 +148,95 @@ fun JointSliders(isShoulder: Boolean) {
 			isShoulder = isShoulder,
 			inverted = true
 		)
+	}
+}
+
+class SliderForConfiguration {
+	@Composable
+	fun Slider(
+		value: Float,
+		onValueChange: (Float) -> Unit,
+		textForReset: String = "Reset",
+		typeForReset: ButtonsEnum? = ButtonsEnum.HEIGHT,
+		valueRange: ClosedFloatingPointRange<Float>,
+		ruta: Painter
+	) {
+		val button = Buttons()
+		val setps =
+			if (typeForReset == null) {
+				((valueRange.endInclusive - valueRange.start) / 5).toInt() - 1
+			} else {
+				0
+			}
+
+		Column(Modifier.padding(vertical = 5.dp)) {
+			Row(verticalAlignment = Alignment.CenterVertically) {
+				Spacer(Modifier.width(5.dp))
+
+				Image(
+					painter = ruta,
+					contentDescription = null
+				)
+				Spacer(Modifier.width(5.dp))
+
+				Slider(
+					value = value,
+					onValueChange = { onValueChange(it) },
+					valueRange = valueRange,
+					steps = setps,
+					colors = SliderDefaults.colors(
+						thumbColor = MaterialTheme.colorScheme.primary,
+						activeTrackColor = MaterialTheme.colorScheme.primary,
+						inactiveTrackColor = MaterialTheme.colorScheme.secondary
+					),
+					modifier = Modifier.weight(1f)
+				)
+				Spacer(Modifier.width(5.dp))
+
+				val width = if (typeForReset != null) 50.dp else 40.dp
+				Box(
+					modifier = Modifier
+						.height(40.dp)
+						.width(width)
+						.background(
+							color = MaterialTheme.colorScheme.primary,
+							shape = RoundedCornerShape(25)
+						)
+						.border(
+							color = MaterialTheme.colorScheme.onSecondary,
+							width = 2.dp,
+							shape = RoundedCornerShape(25)
+						),
+					contentAlignment = Alignment.Center
+				) {
+					if (typeForReset != null) {
+						Text(
+							text = "${(value * 100).toInt()}%",
+							color = MaterialTheme.colorScheme.secondary
+						)
+					} else {
+						Text(
+							text = "${value.toInt()}",
+							color = MaterialTheme.colorScheme.secondary
+						)
+					}
+				}
+				Spacer(Modifier.width(5.dp))
+			}
+			Spacer(Modifier.height(5.dp))
+
+			Row(verticalAlignment = Alignment.CenterVertically) {
+				Spacer(Modifier.width(5.dp))
+
+				button.Simple(textForReset) {
+					when (typeForReset) {
+						ButtonsEnum.WIDTH -> onValueChange(0.95f)
+						ButtonsEnum.HEIGHT -> onValueChange(0.75f)
+						else -> onValueChange(50f)
+					}
+				}
+			}
+		}
 	}
 }
 

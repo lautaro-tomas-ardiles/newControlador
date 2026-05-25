@@ -24,13 +24,18 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,16 +50,14 @@ import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.data.Directions
+import com.example.newcontrolador.connection.data.DirectionsEnum
 import com.example.newcontrolador.connection.data.DirectionsConfig
+import com.example.newcontrolador.data.store.DataStoreViewModel
 import kotlinx.coroutines.delay
 
 class MovementButtons {
 	private var maxButtonHeigthPercent = (1f / 2f)
 	private var maxButtonWidthPercent = (1f / 3f)
-
-	private var buttonHeigthPercent = maxButtonHeigthPercent * 0.75f
-	private var buttonWidthPercent = maxButtonWidthPercent * 0.95f
 
 	/**
 	 * Botón direccional para control de movimiento.
@@ -68,17 +71,17 @@ class MovementButtons {
 	 */
 	@Composable
 	private fun DirectionButton(
-		direction: Directions,
-		onPress: (Directions) -> Unit,
-		onRelease: (Directions) -> Unit,
+		direction: DirectionsEnum,
+		onPress: (DirectionsEnum) -> Unit,
+		onRelease: (DirectionsEnum) -> Unit,
 		buttonWidth: Dp,
 		buttonHeight: Dp
 	) {
 		val arrowDirection = when (direction) {
-			Directions.UP -> Icons.Default.KeyboardArrowUp
-			Directions.DOWN -> Icons.Default.KeyboardArrowDown
-			Directions.LEFT -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
-			Directions.RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
+			DirectionsEnum.UP -> Icons.Default.KeyboardArrowUp
+			DirectionsEnum.DOWN -> Icons.Default.KeyboardArrowDown
+			DirectionsEnum.LEFT -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
+			DirectionsEnum.RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
 			else -> Icons.Default.KeyboardArrowUp
 		}
 
@@ -114,24 +117,33 @@ class MovementButtons {
 	@Composable
 	fun GridButton(
 		connectionManager: ConnectionViewModel,
-		directionChars: DirectionsConfig
+		directionChars: DirectionsConfig,
+		viewModel: DataStoreViewModel
 	) {
-		var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
+		var directionsPressed by remember { mutableStateOf(setOf<DirectionsEnum>()) }
 		var isPressed by remember { mutableStateOf(false) }
+
+		var aSidoEnviado = false
+
+		val configButton by viewModel.buttonConfig.collectAsState()
+		var buttonHeightPercent by remember { mutableFloatStateOf(configButton.height) }
+		var buttonWidthPercent by remember { mutableFloatStateOf(configButton.width) }
 
 		//enviar continuamente los caracteres mientras el botón esté presionado
 		LaunchedEffect(isPressed, directionsPressed) {
 			if (isPressed && directionsPressed.isNotEmpty()) {
 				while (isPressed) {
 					connectionManager.sendChar(
-						Directions.charFromSet(directionsPressed, directionChars)
+						DirectionsEnum.charFromSet(directionsPressed, directionChars)
 					)
-					delay(50L)
+					aSidoEnviado = !aSidoEnviado
+					if (aSidoEnviado) delay(50L) else delay(1L)
 				}
 			} else {
 				while (!isPressed) {
 					connectionManager.sendChar(directionChars.stopChar)
-					delay(50L)
+					 aSidoEnviado = !aSidoEnviado
+					if (aSidoEnviado) delay(50L) else delay(1L)
 				}
 			}
 		}
@@ -140,9 +152,9 @@ class MovementButtons {
 			val height = this.maxHeight
 			val width = this.maxWidth
 
-			val buttonHeight = (height * buttonHeigthPercent)
+			val buttonHeight = (height * (maxButtonHeigthPercent * buttonHeightPercent))
 				.coerceAtMost(height * maxButtonHeigthPercent)
-			val buttonWidth = (width * buttonWidthPercent)
+			val buttonWidth = (width * (maxButtonWidthPercent * buttonWidthPercent))
 				.coerceAtMost(width * maxButtonWidthPercent)
 
 			Row(
@@ -152,7 +164,7 @@ class MovementButtons {
 			) {
 				Column {
 					DirectionButton(
-						direction = Directions.UP,
+						direction = DirectionsEnum.UP,
 						onPress = {
 							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -171,7 +183,7 @@ class MovementButtons {
 					)
 
 					DirectionButton(
-						direction = Directions.DOWN,
+						direction = DirectionsEnum.DOWN,
 						onPress = {
 							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -192,7 +204,7 @@ class MovementButtons {
 
 				Row {
 					DirectionButton(
-						direction = Directions.LEFT,
+						direction = DirectionsEnum.LEFT,
 						onPress = {
 							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -211,7 +223,7 @@ class MovementButtons {
 					)
 
 					DirectionButton(
-						direction = Directions.RIGHT,
+						direction = DirectionsEnum.RIGHT,
 						onPress = {
 							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -234,11 +246,8 @@ class MovementButtons {
 	}
 
 	@Composable
-	fun GridButtonA(
-		//* connectionManager: ConnectionViewModel,
-		//* directionChars: DirectionsConfig para despues
-	) {
-		var directionsPressed by remember { mutableStateOf(setOf<Directions>()) }
+	fun GridButtonA() {
+		var directionsPressed by remember { mutableStateOf(setOf<DirectionsEnum>()) }
 		var isPressed by remember { mutableStateOf(false) }
 
 		//enviar continuamente los caracteres mientras el botón esté presionado
@@ -246,7 +255,7 @@ class MovementButtons {
 			if (isPressed && directionsPressed.isNotEmpty()) {
 				while (isPressed) {
 //					connectionManager.sendChar(
-//						Directions.charFromSet(
+//						DirectionsEnum.charFromSet(
 //							directionsPressed,
 //							directionChars
 //						)
@@ -265,10 +274,8 @@ class MovementButtons {
 			val height = this.maxHeight
 			val width = this.maxWidth
 
-			val buttonHeight = (height * buttonHeigthPercent)
-				.coerceAtMost(height * maxButtonHeigthPercent)
-			val buttonWidth = (width * buttonWidthPercent)
-				.coerceAtMost(width * maxButtonWidthPercent)
+			val buttonHeight = 10.dp
+			val buttonWidth = 10.dp
 
 			Row(
 				Modifier.fillMaxSize(),
@@ -277,7 +284,7 @@ class MovementButtons {
 			) {
 				Column {
 					DirectionButton(
-						direction = Directions.UP,
+						direction = DirectionsEnum.UP,
 						onPress = {
 							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -297,7 +304,7 @@ class MovementButtons {
 					//Spacer(Modifier.height(10.dp))
 
 					DirectionButton(
-						direction = Directions.DOWN,
+						direction = DirectionsEnum.DOWN,
 						onPress = {
 							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -318,7 +325,7 @@ class MovementButtons {
 
 				Row {
 					DirectionButton(
-						direction = Directions.LEFT,
+						direction = DirectionsEnum.LEFT,
 						onPress = {
 							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -338,7 +345,7 @@ class MovementButtons {
 					//Spacer(Modifier.width(10.dp))
 
 					DirectionButton(
-						direction = Directions.RIGHT,
+						direction = DirectionsEnum.RIGHT,
 						onPress = {
 							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
 
@@ -368,7 +375,6 @@ class Buttons {
 
 	@Composable
 	fun Painter(
-		//onClick: () -> Unit,
 		painter: Painter,
 		inverted: Boolean,
 		connectionManager: ConnectionViewModel,
@@ -404,31 +410,33 @@ class Buttons {
 			pairedDevices = setOf()
 		}
 
-		IconButton(
-			onClick = {
-				menuDevicesState = !menuDevicesState
-			},
-			shape = shape,
-			modifier = buttonSize,
-			colors = IconButtonDefaults.iconButtonColors(
-				containerColor = primary,
-				contentColor = secondary
-			)
-		) {
-			Icon(
-				painter = painter,
-				contentDescription = contentDescription,
-				tint = secondary,
-				modifier = iconSize
+		Box(contentAlignment = Alignment.Center) {
+			IconButton(
+				onClick = {
+					menuDevicesState = !menuDevicesState
+				},
+				shape = shape,
+				modifier = buttonSize,
+				colors = IconButtonDefaults.iconButtonColors(
+					containerColor = primary,
+					contentColor = secondary
+				)
+			) {
+				Icon(
+					painter = painter,
+					contentDescription = contentDescription,
+					tint = secondary,
+					modifier = iconSize
+				)
+			}
+			BluetoothDropMenu(
+				state = menuDevicesState,
+				onStateChange = { menuDevicesState = it },
+				setOfDevices = pairedDevices,
+				connectionManager = connectionManager,
+				context = LocalContext.current
 			)
 		}
-		BluetoothDropMenu(
-			state = menuDevicesState,
-			onStateChange = { menuDevicesState = it },
-			setOfDevices = pairedDevices,
-			connectionManager = connectionManager,
-			context = LocalContext.current
-		)
 	}
 
 	@Composable
@@ -496,6 +504,23 @@ class Buttons {
 					modifier = iconSize
 				)
 			}
+		}
+	}
+
+	@Composable
+	fun Simple(
+		text: String,
+		onClick: () -> Unit
+	) {
+		Button(
+			onClick = { onClick() },
+			colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary),
+			shape = shape
+		) {
+			Text(
+				text = text,
+				color = MaterialTheme.colorScheme.background
+			)
 		}
 	}
 }
