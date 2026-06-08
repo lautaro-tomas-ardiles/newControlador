@@ -5,6 +5,8 @@ Este documento contiene los comandos necesarios para construir la APK de **newCo
 ## Paso 1: Construir (o re-construir) la imagen
 Cada vez que realices cambios en el código fuente, ejecuta este comando para actualizar la imagen y compilar la nueva APK. Docker usará la caché para que sea más rápido.
 
+https://pl.kotl.in/-swZ4C7_h
+
 ```bash
 docker build -t app-builder .
 ```
