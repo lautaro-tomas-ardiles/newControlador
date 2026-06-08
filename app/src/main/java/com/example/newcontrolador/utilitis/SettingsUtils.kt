@@ -40,6 +40,7 @@ fun SettingsDropMenu(
 	listOfThemes: List<ThemeConfig>
 ) {
 	val scroll = rememberScrollState()
+	val buttonsUtils = ButtonsUtils()
 
 	DropdownMenu(
 		expanded = state,
@@ -65,15 +66,13 @@ fun SettingsDropMenu(
 				}
 			}
 
-			TextAndButton(
-				text = "configuracion completa ",
-				isPainter = true,
-				painter = painterResource(R.drawable.external_link),
-				tintColor = MaterialTheme.colorScheme.background
-			) {
-				navController.navigate(AppScreen.SettingsPage.route)
+			buttonsUtils.Text("configuracion completa :") {
+				it.Painter(
+					onClick = { navController.navigate(AppScreen.SettingsPage.route) },
+					image = painterResource(R.drawable.external_link),
+					tintColor = MaterialTheme.colorScheme.background
+				)
 			}
-
 			listOfSliders.forEach { config ->
 				SliderForConfiguration(
 					value = config.value,

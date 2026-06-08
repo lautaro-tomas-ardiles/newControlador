@@ -31,9 +31,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/logo"
+        android:icon="@drawable/logo_5"
         android:label="control de auto"
-        android:roundIcon="@drawable/logo"
+        android:roundIcon="@drawable/logo_5"
         android:supportsRtl="true"
         android:theme="@style/Theme.NewControlador"
         tools:targetApi="31">

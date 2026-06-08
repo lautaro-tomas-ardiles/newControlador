@@ -18,6 +18,8 @@ fun WifiTextField(
 	ip: String,
 	onIpChange: (String) -> Unit
 ) {
+	val buttonsUtils = ButtonsUtils()
+
 	TextField(
 		value = ip,
 		onValueChange = { onIpChange(it) },
@@ -28,12 +30,10 @@ fun WifiTextField(
 			)
 		},
 		trailingIcon = {
-			IconsButtonsCustom(
-				onClick = {
-					connectionManager.connectToWifi(ip)
-				},
+			buttonsUtils.ImageVector(
+				image = Icons.AutoMirrored.Filled.Send,
 				tintColor = MaterialTheme.colorScheme.background,
-				imageVector = Icons.AutoMirrored.Filled.Send
+				onClick = { connectionManager.connectToWifi(ip) }
 			)
 		},
 		singleLine = true,

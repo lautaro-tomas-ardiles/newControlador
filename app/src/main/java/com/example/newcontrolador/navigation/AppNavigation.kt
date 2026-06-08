@@ -6,9 +6,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.screen.MainAboutScreen
 import com.example.newcontrolador.screen.MainArduinoOneAndHC05Page
 import com.example.newcontrolador.screen.MainESP32Page
-import com.example.newcontrolador.screen.MainESP8622Page
 import com.example.newcontrolador.screen.MainScreen
 import com.example.newcontrolador.screen.MainSettingsPage
 
@@ -23,9 +23,6 @@ fun AppNavigation(
 		composable(AppScreen.MainPage.route) {
 			MainScreen(bluetoothAdapter, navController, viewModel)
 		}
-		composable(AppScreen.ESP8622Page.route) {
-			MainESP8622Page(navController)
-		}
 		composable(AppScreen.ESP32Page.route) {
 			MainESP32Page(navController)
 		}
@@ -34,6 +31,9 @@ fun AppNavigation(
 		}
 		composable(AppScreen.SettingsPage.route) {
 			MainSettingsPage(navController, viewModel)
+		}
+		composable(AppScreen.AboutPage.route) {
+			MainAboutScreen(navController)
 		}
 	}
 }

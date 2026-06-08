@@ -32,7 +32,7 @@ import com.example.newcontrolador.connection.data.Buttons
  * @param value Valor actual del slider.
  * @param onValueChange Función que se ejecuta al cambiar el valor del slider.
  * @param textForReset Texto que se mostrará en el botón de reinicio. Por defecto `"Reset"`.
- * @param typeForReset Tipo de valor que se debe reiniciar. Por defecto `Buttons.HEIGHT`.
+ * @param typeForReset Tipo de valor que se debe reiniciar. Por defecto `ButtonsUtils.HEIGHT`.
  * @param valueRange Rango permitido para el slider (`ClosedFloatingPointRange<Float>`).
  * @param ruta Imagen representativa que se mostrará al inicio del slider.
  */
@@ -45,12 +45,23 @@ fun SliderForConfiguration(
 	valueRange: ClosedFloatingPointRange<Float>,
 	ruta: Painter
 ) {
+	val rangoReal = valueRange.endInclusive - valueRange.start
+
 	val setps =
-		if (typeForReset != null) {
-			((valueRange.endInclusive - valueRange.start) / 5).toInt() - 1
-		} else {
-			((valueRange.endInclusive - valueRange.start) / 10).toInt() - 1
+		when (typeForReset) {
+			Buttons.PADDING -> {
+				(rangoReal / 5 - 1).toInt()
+			}
+			null -> {
+				(rangoReal / 10 - 1).toInt()
+			}
+			else -> {
+				0
+			}
 		}
+
+	val buttonsUtils = ButtonsUtils()
+
 	Column(Modifier.padding(vertical = 5.dp)) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.width(5.dp))
@@ -91,10 +102,17 @@ fun SliderForConfiguration(
 					),
 				contentAlignment = Alignment.Center
 			) {
-				Text(
-					text = "${value.toInt()}",
-					color = MaterialTheme.colorScheme.secondary
-				)
+				if (typeForReset != null && typeForReset != Buttons.PADDING) {
+					Text(
+						text = "${(value * 100).toInt()}%",
+						color = MaterialTheme.colorScheme.secondary
+					)
+				} else {
+					Text(
+						text = "${value.toInt()}",
+						color = MaterialTheme.colorScheme.secondary
+					)
+				}
 			}
 			Spacer(Modifier.width(5.dp))
 		}
@@ -103,10 +121,10 @@ fun SliderForConfiguration(
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.width(5.dp))
 
-			SimpleButton(textForReset) {
+			buttonsUtils.Simple(textForReset) {
 				when (typeForReset) {
-					Buttons.WIDTH -> onValueChange(165f)
-					Buttons.HEIGHT -> onValueChange(150f)
+					Buttons.WIDTH -> onValueChange(1f/4f)
+					Buttons.HEIGHT -> onValueChange(1f/2f)
 					Buttons.PADDING -> onValueChange(0f)
 					else -> onValueChange(50f)
 				}

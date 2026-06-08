@@ -23,11 +23,11 @@ import androidx.navigation.NavController
 import com.example.newcontrolador.connection.data.Directions
 import com.example.newcontrolador.connection.data.Modes
 import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.utilitis.ButtonsUtils
 import com.example.newcontrolador.utilitis.LineAndText
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.SettingsItemForDirections
 import com.example.newcontrolador.utilitis.SettingsItemForModes
-import com.example.newcontrolador.utilitis.SimpleButton
 import com.example.newcontrolador.utilitis.TopBar2
 
 @Composable
@@ -71,28 +71,30 @@ fun MainSettingsPageContent(
 		Directions.STOP,
 	)
 
+	val buttonsUtils = ButtonsUtils()
+
 	Scaffold(
 		topBar = {
-			TopBar2(
-				"Configuración completa",
-				navController
-			) },
+			TopBar2("Configuración completa", navController)
+		},
 		containerColor = MaterialTheme.colorScheme.background
 	) { padding ->
 		Column(
 			Modifier
 				.padding(padding)
-				.padding(horizontal = 10.dp, vertical = 30.dp)
+				.padding(
+					horizontal = 10.dp,
+					vertical = 30.dp
+				)
 				.verticalScroll(scroll),
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
 			LineAndText("Ajustes de modos")
 
-			SimpleButton("resetear modos") {
+			buttonsUtils.Simple("resetear modos") {
 				viewModel.resetModesToDefault()
 				onReload() // recargar la pantalla
 			}
-
 			modes.forEach { mode ->
 				SettingsItemForModes(mode, viewModel)
 			}
@@ -101,11 +103,10 @@ fun MainSettingsPageContent(
 
 			LineAndText("Ajustes de direcciones")
 
-			SimpleButton("resetear direcciones") {
+			buttonsUtils.Simple("resetear direcciones") {
 				viewModel.resetDirectionChars()
 				onReload() // recargar la pantalla
 			}
-
 			directions.forEach { direction ->
 				SettingsItemForDirections(direction, viewModel)
 			}

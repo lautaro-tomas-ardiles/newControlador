@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -54,13 +56,15 @@ import com.example.newcontrolador.navigation.AppScreen
  */
 @Composable
 fun TopBar2(text: String, navController: NavController) {
+	val buttonsUtils = ButtonsUtils()
+
 	CenterAlignedTopAppBar(
 		title = { Text(text = text) },
 		navigationIcon = {
 			Row {
-				IconsButtonsCustom(
+				buttonsUtils.ImageVector(
 					onClick = { navController.navigate(AppScreen.MainPage.route) },
-					imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+					image = Icons.AutoMirrored.Outlined.ArrowBack,
 					tintColor = MaterialTheme.colorScheme.background
 				)
 			}
@@ -88,7 +92,8 @@ private fun TopBarForMainPageStart(
 	onBluetoothChange: (Boolean) -> Unit,
 	connectionManager: ConnectionViewModel,
 	bluetoothAdapter: BluetoothAdapter,
-	directionsConfig: DirectionsConfig
+	directionsConfig: DirectionsConfig,
+	buttonsUtils: ButtonsUtils
 ) {
 	var ip by remember { mutableStateOf("") }
 
@@ -137,12 +142,11 @@ private fun TopBarForMainPageStart(
 			horizontalArrangement = Arrangement.End
 		) {
 			if (bluetooth) {
-				TextAndButton(
-					text = "Conecte a el robot :",
-					isBluetooth = true
-				) {
-					if (connectionManager.verifyBluetoothDevices(pairedDevices)) {
-						menuDevicesState = !menuDevicesState
+				buttonsUtils.Text("Conecte a el robot :") {
+					it.Bluetooth {
+						if (connectionManager.verifyBluetoothDevices(pairedDevices)) {
+							menuDevicesState = !menuDevicesState
+						}
 					}
 				}
 				BluetoothDropMenu(
@@ -179,7 +183,8 @@ private fun TopBarForMainPageEnd(
 	modeSelected: (Modes) -> Unit,
 	connectionManager: ConnectionViewModel,
 	navController: NavController,
-	viewModel: DataStoreViewModel
+	viewModel: DataStoreViewModel,
+	buttonsUtils: ButtonsUtils
 ) {
 	val configButton by viewModel.buttonConfig.collectAsState()
 	val selectedTheme by viewModel.theme.collectAsState()
@@ -201,7 +206,6 @@ private fun TopBarForMainPageEnd(
 	var modeSelect by remember { mutableStateOf(Modes.MANUAL) }
 
 	var menuDiagramasState by remember { mutableStateOf(false) }
-
 	var menuSettingState by remember { mutableStateOf(false) }
 
 	val modes = setOf(
@@ -214,8 +218,8 @@ private fun TopBarForMainPageEnd(
 			onValueChange = {
 				velocity = it
 				val char = when {
-					it < 100f -> ('0' + (it / 10).toInt())
-					it == 100f -> 'q'
+					velocity < 100f -> ('0' + (it / 10).toInt())
+					velocity == 100f -> 'q'
 					else -> '0'
 				}
 				viewModel.setVelocityChar(char)
@@ -227,19 +231,19 @@ private fun TopBarForMainPageEnd(
 		SliderConfig(
 			value = buttonHeight,
 			onValueChange = {
-				buttonHeight = it
-				viewModel.setButtonHeight(it)
+				buttonHeight = (it * 100).toInt() / 100f
+				viewModel.setButtonHeight(buttonHeight)
 			},
-			valueRange = 100f..300f,
+			valueRange = 0f..1f,
 			ruta = painterResource(id = R.drawable.height)
 		),
 		SliderConfig(
 			value = buttonWidth,
 			onValueChange = {
-				buttonWidth = it
-				viewModel.setButtonWidth(it)
+				buttonWidth = (it * 100).toInt() / 100f
+				viewModel.setButtonWidth(buttonWidth)
 			},
-			valueRange = 100f..300f,
+			valueRange = 0f..1f,
 			typeForReset = Buttons.WIDTH,
 			ruta = painterResource(id = R.drawable.width)
 		),
@@ -247,7 +251,7 @@ private fun TopBarForMainPageEnd(
 			value = paddings,
 			onValueChange = {
 				paddings = it
-				viewModel.setButtonPadding(it)
+				viewModel.setButtonPadding(paddings)
 			},
 			valueRange = 0f..50f,
 			typeForReset = Buttons.PADDING,
@@ -274,7 +278,6 @@ private fun TopBarForMainPageEnd(
 	LaunchedEffect(Unit, configVelocity.velocityChar) {
 		connectionManager.sendChar(configVelocity.velocityChar)
 	}
-
 	Row(
 		horizontalArrangement = Arrangement.End,
 		verticalAlignment = Alignment.CenterVertically,
@@ -283,8 +286,24 @@ private fun TopBarForMainPageEnd(
 			.padding(end = 20.dp)
 	) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
-			TextAndButton("modo :") {
-				menuModeState = !menuModeState
+			buttonsUtils.Text("acerca de:") {
+				it.Painter(
+					onClick = { navController.navigate(AppScreen.AboutPage.route) },
+					image = painterResource(R.drawable.alert_circle),
+					border = true,
+					modifier = Modifier.size(50.dp)
+				)
+			}
+		}
+		Spacer(Modifier.width(10.dp))
+
+		Row(verticalAlignment = Alignment.CenterVertically) {
+			buttonsUtils.Text("modo :") {
+				it.ImageVector(
+					onClick = { menuModeState = !menuModeState },
+					image = Icons.Default.MoreVert,
+					border = true
+				)
 			}
 			ModeDropMenu(
 				state = menuModeState,
@@ -301,8 +320,12 @@ private fun TopBarForMainPageEnd(
 		Spacer(Modifier.width(10.dp))
 
 		Row(verticalAlignment = Alignment.CenterVertically) {
-			TextAndButton("diagramas :") {
-				menuDiagramasState = !menuDiagramasState
+			buttonsUtils.Text("digramas :") {
+				it.ImageVector(
+					onClick = { menuDiagramasState = !menuDiagramasState },
+					image = Icons.Default.MoreVert,
+					border = true
+				)
 			}
 			DiagramaDropMenu(
 				state = menuDiagramasState,
@@ -311,23 +334,18 @@ private fun TopBarForMainPageEnd(
 					DiagramaItem("ESP 32") {
 						navController.navigate(AppScreen.ESP32Page.route)
 					}
-					/*
-					DiagramaItem("ESP 8622") {
-						navController.navigate(AppScreen.ESP8622Page.route)
-					}
-					*/
 					DiagramaItem("Ardiuno y hc-05") {
 						navController.navigate(AppScreen.ArduinoOneAndHC05Page.route)
 					}
 				}
 			)
 		}
-		Spacer(modifier = Modifier.width(10.dp))
+		Spacer(Modifier.width(10.dp))
 
 		Row(verticalAlignment = Alignment.CenterVertically) {
-			IconsButtonsCustom(
+			buttonsUtils.ImageVector(
 				onClick = { menuSettingState = !menuSettingState },
-				isSolidColor = false,
+				border = true
 			)
 			SettingsDropMenu(
 				state = menuSettingState,
@@ -337,6 +355,7 @@ private fun TopBarForMainPageEnd(
 				navController = navController
 			)
 		}
+		Spacer(Modifier.width(10.dp))
 	}
 }
 
@@ -362,6 +381,7 @@ fun TopBarForMainPage(
 	modeSelected: (Modes) -> Unit,
 	directionsConfig: DirectionsConfig
 ) {
+	val buttonsUtils = ButtonsUtils()
 	Box(
 		contentAlignment = Alignment.Center,
 		modifier = Modifier
@@ -373,14 +393,16 @@ fun TopBarForMainPage(
 			onBluetoothChange = { connectionManager.isBluetooth = it },
 			connectionManager = connectionManager,
 			bluetoothAdapter = bluetoothAdapter,
-			directionsConfig = directionsConfig
+			directionsConfig = directionsConfig,
+			buttonsUtils = buttonsUtils
 		)
 
 		TopBarForMainPageEnd(
 			modeSelected = { modeSelected(it) },
 			navController = navController,
 			viewModel = viewModel,
-			connectionManager = connectionManager
+			connectionManager = connectionManager,
+			buttonsUtils = buttonsUtils
 		)
 	}
 }

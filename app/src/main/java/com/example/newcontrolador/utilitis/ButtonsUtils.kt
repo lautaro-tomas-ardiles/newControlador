@@ -1,23 +1,13 @@
 package com.example.newcontrolador.utilitis
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,203 +22,177 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.R
-import com.example.newcontrolador.connection.data.Directions
 
-/**
- * Botón direccional para control de movimiento.
- *
- * Muestra un botón con una flecha que indica la dirección especificada (arriba, abajo, izquierda o derecha).
- * Detecta la presión y liberación del botón para enviar eventos personalizados.
- *
- * @param direction Dirección del botón (UP, DOWN, LEFT o RIGHT).
- * @param onPress Función que se ejecuta cuando el botón es presionado.
- * @param onRelease Función que se ejecuta cuando el botón es liberado.
- * @param width Ancho del botón en dp.
- * @param height Alto del botón en dp.
- */
-@Composable
-fun DirectionButton(
-	direction: Directions,
-	onPress: (Directions) -> Unit,
-	onRelease: (Directions) -> Unit,
-	width: Int,
-	height: Int
-) {
-	val arrowDirection = when (direction) {
-		Directions.UP -> Icons.Default.KeyboardArrowUp
-		Directions.DOWN -> Icons.Default.KeyboardArrowDown
-		Directions.LEFT -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
-		Directions.RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
-		else -> Icons.Default.KeyboardArrowUp
+class ButtonsUtils {
+	private val sizeButton = 45.dp
+	private val sizeIcon = 30.dp
+
+	/**
+	 * Devuelve el color para el borde o el fondo dependiende de un booleanno,
+	 * si es `true` devuelve el color secundario del tema, si es `false` devuelve transparente
+	 *
+	 * @param key booleano que indica si se debe usar el color secundario o transparente
+	 * @return Color correspondiente al estado del botón (sólido o con borde)
+	 */
+	@Composable
+	private fun getSolidAndBorder(key: Boolean): Color {
+		return when (key) {
+			true -> MaterialTheme.colorScheme.secondary
+			false -> Color.Transparent
+		}
 	}
 
-	Box(
-		modifier = Modifier
-			.height(height.dp)
-			.width(width.dp)
-			.background(MaterialTheme.colorScheme.onTertiary)
-			.border(2.dp, MaterialTheme.colorScheme.secondary)
-			.pointerInput(Unit) {
-				detectTapGestures(
-					onPress = {
-						onPress(direction)
-						tryAwaitRelease()
-						onRelease(direction)
-					}
-				)
-			},
-		contentAlignment = Alignment.Center
+	/**
+	 * boton con icono Painter personalizable.
+	 *
+	 * @param onClick acción que se ejecuta al presionar el botón
+	 * @param solid indica si tiene o no fondo sólido
+	 * @param border indica si tiene o no borde
+	 * @param tintColor color del ícono
+	 * @param image ícono a mostrar, por defecto es un ícono de enlace externo
+	 */
+	@Composable
+	fun Painter(
+		onClick: () -> Unit,
+		modifier: Modifier = Modifier,
+		solid: Boolean = false,
+		border: Boolean = false,
+		tintColor: Color = MaterialTheme.colorScheme.tertiary,
+		image: Painter = painterResource(R.drawable.external_link)
 	) {
-		Icon(
-			imageVector = arrowDirection,
-			contentDescription = "Flecha de dirección $direction",
+		IconButton(
+			onClick = { onClick() },
+			colors = IconButtonDefaults.iconButtonColors(
+				containerColor = getSolidAndBorder(solid)
+			),
 			modifier = Modifier
-				.size(70.dp)
-				.background(MaterialTheme.colorScheme.secondary, CircleShape),
-			tint = MaterialTheme.colorScheme.background
-		)
-	}
-}
-
-/**
- * Botón icónico configurable.
- *
- * Muestra un botón con un ícono, que puede ser sólido o transparente, con o sin borde.
- * Puede mostrar un ícono especial de Bluetooth según el parámetro.
- *
- * @param onClick Acción que se ejecuta al presionar el botón.
- * @param isSolidColor Indica si el fondo debe ser sólido `true` o transparente `false`.
- * @param isBluetooth Si es `true`, muestra el ícono personalizado de Bluetooth.
- * @param border Si es `true`, muestra un borde alrededor del botón.
- * @param tintColor Color del ícono cuando no es Bluetooth.
- * @param imageVector Ícono a mostrar (por defecto, el ícono de ajustes).
- */
-@Composable
-fun IconsButtonsCustom(
-	onClick: () -> Unit,
-	isSolidColor: Boolean = false,
-	isBluetooth: Boolean = false,
-	border: Boolean = false,
-	isPainter: Boolean = false,
-	tintColor: Color = MaterialTheme.colorScheme.tertiary,
-	imageVector: ImageVector = Icons.Default.Settings,
-	painter: Painter = painterResource(R.drawable.external_link)
-) {
-	IconButton(
-		onClick = { onClick() },
-		colors = IconButtonDefaults.iconButtonColors(
-			containerColor = if (isSolidColor) MaterialTheme.colorScheme.secondary else Color.Transparent,
-		),
-		modifier = Modifier
-			.size(45.dp)
-			.border(
-				width = 3.dp,
-				color = if (border) MaterialTheme.colorScheme.secondary else Color.Transparent,
-				shape = CircleShape
+				.size(sizeButton)
+				.border(
+					width = 3.dp,
+					color = getSolidAndBorder(border),
+					shape = CircleShape
+				)
+		) {
+			Icon(
+				painter = image,
+				contentDescription = "Ícono de acción",
+				tint = tintColor,
+				modifier = modifier.size(sizeIcon)
 			)
+		}
+	}
+
+	/**
+	 * Botón con icono ImageVector personalizable.
+	 *
+	 * @param onClick acción que se ejecuta al presionar el botón
+	 * @param solid indica si el botón tiene fondo sólido o no
+	 * @param border indica si el botón tiene borde o no
+	 * @param tintColor color del ícono
+	 * @param image ícono a mostrar, por defecto es el ícono de configuración
+	 */
+	@Composable
+	fun ImageVector(
+		onClick: () -> Unit,
+		solid: Boolean = false,
+		border: Boolean = false,
+		tintColor: Color = MaterialTheme.colorScheme.tertiary,
+		image: ImageVector = Icons.Default.Settings
 	) {
-		if (isBluetooth) {
+		IconButton(
+			onClick = { onClick() },
+			colors = IconButtonDefaults.iconButtonColors(
+				containerColor = getSolidAndBorder(solid)
+			),
+			modifier = Modifier
+				.size(sizeButton)
+				.border(
+					width = 3.dp,
+					color = getSolidAndBorder(border),
+					shape = CircleShape
+				)
+		) {
+			Icon(
+				imageVector = image,
+				contentDescription = "Ícono de acción",
+				tint = tintColor,
+				modifier = Modifier.size(sizeIcon)
+			)
+		}
+	}
+
+	/**
+	 * boton con icono de Bluetooth.
+	 *
+	 * @param onClick acción que se ejecuta al presionar el botón
+	 */
+	@Composable
+	fun Bluetooth(
+		onClick: () -> Unit
+	) {
+		IconButton(
+			onClick = { onClick() },
+			colors = IconButtonDefaults.iconButtonColors(
+				containerColor = MaterialTheme.colorScheme.secondary,
+			),
+			modifier = Modifier.size(sizeButton)
+		) {
 			Icon(
 				painter = painterResource(R.drawable.bluetooth),
 				contentDescription = "Ícono de Bluetooth",
 				tint = MaterialTheme.colorScheme.background
 			)
 		}
-		if (isPainter && !isBluetooth) {
-			Icon(
-				painter = painter,
-				contentDescription = "Ícono de acción",
-				tint = tintColor,
-				modifier = Modifier.size(30.dp)
+	}
+
+	/**
+	 * Texto con botón personalizado.
+	 *
+	 * @param text Texto que se muestra junto al botón
+	 * @param button Función que recibe el objeto `ButtonsUtils` para mostrar un botón personalizado junto al texto
+	 */
+	@Composable
+	fun Text(
+		text: String,
+		button: @Composable (ButtonsUtils) -> Unit
+	) {
+		Row (verticalAlignment = Alignment.CenterVertically) {
+			Text(
+				text = text,
+				color = MaterialTheme.colorScheme.background,
+				fontSize = MaterialTheme.typography.bodyMedium.fontSize
 			)
-		}
-		if (!isBluetooth && !isPainter) {
-			Icon(
-				imageVector = imageVector,
-				contentDescription = "Ícono de acción",
-				tint = tintColor,
-				modifier = Modifier.size(30.dp)
-			)
+			Spacer(modifier = Modifier.padding(3.dp))
+
+			button(this@ButtonsUtils)
 		}
 	}
-}
 
-/**
- * Componente combinado de texto y botón.
- *
- * Muestra un texto acompañado de un botón icónico (por ejemplo, configuración o Bluetooth).
- *
- * @param text Texto que se muestra junto al botón.
- * @param imageVector Ícono del botón (por defecto, el ícono de opciones verticales).
- * @param isBluetooth Si es `true`, el botón adopta el estilo especial de Bluetooth.
- * @param onClick Acción que se ejecuta al presionar el botón.
- */
-@Composable
-fun TextAndButton(
-	text: String,
-	imageVector: ImageVector = Icons.Default.MoreVert,
-	painter: Painter = painterResource(R.drawable.external_link),
-	isBluetooth: Boolean = false,
-	isPainter: Boolean = false,
-	tintColor: Color = MaterialTheme.colorScheme.tertiary,
-	onClick: () -> Unit
-) {
-	Row (
-		verticalAlignment = Alignment.CenterVertically
+	/**
+	 * bootn simple con texto.
+	 *
+	 * @param text Texto que se muestra en el botón
+	 * @param onClick Acción que se ejecuta al presionar el botón
+	 */
+	@Composable
+	fun Simple(
+		text: String,
+		onClick: () -> Unit
 	) {
-		Text(
-			text = text,
-			color = MaterialTheme.colorScheme.background,
-			fontSize = MaterialTheme.typography.bodyMedium.fontSize
-		)
-		Spacer(modifier = Modifier.padding(3.dp))
-
-		if (isPainter) {
-			IconsButtonsCustom(
-				onClick = { onClick() },
-				border = !isBluetooth,
-				painter = painter,
-				isPainter = true,
-				isSolidColor = isBluetooth,
-				tintColor = tintColor
-			)
-		} else {
-			IconsButtonsCustom(
-				onClick = { onClick() },
-				border = !isBluetooth, // si es bluetooth no debe tener borde
-				imageVector = imageVector,
-				isBluetooth = isBluetooth,
-				isSolidColor = isBluetooth
+		Button(
+			onClick = { onClick() },
+			colors = ButtonDefaults.buttonColors(
+				containerColor = MaterialTheme.colorScheme.secondary
+			),
+			shape = RoundedCornerShape(30)
+		) {
+			Text(
+				text = text,
+				color = MaterialTheme.colorScheme.background
 			)
 		}
-	}
-}
-
-/**
- * Botón simple con texto.
- *
- * Muestra un botón básico con fondo amarillo y texto negro.
- *
- * @param text Texto que se muestra en el botón.
- * @param onClick Acción que se ejecuta al presionar el botón.
- */
-@Composable
-fun SimpleButton(
-	text: String,
-	onClick: () -> Unit
-) {
-	Button(
-		onClick = { onClick() },
-		colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-		shape = RoundedCornerShape(30)
-	) {
-		Text(
-			text = text,
-			color = MaterialTheme.colorScheme.background
-		)
 	}
 }
