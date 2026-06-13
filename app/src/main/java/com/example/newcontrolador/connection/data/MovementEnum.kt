@@ -1,6 +1,6 @@
 package com.example.newcontrolador.connection.data
 
-enum class Buttons {
+enum class MovementEnum {
 	WIDTH,
 	HEIGHT,
 	PADDING

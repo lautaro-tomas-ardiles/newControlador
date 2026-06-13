@@ -14,6 +14,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,23 +23,38 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
+import com.example.newcontrolador.data.DataStoreViewModel
 import com.example.newcontrolador.utilitis.ArduinoCode
+import com.example.newcontrolador.utilitis.ButtonsUtils
+import com.example.newcontrolador.utilitis.SecondaryTopBar
 import com.example.newcontrolador.utilitis.SetOrientation
-import com.example.newcontrolador.utilitis.TopBar2
 
 @Composable
-fun MainESP32Page(navController: NavController) {
+fun MainESP32Page(
+	navController: NavController,
+	viewModel: DataStoreViewModel
+) {
+	val buttons by viewModel.buttonsConfig.collectAsState()
+	val buttonsUtils = ButtonsUtils(
+		sizeButton = buttons.button,
+		sizeIcon = buttons.icon
+	)
+
 	val scroll = rememberScrollState()
 	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, LocalContext.current)
 
 	Scaffold(
 		topBar = {
-			TopBar2("ESP 32", navController)
+			SecondaryTopBar(
+				text = "ESP 32",
+				navController = navController,
+				buttonsUtils = buttonsUtils
+			)
 		},
 		containerColor = MaterialTheme.colorScheme.background
 	) { padding ->
 		Column(
-			Modifier
+			modifier = Modifier
 				.padding(padding)
 				.fillMaxSize()
 				.padding(horizontal = 10.dp)

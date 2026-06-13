@@ -16,10 +16,9 @@ import com.example.newcontrolador.connection.ConnectionViewModel
 fun WifiTextField(
 	connectionManager: ConnectionViewModel,
 	ip: String,
+	buttonsUtils: ButtonsUtils,
 	onIpChange: (String) -> Unit
 ) {
-	val buttonsUtils = ButtonsUtils()
-
 	TextField(
 		value = ip,
 		onValueChange = { onIpChange(it) },

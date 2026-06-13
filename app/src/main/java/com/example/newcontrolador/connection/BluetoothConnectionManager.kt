@@ -8,7 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.connection.data.DirectionsConfig
-import com.example.newcontrolador.connection.data.Directions
+import com.example.newcontrolador.connection.data.DirectionsEnum
 import com.example.newcontrolador.exceptions.*
 import java.io.IOException
 import java.util.UUID
@@ -95,7 +95,7 @@ class BluetoothConnectionManager {
 	}
 
 	/**
-	 * Traduce caracteres de entrada en comandos definidos por el enum [Directions].
+	 * Traduce caracteres de entrada en comandos definidos por el enum [DirectionsEnum].
 	 */
 	private fun translateChar(c: Char, directionsConfig: DirectionsConfig): Char {
 		return when (c) {

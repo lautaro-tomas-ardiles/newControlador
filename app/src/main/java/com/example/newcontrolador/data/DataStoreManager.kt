@@ -3,13 +3,15 @@ package com.example.newcontrolador.data
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.newcontrolador.connection.data.ButtonConfig
+import com.example.newcontrolador.connection.data.ButtonsConfig
+import com.example.newcontrolador.connection.data.MovementConfig
 import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.ModesConfig
-import com.example.newcontrolador.connection.data.Directions
-import com.example.newcontrolador.connection.data.Modes
+import com.example.newcontrolador.connection.data.DirectionsEnum
+import com.example.newcontrolador.connection.data.ModesEnum
 import com.example.newcontrolador.connection.data.VelocityConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,15 +20,19 @@ val Context.dataStore by preferencesDataStore(name = "settings")
 
 class DataStoreManager(private val context: Context) {
 	companion object {
+		// temas
 		val THEME_KEY = stringPreferencesKey("theme")
 
+		// botones de movimiente
 		val HEIGHT_KEY = floatPreferencesKey("height")
 		val WIDTH_KEY = floatPreferencesKey("width")
 		val PADDING_KEY = floatPreferencesKey("padding")
 
+		// modos
 		val MODE_MANUAL_KEY = stringPreferencesKey("mode_manual")
 		val MODE_AUTOMATA_KEY = stringPreferencesKey("mode_automata")
 
+		// direcciones
 		val UP_CHAR_KEY = stringPreferencesKey("up_char")
 		val DOWN_CHAR_KEY = stringPreferencesKey("down_char")
 		val LEFT_CHAR_KEY = stringPreferencesKey("left_char")
@@ -37,7 +43,12 @@ class DataStoreManager(private val context: Context) {
 		val DOWN_RIGHT_CHAR_KEY = stringPreferencesKey("down_right_char")
 		val STOP_CHAR_KEY = stringPreferencesKey("stop_char")
 
+		// velocidad
 		val VELOCITY_CHAR_KEY = stringPreferencesKey("velocity_char")
+
+		// botones generales
+		val BUTTON_KEY = intPreferencesKey("button")
+		val ICON_KEY = intPreferencesKey("icon")
 	}
 
 	//* guardar los datos de button */
@@ -60,36 +71,36 @@ class DataStoreManager(private val context: Context) {
 	}
 
 	//* cargar los datos de button */
-	val loadButtonConfig: Flow<ButtonConfig> = context.dataStore.data.map { prefs ->
-		ButtonConfig(
-			width = prefs[WIDTH_KEY] ?: 165f,
-			height = prefs[HEIGHT_KEY] ?: 150f,
+	val loadMovementConfig: Flow<MovementConfig> = context.dataStore.data.map { prefs ->
+		MovementConfig(
+			width = prefs[WIDTH_KEY] ?: 0.8f,
+			height = prefs[HEIGHT_KEY] ?: 0.9f,
 			padding = prefs[PADDING_KEY] ?: 0f
 		)
 	}
 
 	//* guardar y cargar los datos de direcciones y modos */
-	suspend fun saveDirectionChar(key: Directions, char: Char) {
+	suspend fun saveDirectionChar(key: DirectionsEnum, char: Char) {
 		val preferencesKey = when (key) {
-			Directions.UP -> UP_CHAR_KEY
-			Directions.DOWN -> DOWN_CHAR_KEY
-			Directions.LEFT -> LEFT_CHAR_KEY
-			Directions.RIGHT -> RIGHT_CHAR_KEY
-			Directions.UP_LEFT -> UP_LEFT_CHAR_KEY
-			Directions.UP_RIGHT -> UP_RIGHT_CHAR_KEY
-			Directions.DOWN_LEFT -> DOWN_LEFT_CHAR_KEY
-			Directions.DOWN_RIGHT -> DOWN_RIGHT_CHAR_KEY
-			Directions.STOP -> STOP_CHAR_KEY
+			DirectionsEnum.UP -> UP_CHAR_KEY
+			DirectionsEnum.DOWN -> DOWN_CHAR_KEY
+			DirectionsEnum.LEFT -> LEFT_CHAR_KEY
+			DirectionsEnum.RIGHT -> RIGHT_CHAR_KEY
+			DirectionsEnum.UP_LEFT -> UP_LEFT_CHAR_KEY
+			DirectionsEnum.UP_RIGHT -> UP_RIGHT_CHAR_KEY
+			DirectionsEnum.DOWN_LEFT -> DOWN_LEFT_CHAR_KEY
+			DirectionsEnum.DOWN_RIGHT -> DOWN_RIGHT_CHAR_KEY
+			DirectionsEnum.STOP -> STOP_CHAR_KEY
 		}
 		context.dataStore.edit { preferences ->
 			preferences[preferencesKey] = char.toString()
 		}
 	}
 
-	suspend fun saveModeChar(key: Modes, char: Char) {
+	suspend fun saveModeChar(key: ModesEnum, char: Char) {
 		val preferencesKey = when (key) {
-			Modes.MANUAL -> MODE_MANUAL_KEY
-			Modes.AUTOMATA -> MODE_AUTOMATA_KEY
+			ModesEnum.MANUAL -> MODE_MANUAL_KEY
+			ModesEnum.AUTOMATA -> MODE_AUTOMATA_KEY
 		}
 
 		context.dataStore.edit { preferences ->
@@ -162,4 +173,25 @@ class DataStoreManager(private val context: Context) {
 			velocityChar = (prefs[VELOCITY_CHAR_KEY]?.get(0)) ?: '5'
 		)
 	}
+
+	//* guardar y cargar los datos de button utils */
+	suspend fun saveIconSize(size: Int) {
+		context.dataStore.edit { preferences ->
+			preferences[ICON_KEY] = size
+		}
+	}
+
+	suspend fun saveButtonSize(size: Int) {
+		context.dataStore.edit { preferences ->
+			preferences[BUTTON_KEY] = size
+		}
+	}
+
+	val loadButtonsConfig: Flow<ButtonsConfig> = context.dataStore.data.map { prefs ->
+		ButtonsConfig(
+			icon = prefs[ICON_KEY] ?: 30,
+			button = prefs[BUTTON_KEY] ?: 45
+		)
+	}
+
 }

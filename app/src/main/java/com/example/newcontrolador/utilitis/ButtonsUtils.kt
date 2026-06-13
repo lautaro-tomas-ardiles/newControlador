@@ -26,10 +26,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.R
 
-class ButtonsUtils {
-	private val sizeButton = 45.dp
-	private val sizeIcon = 30.dp
-
+class ButtonsUtils(
+	private val sizeButton: Int,
+	private val sizeIcon: Int
+) {
 	/**
 	 * Devuelve el color para el borde o el fondo dependiende de un booleanno,
 	 * si es `true` devuelve el color secundario del tema, si es `false` devuelve transparente
@@ -69,7 +69,7 @@ class ButtonsUtils {
 				containerColor = getSolidAndBorder(solid)
 			),
 			modifier = Modifier
-				.size(sizeButton)
+				.size(sizeButton.dp)
 				.border(
 					width = 3.dp,
 					color = getSolidAndBorder(border),
@@ -80,7 +80,7 @@ class ButtonsUtils {
 				painter = image,
 				contentDescription = "Ícono de acción",
 				tint = tintColor,
-				modifier = modifier.size(sizeIcon)
+				modifier = modifier.size(sizeIcon.dp)
 			)
 		}
 	}
@@ -108,7 +108,7 @@ class ButtonsUtils {
 				containerColor = getSolidAndBorder(solid)
 			),
 			modifier = Modifier
-				.size(sizeButton)
+				.size(sizeButton.dp)
 				.border(
 					width = 3.dp,
 					color = getSolidAndBorder(border),
@@ -119,7 +119,7 @@ class ButtonsUtils {
 				imageVector = image,
 				contentDescription = "Ícono de acción",
 				tint = tintColor,
-				modifier = Modifier.size(sizeIcon)
+				modifier = Modifier.size(sizeIcon.dp)
 			)
 		}
 	}
@@ -138,7 +138,7 @@ class ButtonsUtils {
 			colors = IconButtonDefaults.iconButtonColors(
 				containerColor = MaterialTheme.colorScheme.secondary,
 			),
-			modifier = Modifier.size(sizeButton)
+			modifier = Modifier.size(sizeButton.dp)
 		) {
 			Icon(
 				painter = painterResource(R.drawable.bluetooth),

@@ -2,11 +2,12 @@ package com.example.newcontrolador.data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newcontrolador.connection.data.ButtonConfig
+import com.example.newcontrolador.connection.data.ButtonsConfig
+import com.example.newcontrolador.connection.data.MovementConfig
 import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.connection.data.ModesConfig
-import com.example.newcontrolador.connection.data.Directions
-import com.example.newcontrolador.connection.data.Modes
+import com.example.newcontrolador.connection.data.DirectionsEnum
+import com.example.newcontrolador.connection.data.ModesEnum
 import com.example.newcontrolador.connection.data.ThemeType
 import com.example.newcontrolador.connection.data.VelocityConfig
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +31,17 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 			modeManualChar = 'C',
 			modeAutomataChar = 'A'
 		)
+
+		val movement = MovementConfig(
+			width = 0.8f,
+			height = 0.9f,
+			padding = 0f
+		)
+
+		val buttons = ButtonsConfig(
+			button = 45,
+			icon = 30
+		)
 	}
 
 	// Theme
@@ -47,9 +59,9 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 		}
 	}
 
-	// Button
-	val buttonConfig: StateFlow<ButtonConfig> = dataStoreManager.loadButtonConfig
-		.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonConfig())
+	// Movement
+	val movementConfig: StateFlow<MovementConfig> = dataStoreManager.loadMovementConfig
+		.stateIn(viewModelScope, SharingStarted.Eagerly, MovementConfig())
 
 	fun setButtonWidth(width: Float) = viewModelScope.launch {
 		dataStoreManager.saveButtonWidth(width)
@@ -63,11 +75,17 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 		dataStoreManager.saveButtonPadding(padding)
 	}
 
-	// Directions
+	fun resetMovementConfig() = viewModelScope.launch {
+		dataStoreManager.saveButtonHeight(DefaultConfigs.movement.height)
+		dataStoreManager.saveButtonWidth(DefaultConfigs.movement.width)
+		dataStoreManager.saveButtonPadding(DefaultConfigs.movement.padding)
+	}
+
+	// DirectionsEnum
 	val directionChars: StateFlow<DirectionsConfig> = dataStoreManager.loadDirectionChars
 		.stateIn(viewModelScope, SharingStarted.Eagerly, DirectionsConfig())
 
-	fun setDirectionChar(direction: Directions, char: Char) = viewModelScope.launch {
+	fun setDirectionChar(direction: DirectionsEnum, char: Char) = viewModelScope.launch {
 		dataStoreManager.saveDirectionChar(direction, char)
 	}
 
@@ -75,11 +93,11 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 		dataStoreManager.saveAllDirectionChars(DefaultConfigs.directions)
 	}
 
-	// Modes
+	// ModesEnum
 	val modeChars: StateFlow<ModesConfig> = dataStoreManager.loadModeChars
 		.stateIn(viewModelScope, SharingStarted.Eagerly, ModesConfig())
 
-	fun setModeChar(mode: Modes, char: Char) = viewModelScope.launch {
+	fun setModeChar(mode: ModesEnum, char: Char) = viewModelScope.launch {
 		dataStoreManager.saveModeChar(mode, char)
 	}
 
@@ -93,5 +111,22 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 
 	fun setVelocityChar(char: Char) = viewModelScope.launch {
 		dataStoreManager.saveVelocityChar(char)
+	}
+
+	// Buttons
+	val buttonsConfig: StateFlow<ButtonsConfig> = dataStoreManager.loadButtonsConfig
+		.stateIn(viewModelScope, SharingStarted.Eagerly, ButtonsConfig())
+
+	fun setButtonSize(size: Int) = viewModelScope.launch {
+		dataStoreManager.saveButtonSize(size)
+	}
+
+	fun setIconSize(size: Int) = viewModelScope.launch {
+		dataStoreManager.saveIconSize(size)
+	}
+
+	fun resetButtonsConfig() = viewModelScope.launch {
+		dataStoreManager.saveButtonSize(DefaultConfigs.buttons.button)
+		dataStoreManager.saveIconSize(DefaultConfigs.buttons.icon)
 	}
 }

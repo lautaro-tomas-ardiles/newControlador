@@ -10,7 +10,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.newcontrolador.connection.data.Modes
+import com.example.newcontrolador.connection.data.ModesEnum
 
 /**
  * Elemento individual de un menú desplegable para seleccionar un modo.
@@ -65,9 +65,9 @@ private fun ModeItem(
 fun ModeDropMenu(
 	state: Boolean,
 	onStateChange: (Boolean) -> Unit,
-	setOfModes: Set<Modes>,
-	onClick: (Modes) -> Unit,
-	modeSelect: Modes
+	setOfModes: Set<ModesEnum>,
+	onClick: (ModesEnum) -> Unit,
+	modeSelect: ModesEnum
 ) {
 	DropdownMenu(
 		expanded = state,
@@ -78,7 +78,7 @@ fun ModeDropMenu(
 	) {
 		setOfModes.forEach { modes ->
 			ModeItem(
-				text = Modes.getModeName(modes),
+				text = ModesEnum.getModeName(modes),
 				onClick = { onClick(modes) },
 				stateOfItem = modeSelect == modes
 			)

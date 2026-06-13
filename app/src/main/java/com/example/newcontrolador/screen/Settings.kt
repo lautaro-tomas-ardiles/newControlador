@@ -10,41 +10,45 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.newcontrolador.connection.data.Directions
-import com.example.newcontrolador.connection.data.Modes
+import com.example.newcontrolador.connection.data.DirectionsEnum
+import com.example.newcontrolador.connection.data.ModesEnum
 import com.example.newcontrolador.data.DataStoreViewModel
 import com.example.newcontrolador.utilitis.ButtonsUtils
 import com.example.newcontrolador.utilitis.LineAndText
+import com.example.newcontrolador.utilitis.SecondaryTopBar
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.SettingsItemForDirections
 import com.example.newcontrolador.utilitis.SettingsItemForModes
-import com.example.newcontrolador.utilitis.TopBar2
 
 @Composable
 fun MainSettingsPage(
 	navController: NavController,
 	viewModel: DataStoreViewModel
 ) {
+	val buttons by viewModel.buttonsConfig.collectAsState()
+	val buttonsUtils = ButtonsUtils(
+		sizeButton = buttons.button,
+		sizeIcon = buttons.icon
+	)
+
 	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, LocalContext.current)
 
-	var reloadKey by remember { mutableIntStateOf(0) }
+	val directions by viewModel.directionChars.collectAsState()
+	val modes by viewModel.modeChars.collectAsState()
+
 	val scroll = rememberScrollState()
 
 	// Si cambia reloadKey, todo el contenido se recompondrá
-	key(reloadKey) {
-		MainSettingsPageContent(navController, viewModel, scroll) {
-			reloadKey++ // acción que fuerza la recarga
-		}
+	key(directions, modes) {
+		MainSettingsPageContent(navController, viewModel, buttonsUtils, scroll)
 	}
 }
 
@@ -52,30 +56,32 @@ fun MainSettingsPage(
 fun MainSettingsPageContent(
 	navController: NavController,
 	viewModel: DataStoreViewModel,
-	scroll: ScrollState,
-	onReload: () -> Unit
+	buttonsUtils: ButtonsUtils,
+	scroll: ScrollState
 ) {
 	val modes = listOf(
-		Modes.AUTOMATA,
-		Modes.MANUAL
+		ModesEnum.AUTOMATA,
+		ModesEnum.MANUAL
 	)
 	val directions = listOf(
-		Directions.UP,
-		Directions.DOWN,
-		Directions.LEFT,
-		Directions.DOWN_LEFT,
-		Directions.UP_LEFT,
-		Directions.RIGHT,
-		Directions.DOWN_RIGHT,
-		Directions.UP_RIGHT,
-		Directions.STOP,
+		DirectionsEnum.UP,
+		DirectionsEnum.DOWN,
+		DirectionsEnum.LEFT,
+		DirectionsEnum.DOWN_LEFT,
+		DirectionsEnum.UP_LEFT,
+		DirectionsEnum.RIGHT,
+		DirectionsEnum.DOWN_RIGHT,
+		DirectionsEnum.UP_RIGHT,
+		DirectionsEnum.STOP,
 	)
-
-	val buttonsUtils = ButtonsUtils()
 
 	Scaffold(
 		topBar = {
-			TopBar2("Configuración completa", navController)
+			SecondaryTopBar(
+				text = "Configuración completa",
+				navController = navController,
+				buttonsUtils = buttonsUtils
+			)
 		},
 		containerColor = MaterialTheme.colorScheme.background
 	) { padding ->
@@ -93,7 +99,6 @@ fun MainSettingsPageContent(
 
 			buttonsUtils.Simple("resetear modos") {
 				viewModel.resetModesToDefault()
-				onReload() // recargar la pantalla
 			}
 			modes.forEach { mode ->
 				SettingsItemForModes(mode, viewModel)
@@ -105,7 +110,6 @@ fun MainSettingsPageContent(
 
 			buttonsUtils.Simple("resetear direcciones") {
 				viewModel.resetDirectionChars()
-				onReload() // recargar la pantalla
 			}
 			directions.forEach { direction ->
 				SettingsItemForDirections(direction, viewModel)

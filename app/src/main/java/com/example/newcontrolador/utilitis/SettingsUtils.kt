@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
@@ -37,19 +37,24 @@ fun SettingsDropMenu(
 	navController: NavController,
 	onStateChange: (Boolean) -> Unit,
 	listOfSliders: List<SliderConfig>,
-	listOfThemes: List<ThemeConfig>
+	listOfThemes: List<ThemeConfig>,
+	buttonsUtils: ButtonsUtils
 ) {
 	val scroll = rememberScrollState()
-	val buttonsUtils = ButtonsUtils()
 
 	DropdownMenu(
 		expanded = state,
 		onDismissRequest = { onStateChange(false) },
 		modifier = Modifier
 			.background(MaterialTheme.colorScheme.tertiary)
-			.wrapContentSize()
+			.wrapContentHeight()
+			.width(300.dp)
 	) {
-		Column(Modifier.padding(horizontal = 10.dp, vertical = 5.dp)) {
+		Column(
+			modifier = Modifier.padding(
+				horizontal = 10.dp,
+				vertical = 5.dp)
+		) {
 			Row(
 				modifier = Modifier
 					.horizontalScroll(scroll)
@@ -79,7 +84,8 @@ fun SettingsDropMenu(
 					onValueChange = config.onValueChange,
 					valueRange = config.valueRange,
 					ruta = config.ruta,
-					typeForReset = config.typeForReset
+					typeForReset = config.typeForReset,
+					buttonsUtils = buttonsUtils
 				)
 			}
 		}

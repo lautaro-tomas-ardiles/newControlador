@@ -2,6 +2,7 @@ package com.example.newcontrolador.screen
 
 import android.bluetooth.BluetoothAdapter
 import android.content.pm.ActivityInfo
+import androidx.compose.runtime.key
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,12 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.example.newcontrolador.connection.*
-import com.example.newcontrolador.connection.data.Modes
+import com.example.newcontrolador.connection.data.ModesEnum
 import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.utilitis.ButtonsUtils
 import com.example.newcontrolador.utilitis.CustomSnackbar
 import com.example.newcontrolador.utilitis.MovementUtils
 import com.example.newcontrolador.utilitis.SetOrientation
-import com.example.newcontrolador.utilitis.TopBarForMainPage
+import com.example.newcontrolador.utilitis.TopBarUtils
 
 @Composable
 fun MainScreen(
@@ -37,13 +39,15 @@ fun MainScreen(
     navController: NavController,
     viewModel: DataStoreViewModel
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
+	val snackbarHostState = remember { SnackbarHostState() }
 
 	val directions by viewModel.directionChars.collectAsState()
+	val movement by viewModel.movementConfig.collectAsState()
 	val modes by viewModel.modeChars.collectAsState()
 	val velocity by viewModel.velocityChar.collectAsState()
+	val buttons by viewModel.buttonsConfig.collectAsState()
 
-    var modeSelected by remember { mutableStateOf(Modes.MANUAL) }
+    var modeSelected by remember { mutableStateOf(ModesEnum.MANUAL) }
 
     val bluetoothConnectionManager = remember { BluetoothConnectionManager() }
     val wifiManager = remember { WiFiConnectionManager() }
@@ -55,6 +59,17 @@ fun MainScreen(
     }
 
 	val movementButtons = MovementUtils()
+	val utilisButtons = ButtonsUtils(
+		sizeButton = buttons.button,
+		sizeIcon = buttons.icon
+	)
+
+	val topBar = TopBarUtils(
+		bluetoothAdapter = bluetoothAdapter,
+		connectionManager = connectionManager,
+		dataStore = viewModel,
+		buttonsUtils = utilisButtons,
+	)
 
 	LaunchedEffect(Unit) {
 		connectionManager.sendChar(velocity.velocityChar)
@@ -62,8 +77,8 @@ fun MainScreen(
     LaunchedEffect(modeSelected) {
         connectionManager.sendChar(
             when (modeSelected) {
-                Modes.MANUAL -> modes.modeManualChar
-                Modes.AUTOMATA -> modes.modeAutomataChar
+                ModesEnum.MANUAL -> modes.modeManualChar
+                ModesEnum.AUTOMATA -> modes.modeAutomataChar
             }
         )
     }
@@ -76,14 +91,11 @@ fun MainScreen(
 
     Scaffold(
         topBar = {
-            TopBarForMainPage(
-                bluetoothAdapter = bluetoothAdapter,
-                connectionManager = connectionManager,
-                navController = navController,
-                viewModel = viewModel,
-                modeSelected = { modeSelected = it },
-                directionsConfig = directions
-            )
+            topBar.MainTopBar(
+				navController = navController,
+				modeSelected = { modeSelected = it },
+				directionsConfig = directions
+			)
         },
         snackbarHost = {
 			SnackbarHost(
@@ -98,16 +110,18 @@ fun MainScreen(
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(
-            Modifier
+			modifier = Modifier
 				.padding(padding)
 				.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            movementButtons.GridButton(
-                connectionManager = connectionManager,
-				directionChars = directions,
-				viewModel = viewModel
-            )
+			key(movement) {
+				movementButtons.GridButton(
+					connectionManager = connectionManager,
+					directionChars = directions,
+					viewModel = viewModel
+				)
+			}
         }
     }
 }

@@ -41,9 +41,9 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.data.Buttons
+import com.example.newcontrolador.connection.data.MovementEnum
 import com.example.newcontrolador.connection.data.DirectionsConfig
-import com.example.newcontrolador.connection.data.Modes
+import com.example.newcontrolador.connection.data.ModesEnum
 import com.example.newcontrolador.connection.data.ThemeType
 import com.example.newcontrolador.data.DataStoreViewModel
 import com.example.newcontrolador.navigation.AppScreen
@@ -53,11 +53,14 @@ import com.example.newcontrolador.navigation.AppScreen
  *
  * @param text Texto que se mostrará en la barra superior.
  * @param navController Controlador de navegación para manejar la acción de retroceso.
+ * @param buttonsUtils Clase con los botones personalizados para la barra superior.
  */
 @Composable
-fun TopBar2(text: String, navController: NavController) {
-	val buttonsUtils = ButtonsUtils()
-
+fun SecondaryTopBar(
+	text: String,
+	navController: NavController,
+	buttonsUtils: ButtonsUtils
+) {
 	CenterAlignedTopAppBar(
 		title = { Text(text = text) },
 		navigationIcon = {
@@ -78,331 +81,324 @@ fun TopBar2(text: String, navController: NavController) {
 }
 
 /**
- * Sección izquierda de la TopBar en la página principal.
+ * Clase de utilidades para la barra superior (TopBar) de la página principal.
  *
- * Muestra un switch para alternar Bluetooth/WiFi, un botón para conectarse al robot
- * y un menú desplegable de dispositivos disponibles.
- *
- * @param onBluetoothChange Función que se ejecuta al cambiar el estado del Bluetooth.
- * @param connectionManager Manager para manejar conexiones Bluetooth/WiFi.
- * @param bluetoothAdapter Adaptador Bluetooth del dispositivo.
+ * @property bluetoothAdapter Adaptador de Bluetooth para gestionar conexiones Bluetooth.
+ * @property connectionManager ViewModel para manejar la lógica de conexión y estado de Bluetooth/WiFi.
+ * @property dataStore ViewModel para acceder a la configuración almacenada, como temas y configuraciones de movimiento.
+ * @property buttonsUtils Clase con botones personalizados para usar en la barra superior.
  */
-@Composable
-private fun TopBarForMainPageStart(
-	onBluetoothChange: (Boolean) -> Unit,
-	connectionManager: ConnectionViewModel,
-	bluetoothAdapter: BluetoothAdapter,
-	directionsConfig: DirectionsConfig,
-	buttonsUtils: ButtonsUtils
+class TopBarUtils(
+	private val bluetoothAdapter: BluetoothAdapter,
+	private val connectionManager: ConnectionViewModel,
+	private val dataStore: DataStoreViewModel,
+	private val buttonsUtils: ButtonsUtils
 ) {
-	var ip by remember { mutableStateOf("") }
+	/**
+	 * Sección izquierda de la TopBar en la página principal.
+ 	 *
+	 * Muestra un switch para alternar Bluetooth/WiFi, un botón para conectarse al robot
+	 * y un menú desplegable de dispositivos disponibles.
+ 	 *
+	 * @param onBluetoothChange Función que se ejecuta al cambiar el estado del Bluetooth.
+	 * @param directionsConfig Configuración de direcciones para la conexión Bluetooth.
+	 * @param modifier Modificador para aplicar estilos a la fila contenedora de esta sección.
+	 */
+	@Composable
+	private fun MainTopBarStart(
+		onBluetoothChange: (Boolean) -> Unit,
+		directionsConfig: DirectionsConfig,
+		modifier: Modifier
+	){
+		var ip by remember { mutableStateOf("") }
 
-	var menuDevicesState by remember { mutableStateOf(false) }
+		var menuDevicesState by remember { mutableStateOf(false) }
+		var bluetooth by remember { mutableStateOf(true) }
 
-	var bluetooth by remember { mutableStateOf(true) }
+		val context = LocalContext.current
 
-	val context = LocalContext.current
+		val hasPermission =
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				ActivityCompat.checkSelfPermission(
+					context,
+					Manifest.permission.BLUETOOTH_CONNECT
+				) == PackageManager.PERMISSION_GRANTED
+			} else {
+				ActivityCompat.checkSelfPermission(
+					context,
+					Manifest.permission.BLUETOOTH
+				) == PackageManager.PERMISSION_GRANTED
+			}
 
-	val hasPermission =
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-			ActivityCompat.checkSelfPermission(
-				context,
-				Manifest.permission.BLUETOOTH_CONNECT
-			) == PackageManager.PERMISSION_GRANTED
+		val pairedDevices: Set<BluetoothDevice>
+		if (hasPermission) {
+			pairedDevices = bluetoothAdapter.bondedDevices
 		} else {
-			ActivityCompat.checkSelfPermission(
-				context,
-				Manifest.permission.BLUETOOTH
-			) == PackageManager.PERMISSION_GRANTED
+			pairedDevices = setOf()
 		}
-
-	val pairedDevices: Set<BluetoothDevice>
-
-	if (hasPermission) {
-		pairedDevices = bluetoothAdapter.bondedDevices
-	} else {
-		pairedDevices = setOf()
-	}
-
-	Row(
-		horizontalArrangement = Arrangement.Start,
-		verticalAlignment = Alignment.CenterVertically,
-		modifier = Modifier
-			.fillMaxWidth()
-			.padding(start = 20.dp)
-	) {
-		BluetoothSwitch(bluetooth) {
-			bluetooth = it
-			onBluetoothChange(it)
-		}
-		Spacer(Modifier.width(20.dp))
 
 		Row(
+			horizontalArrangement = Arrangement.Start,
 			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.End
+			modifier = modifier.fillMaxWidth()
 		) {
-			if (bluetooth) {
-				buttonsUtils.Text("Conecte a el robot :") {
-					it.Bluetooth {
-						if (connectionManager.verifyBluetoothDevices(pairedDevices)) {
-							menuDevicesState = !menuDevicesState
+			BluetoothSwitch(bluetooth) {
+				bluetooth = it
+				onBluetoothChange(it)
+			}
+			Spacer(Modifier.width(20.dp))
+
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.End
+			) {
+				if (bluetooth) {
+					buttonsUtils.Text("Conecte a el robot :") {
+						it.Bluetooth {
+							if (connectionManager.verifyBluetoothDevices(pairedDevices)) {
+								menuDevicesState = !menuDevicesState
+							}
 						}
 					}
-				}
-				BluetoothDropMenu(
-					state = menuDevicesState,
-					onStateChange = { menuDevicesState = it },
-					setOfDevices = pairedDevices,
-					connectionManager = connectionManager,
-					context = context,
-					directionsConfig = directionsConfig
-				)
-			} else {
-				WifiTextField(
-					connectionManager = connectionManager,
-					ip = ip
-				) {
-					ip = it
+					BluetoothDropMenu(
+						state = menuDevicesState,
+						onStateChange = { menuDevicesState = it },
+						setOfDevices = pairedDevices,
+						connectionManager = connectionManager,
+						context = context,
+						directionsConfig = directionsConfig
+					)
+				} else {
+					WifiTextField(
+						connectionManager = connectionManager,
+						ip = ip,
+						buttonsUtils = buttonsUtils
+					) {
+						ip = it
+					}
 				}
 			}
 		}
 	}
-}
 
-/**
- * Sección derecha de la TopBar en la página principal.
- *
- * Muestra los menús de modos, diagramas y configuración de sliders para botones.
- *
- * @param modeSelected Función que se ejecuta al seleccionar un modo.
- * @param navController Controlador de navegación para los diagramas.
- * @param viewModel ViewModel para manejar la configuración almacenada.
- */
-@Composable
-private fun TopBarForMainPageEnd(
-	modeSelected: (Modes) -> Unit,
-	connectionManager: ConnectionViewModel,
-	navController: NavController,
-	viewModel: DataStoreViewModel,
-	buttonsUtils: ButtonsUtils
-) {
-	val configButton by viewModel.buttonConfig.collectAsState()
-	val selectedTheme by viewModel.theme.collectAsState()
-	val configVelocity by viewModel.velocityChar.collectAsState()
-
-	val value = when (val c = configVelocity.velocityChar) {
-		in '0'..'9' -> (c - '0') * 10f
-		'q' -> 100f
-		else -> 0f
-	}
-
-	var buttonHeight by remember { mutableFloatStateOf(configButton.height) }
-	var buttonWidth by remember { mutableFloatStateOf(configButton.width) }
-	var paddings by remember { mutableFloatStateOf(configButton.padding) }
-
-	var velocity by remember { mutableFloatStateOf(value) }
-
-	var menuModeState by remember { mutableStateOf(false) }
-	var modeSelect by remember { mutableStateOf(Modes.MANUAL) }
-
-	var menuDiagramasState by remember { mutableStateOf(false) }
-	var menuSettingState by remember { mutableStateOf(false) }
-
-	val modes = setOf(
-		Modes.AUTOMATA,
-		Modes.MANUAL
-	)
-	val slidersList = listOf(
-		SliderConfig(
-			value = velocity,
-			onValueChange = {
-				velocity = it
-				val char = when {
-					velocity < 100f -> ('0' + (it / 10).toInt())
-					velocity == 100f -> 'q'
-					else -> '0'
-				}
-				viewModel.setVelocityChar(char)
-			},
-			valueRange = 0f..100f,
-			typeForReset = null,
-			ruta = painterResource(R.drawable.velocity)
-		),
-		SliderConfig(
-			value = buttonHeight,
-			onValueChange = {
-				buttonHeight = (it * 100).toInt() / 100f
-				viewModel.setButtonHeight(buttonHeight)
-			},
-			valueRange = 0f..1f,
-			ruta = painterResource(id = R.drawable.height)
-		),
-		SliderConfig(
-			value = buttonWidth,
-			onValueChange = {
-				buttonWidth = (it * 100).toInt() / 100f
-				viewModel.setButtonWidth(buttonWidth)
-			},
-			valueRange = 0f..1f,
-			typeForReset = Buttons.WIDTH,
-			ruta = painterResource(id = R.drawable.width)
-		),
-		SliderConfig(
-			value = paddings,
-			onValueChange = {
-				paddings = it
-				viewModel.setButtonPadding(paddings)
-			},
-			valueRange = 0f..50f,
-			typeForReset = Buttons.PADDING,
-			ruta = painterResource(id = R.drawable.padding)
-		)
-	)
-	val themesList = listOf(
-		ThemeConfig(
-			isColorSelected = selectedTheme == ThemeType.DEFAULT,
-			onClick = {
-				viewModel.setTheme(ThemeType.DEFAULT)
-			},
-			theme = ThemeType.DEFAULT
-		),
-		ThemeConfig(
-			isColorSelected = selectedTheme == ThemeType.WHITE,
-			onClick = {
-				viewModel.setTheme(ThemeType.WHITE)
-			},
-			theme = ThemeType.WHITE
-		)
-	)
-
-	LaunchedEffect(Unit, configVelocity.velocityChar) {
-		connectionManager.sendChar(configVelocity.velocityChar)
-	}
-	Row(
-		horizontalArrangement = Arrangement.End,
-		verticalAlignment = Alignment.CenterVertically,
-		modifier = Modifier
-			.fillMaxWidth()
-			.padding(end = 20.dp)
+	/**
+	 * Sección derecha de la TopBar en la página principal.
+	 *
+	 * Muestra los menús de modos, diagramas y configuración de sliders para botones.
+	 *
+	 * @param modeSelected Función que se ejecuta al seleccionar un modo.
+	 * @param navController Controlador de navegación para los diagramas.
+	 * @param buttonsUtils class con los botones personalizados.
+	 * @param modifier Modificador para aplicar estilos a la fila contenedora de esta sección.
+	 */
+	@Composable
+	private fun MainTopBarEnd(
+		modeSelected: (ModesEnum) -> Unit,
+		navController: NavController,
+		modifier: Modifier
 	) {
-		Row(verticalAlignment = Alignment.CenterVertically) {
-			buttonsUtils.Text("acerca de:") {
-				it.Painter(
-					onClick = { navController.navigate(AppScreen.AboutPage.route) },
-					image = painterResource(R.drawable.alert_circle),
-					border = true,
-					modifier = Modifier.size(50.dp)
-				)
-			}
-		}
-		Spacer(Modifier.width(10.dp))
+		val configButton by dataStore.movementConfig.collectAsState()
+		val selectedTheme by dataStore.theme.collectAsState()
+		val configVelocity by dataStore.velocityChar.collectAsState()
 
-		Row(verticalAlignment = Alignment.CenterVertically) {
-			buttonsUtils.Text("modo :") {
-				it.ImageVector(
-					onClick = { menuModeState = !menuModeState },
-					image = Icons.Default.MoreVert,
-					border = true
-				)
-			}
-			ModeDropMenu(
-				state = menuModeState,
-				onStateChange = { menuModeState = it },
-				setOfModes = modes,
-				onClick = { mode ->
-					modeSelect = mode
-					menuModeState = false
-					modeSelected(mode)
+		val value = when (configVelocity.velocityChar) {
+			in '0'..'9' -> (configVelocity.velocityChar - '0') * 10f
+			'q' -> 100f
+			else -> 0f
+		}
+
+		var buttonHeight by remember { mutableFloatStateOf(configButton.height) }
+		var buttonWidth by remember { mutableFloatStateOf(configButton.width) }
+		var paddings by remember { mutableFloatStateOf(configButton.padding) }
+
+		var velocity by remember { mutableFloatStateOf(value) }
+
+		var menuModeState by remember { mutableStateOf(false) }
+		var modeSelect by remember { mutableStateOf(ModesEnum.MANUAL) }
+
+		var menuDiagramasState by remember { mutableStateOf(false) }
+		var menuSettingState by remember { mutableStateOf(false) }
+
+		val modes = setOf(
+			ModesEnum.AUTOMATA,
+			ModesEnum.MANUAL
+		)
+		val slidersList = listOf(
+			SliderConfig(
+				value = velocity,
+				onValueChange = {
+					velocity = it
+					val char = when {
+						velocity < 100f -> ('0' + (it / 10).toInt())
+						velocity == 100f -> 'q'
+						else -> '0'
+					}
+					dataStore.setVelocityChar(char)
 				},
-				modeSelect = modeSelect
+				valueRange = 0f..100f,
+				typeForReset = null,
+				ruta = painterResource(R.drawable.velocity)
+			),
+			SliderConfig(
+				value = buttonHeight,
+				onValueChange = {
+					buttonHeight = (it * 100).toInt() / 100f
+					dataStore.setButtonHeight(buttonHeight)
+				},
+				valueRange = 0f..1f,
+				ruta = painterResource(id = R.drawable.height)
+			),
+			SliderConfig(
+				value = buttonWidth,
+				onValueChange = {
+					buttonWidth = (it * 100).toInt() / 100f
+					dataStore.setButtonWidth(buttonWidth)
+				},
+				valueRange = 0f..1f,
+				typeForReset = MovementEnum.WIDTH,
+				ruta = painterResource(id = R.drawable.width)
+			),
+			SliderConfig(
+				value = paddings,
+				onValueChange = {
+					paddings = it
+					dataStore.setButtonPadding(paddings)
+				},
+				valueRange = 0f..50f,
+				typeForReset = MovementEnum.PADDING,
+				ruta = painterResource(id = R.drawable.padding)
 			)
-		}
-		Spacer(Modifier.width(10.dp))
+		)
+		val themesList = listOf(
+			ThemeConfig(
+				isColorSelected = (selectedTheme == ThemeType.DEFAULT),
+				onClick = { dataStore.setTheme(ThemeType.DEFAULT) },
+				theme = ThemeType.DEFAULT
+			),
+			ThemeConfig(
+				isColorSelected = (selectedTheme == ThemeType.WHITE),
+				onClick = { dataStore.setTheme(ThemeType.WHITE) },
+				theme = ThemeType.WHITE
+			)
+		)
 
-		Row(verticalAlignment = Alignment.CenterVertically) {
-			buttonsUtils.Text("digramas :") {
-				it.ImageVector(
-					onClick = { menuDiagramasState = !menuDiagramasState },
-					image = Icons.Default.MoreVert,
-					border = true
+		LaunchedEffect(Unit, configVelocity.velocityChar) {
+			connectionManager.sendChar(configVelocity.velocityChar)
+		}
+		Row(
+			horizontalArrangement = Arrangement.End,
+			verticalAlignment = Alignment.CenterVertically,
+			modifier = modifier.fillMaxWidth()
+		) {
+			Row(verticalAlignment = Alignment.CenterVertically) {
+				buttonsUtils.Text("acerca de:") {
+					it.Painter(
+						onClick = { navController.navigate(AppScreen.AboutPage.route) },
+						image = painterResource(R.drawable.alert_circle),
+						border = true,
+						modifier = Modifier.size(50.dp)
+					)
+				}
+			}
+			Spacer(Modifier.width(10.dp))
+
+			Row(verticalAlignment = Alignment.CenterVertically) {
+				buttonsUtils.Text("modo :") {
+					it.ImageVector(
+						onClick = { menuModeState = !menuModeState },
+						image = Icons.Default.MoreVert,
+						border = true
+					)
+				}
+				ModeDropMenu(
+					state = menuModeState,
+					onStateChange = { menuModeState = it },
+					setOfModes = modes,
+					onClick = { mode ->
+						modeSelect = mode
+						menuModeState = false
+						modeSelected(mode)
+					},
+					modeSelect = modeSelect
 				)
 			}
-			DiagramaDropMenu(
-				state = menuDiagramasState,
-				onStateChange = { menuDiagramasState = it },
-				content = {
-					DiagramaItem("ESP 32") {
-						navController.navigate(AppScreen.ESP32Page.route)
-					}
-					DiagramaItem("Ardiuno y hc-05") {
-						navController.navigate(AppScreen.ArduinoOneAndHC05Page.route)
-					}
+			Spacer(Modifier.width(10.dp))
+
+			Row(verticalAlignment = Alignment.CenterVertically) {
+				buttonsUtils.Text("digramas :") {
+					it.ImageVector(
+						onClick = { menuDiagramasState = !menuDiagramasState },
+						image = Icons.Default.MoreVert,
+						border = true
+					)
 				}
-			)
-		}
-		Spacer(Modifier.width(10.dp))
+				DiagramaDropMenu(
+					state = menuDiagramasState,
+					onStateChange = { menuDiagramasState = it },
+					content = {
+						DiagramaItem("ESP 32") {
+							navController.navigate(AppScreen.ESP32Page.route)
+						}
+						DiagramaItem("Ardiuno y hc-05") {
+							navController.navigate(AppScreen.ArduinoOneAndHC05Page.route)
+						}
+					}
+				)
+			}
+			Spacer(Modifier.width(10.dp))
 
-		Row(verticalAlignment = Alignment.CenterVertically) {
-			buttonsUtils.ImageVector(
-				onClick = { menuSettingState = !menuSettingState },
-				border = true
-			)
-			SettingsDropMenu(
-				state = menuSettingState,
-				onStateChange = { menuSettingState = it },
-				listOfSliders = slidersList,
-				listOfThemes = themesList,
-				navController = navController
-			)
+			Row(verticalAlignment = Alignment.CenterVertically) {
+				buttonsUtils.ImageVector(
+					onClick = { menuSettingState = !menuSettingState },
+					border = false
+				)
+				SettingsDropMenu(
+					state = menuSettingState,
+					onStateChange = { menuSettingState = it },
+					listOfSliders = slidersList,
+					listOfThemes = themesList,
+					navController = navController,
+					buttonsUtils = buttonsUtils
+				)
+			}
+			Spacer(Modifier.width(10.dp))
 		}
-		Spacer(Modifier.width(10.dp))
 	}
-}
 
-/**
- * TopBar completa para la página principal.
- *
- * Combina la sección izquierda (Bluetooth/WiFi) y derecha (modos, diagramas, sliders) en un
- * solo componente con fondo azul.
- *
- * @param bluetoothAdapter Adaptador Bluetooth del dispositivo.
- * @param connectionManager Manager de conexión Bluetooth/WiFi.
- * @param navController Controlador de navegación.
- * @param modeSelected Función que se ejecuta al seleccionar un modo.
- * @param viewModel ViewModel para manejar la configuración almacenada.
- * @param directionsConfig Direcciones de configuración para la conexión.
- */
-@Composable
-fun TopBarForMainPage(
-	bluetoothAdapter: BluetoothAdapter,
-	connectionManager: ConnectionViewModel,
-	navController: NavController,
-	viewModel: DataStoreViewModel,
-	modeSelected: (Modes) -> Unit,
-	directionsConfig: DirectionsConfig
-) {
-	val buttonsUtils = ButtonsUtils()
-	Box(
-		contentAlignment = Alignment.Center,
-		modifier = Modifier
-			.fillMaxWidth()
-			.background(MaterialTheme.colorScheme.primary)
-			.padding(vertical = 7.dp)
+	/**
+	 * Barra superior principal que integra las secciones izquierda y derecha.
+	 *
+	 * @param navController Controlador de navegación para manejar las acciones de los botones y menús.
+	 * @param modeSelected Función que se ejecuta al seleccionar un modo en el menú de modos.
+	 * @param directionsConfig Configuración de direcciones para la conexión Bluetooth, necesaria para la sección izquierda.
+	 * @receiver
+	 */
+	@Composable
+	fun MainTopBar(
+		navController: NavController,
+		modeSelected: (ModesEnum) -> Unit,
+		directionsConfig: DirectionsConfig
 	) {
-		TopBarForMainPageStart(
-			onBluetoothChange = { connectionManager.isBluetooth = it },
-			connectionManager = connectionManager,
-			bluetoothAdapter = bluetoothAdapter,
-			directionsConfig = directionsConfig,
-			buttonsUtils = buttonsUtils
-		)
+		val horizontalPadding = 20.dp
 
-		TopBarForMainPageEnd(
-			modeSelected = { modeSelected(it) },
-			navController = navController,
-			viewModel = viewModel,
-			connectionManager = connectionManager,
-			buttonsUtils = buttonsUtils
-		)
+		Box(
+			contentAlignment = Alignment.Center,
+			modifier = Modifier
+				.fillMaxWidth()
+				.background(MaterialTheme.colorScheme.primary)
+				.padding(vertical = 8.dp)
+		) {
+			MainTopBarStart(
+				onBluetoothChange = { connectionManager.isBluetooth = it },
+				directionsConfig = directionsConfig,
+				modifier = Modifier.padding(start = horizontalPadding)
+			)
+
+			MainTopBarEnd(
+				modeSelected = { modeSelected(it) },
+				navController = navController,
+				modifier = Modifier.padding(end = horizontalPadding)
+			)
+		}
 	}
 }

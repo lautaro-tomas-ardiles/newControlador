@@ -15,7 +15,8 @@ import com.example.newcontrolador.screen.MainSettingsPage
 @Composable
 fun AppNavigation(
 	bluetoothAdapter: BluetoothAdapter,
-	viewModel: DataStoreViewModel
+	viewModel: DataStoreViewModel,
+
 ) {
 	val navController = rememberNavController()
 
@@ -24,16 +25,16 @@ fun AppNavigation(
 			MainScreen(bluetoothAdapter, navController, viewModel)
 		}
 		composable(AppScreen.ESP32Page.route) {
-			MainESP32Page(navController)
+			MainESP32Page(navController, viewModel)
 		}
 		composable(AppScreen.ArduinoOneAndHC05Page.route) {
-			MainArduinoOneAndHC05Page(navController)
+			MainArduinoOneAndHC05Page(navController, viewModel)
 		}
 		composable(AppScreen.SettingsPage.route) {
 			MainSettingsPage(navController, viewModel)
 		}
 		composable(AppScreen.AboutPage.route) {
-			MainAboutScreen(navController)
+			MainAboutScreen(navController, viewModel)
 		}
 	}
 }

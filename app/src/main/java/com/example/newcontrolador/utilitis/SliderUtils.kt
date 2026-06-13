@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import com.example.newcontrolador.connection.data.Buttons
+import com.example.newcontrolador.connection.data.MovementEnum
 
 /**
  * Componente de slider para configuración de propiedades de botones u otros elementos.
@@ -41,26 +41,24 @@ fun SliderForConfiguration(
 	value: Float,
 	onValueChange: (Float) -> Unit,
 	textForReset: String = "Reset",
-	typeForReset: Buttons? = Buttons.HEIGHT,
+	typeForReset: MovementEnum? = MovementEnum.HEIGHT,
 	valueRange: ClosedFloatingPointRange<Float>,
-	ruta: Painter
+	ruta: Painter,
+	buttonsUtils: ButtonsUtils
 ) {
 	val rangoReal = valueRange.endInclusive - valueRange.start
 
-	val setps =
-		when (typeForReset) {
-			Buttons.PADDING -> {
-				(rangoReal / 5 - 1).toInt()
-			}
-			null -> {
-				(rangoReal / 10 - 1).toInt()
-			}
-			else -> {
-				0
-			}
+	val setps = when (typeForReset) {
+		MovementEnum.PADDING -> {
+			(rangoReal / 5 - 1).toInt()
 		}
-
-	val buttonsUtils = ButtonsUtils()
+		null -> {
+			(rangoReal / 10 - 1).toInt()
+		}
+		else -> {
+			0
+		}
+	}
 
 	Column(Modifier.padding(vertical = 5.dp)) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
@@ -87,10 +85,11 @@ fun SliderForConfiguration(
 			)
 			Spacer(Modifier.width(5.dp))
 
+			val width = if (typeForReset != null) 50.dp else 40.dp
 			Box(
 				modifier = Modifier
 					.height(40.dp)
-					.width(40.dp)
+					.width(width)
 					.background(
 						color = MaterialTheme.colorScheme.primary,
 						shape = RoundedCornerShape(25)
@@ -102,7 +101,7 @@ fun SliderForConfiguration(
 					),
 				contentAlignment = Alignment.Center
 			) {
-				if (typeForReset != null && typeForReset != Buttons.PADDING) {
+				if (typeForReset != null && typeForReset != MovementEnum.PADDING) {
 					Text(
 						text = "${(value * 100).toInt()}%",
 						color = MaterialTheme.colorScheme.secondary
@@ -123,9 +122,9 @@ fun SliderForConfiguration(
 
 			buttonsUtils.Simple(textForReset) {
 				when (typeForReset) {
-					Buttons.WIDTH -> onValueChange(1f/4f)
-					Buttons.HEIGHT -> onValueChange(1f/2f)
-					Buttons.PADDING -> onValueChange(0f)
+					MovementEnum.WIDTH -> onValueChange(0.8f)
+					MovementEnum.HEIGHT -> onValueChange(0.9f)
+					MovementEnum.PADDING -> onValueChange(0f)
 					else -> onValueChange(50f)
 				}
 			}

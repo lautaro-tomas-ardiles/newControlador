@@ -20,26 +20,43 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
-import com.example.newcontrolador.ui.theme.NewControladorTheme
+import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.utilitis.ButtonsUtils
+import com.example.newcontrolador.utilitis.SecondaryTopBar
 import com.example.newcontrolador.utilitis.SetOrientation
-import com.example.newcontrolador.utilitis.TopBar2
 import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
-fun MainAboutScreen(navController: NavController) {
+fun MainAboutScreen(
+	navController: NavController,
+	viewModel: DataStoreViewModel
+) {
+	val buttons by viewModel.buttonsConfig.collectAsState()
+	val buttonsUtils = ButtonsUtils(
+		sizeButton = buttons.button,
+		sizeIcon = buttons.icon
+	)
+
 	val scroll = rememberScrollState()
 	SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, LocalContext.current)
 
 	Scaffold(
-		topBar = { TopBar2("Acerca de", navController) },
+		topBar = {
+			SecondaryTopBar(
+				text = "Acerca de",
+				navController = navController,
+				buttonsUtils = buttonsUtils
+			)
+		},
 		containerColor = MaterialTheme.colorScheme.onBackground
 	) { padd ->
 		Column(
@@ -220,13 +237,5 @@ fun MainAboutScreen(navController: NavController) {
 				}
 			}
 		}
-	}
-}
-
-@Preview
-@Composable
-private fun Ads() {
-	NewControladorTheme {
-		MainAboutScreen(navController = NavController(LocalContext.current))
 	}
 }

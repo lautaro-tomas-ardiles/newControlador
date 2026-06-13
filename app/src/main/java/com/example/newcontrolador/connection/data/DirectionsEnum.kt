@@ -1,6 +1,6 @@
 package com.example.newcontrolador.connection.data
 
-enum class Directions() {
+enum class DirectionsEnum() {
 	UP,
 	DOWN,
 	LEFT,
@@ -12,8 +12,8 @@ enum class Directions() {
 	STOP;
 
 	companion object {
-		fun getChar(directions: Directions, config: DirectionsConfig): Char {
-			return when (directions) {
+		fun getChar(directionsEnum: DirectionsEnum, config: DirectionsConfig): Char {
+			return when (directionsEnum) {
 				UP -> config.upChar
 				DOWN -> config.downChar
 				LEFT -> config.leftChar
@@ -26,7 +26,7 @@ enum class Directions() {
 			}
 		}
 
-		private fun fromSet(directions: Set<Directions>): Directions {
+		private fun fromSet(directions: Set<DirectionsEnum>): DirectionsEnum {
 			return when {
 				directions.contains(UP) && directions.contains(LEFT) -> UP_LEFT
 				directions.contains(UP) && directions.contains(RIGHT) -> UP_RIGHT
@@ -40,12 +40,12 @@ enum class Directions() {
 			}
 		}
 
-		fun charFromSet(directions: Set<Directions>, directionsConfig: DirectionsConfig): Char {
-			return getChar(Directions.fromSet(directions), directionsConfig)
+		fun charFromSet(directions: Set<DirectionsEnum>, directionsConfig: DirectionsConfig): Char {
+			return getChar(DirectionsEnum.fromSet(directions), directionsConfig)
 		}
 
-		fun getDirectionsName(directions: Directions): String {
-			return when (directions) {
+		fun getDirectionsName(directionsEnum: DirectionsEnum): String {
+			return when (directionsEnum) {
 				UP -> "Arriba"
 				DOWN -> "Abajo"
 				LEFT -> "Izquierda"
