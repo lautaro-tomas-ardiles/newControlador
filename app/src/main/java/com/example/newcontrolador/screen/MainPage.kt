@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.connection.*
-import com.example.newcontrolador.connection.data.DirectionsConfig
 import com.example.newcontrolador.data.store.DataStoreViewModel
 import com.example.newcontrolador.utilitis.CustomSnackbar
 import com.example.newcontrolador.utilitis.Header
@@ -39,14 +38,18 @@ fun MainScreen(
 ) {
 	val movementButtons = MovementButtons()
 	val directions by viewModel.directionChars.collectAsState()
+	val velocity by viewModel.velocityChar.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val bluetoothConnectionManager = remember { BluetoothConnectionManager() }
-    val connectionManager = remember { ConnectionViewModel(bluetoothConnectionManager) }
+	val connectionManager = remember { ConnectionViewModel(bluetoothConnectionManager) }
 
-    LaunchedEffect(connectionManager.message) {
+	LaunchedEffect(connectionManager.message) {
 		connectionManager.message?.let {
 			snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Indefinite)
 		}
+	}
+	LaunchedEffect(velocity, Unit) {
+		connectionManager.sendChar(velocity.velocityChar)
 	}
     SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, LocalContext.current)
 
@@ -73,10 +76,10 @@ fun MainScreen(
 
             Spacer(Modifier.padding(10.dp))
 
-            JointSliders(true)
-            JointSliders(false)
+            JointSliders(true, connectionManager::sendString)
+			JointSliders(false, connectionManager::sendString)
 
-            movementButtons.GridButton(connectionManager, directions, viewModel)
+			movementButtons.GridButton(connectionManager, directions, viewModel)
         }
     }
 }

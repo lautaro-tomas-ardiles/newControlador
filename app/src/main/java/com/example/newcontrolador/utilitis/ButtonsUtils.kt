@@ -133,6 +133,7 @@ class MovementButtons {
 		LaunchedEffect(isPressed, directionsPressed) {
 			if (isPressed && directionsPressed.isNotEmpty()) {
 				while (isPressed) {
+					connectionManager.sendChar('*')
 					connectionManager.sendChar(
 						DirectionsEnum.charFromSet(directionsPressed, directionChars)
 					)
@@ -141,6 +142,7 @@ class MovementButtons {
 				}
 			} else {
 				while (!isPressed) {
+					connectionManager.sendChar('*')
 					connectionManager.sendChar(directionChars.stopChar)
 					 aSidoEnviado = !aSidoEnviado
 					if (aSidoEnviado) delay(50L) else delay(1L)
@@ -221,128 +223,6 @@ class MovementButtons {
 						buttonWidth = buttonWidth,
 						buttonHeight = buttonHeight
 					)
-
-					DirectionButton(
-						direction = DirectionsEnum.RIGHT,
-						onPress = {
-							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
-
-							isPressed = true
-						},
-						onRelease = {
-							directionsPressed =
-								directionsPressed.toMutableSet().apply { remove(it) }
-
-							if (directionsPressed.isEmpty()) {
-								isPressed = false
-							}
-						},
-						buttonWidth = buttonWidth,
-						buttonHeight = buttonHeight
-					)
-				}
-			}
-		}
-	}
-
-	@Composable
-	fun GridButtonA() {
-		var directionsPressed by remember { mutableStateOf(setOf<DirectionsEnum>()) }
-		var isPressed by remember { mutableStateOf(false) }
-
-		//enviar continuamente los caracteres mientras el botón esté presionado
-		LaunchedEffect(isPressed, directionsPressed) {
-			if (isPressed && directionsPressed.isNotEmpty()) {
-				while (isPressed) {
-//					connectionManager.sendChar(
-//						DirectionsEnum.charFromSet(
-//							directionsPressed,
-//							directionChars
-//						)
-//					)
-					delay(50L)
-				}
-			} else {
-				while (!isPressed) {
-//					connectionManager.sendChar(directionChars.stopChar)
-//					delay(50L)
-				}
-			}
-		}
-
-		BoxWithConstraints {
-			val height = this.maxHeight
-			val width = this.maxWidth
-
-			val buttonHeight = 10.dp
-			val buttonWidth = 10.dp
-
-			Row(
-				Modifier.fillMaxSize(),
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceBetween
-			) {
-				Column {
-					DirectionButton(
-						direction = DirectionsEnum.UP,
-						onPress = {
-							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
-
-							isPressed = true
-						},
-						onRelease = {
-							directionsPressed =
-								directionsPressed.toMutableSet().apply { remove(it) }
-
-							if (directionsPressed.isEmpty()) {
-								isPressed = false
-							}
-						},
-						buttonWidth = buttonWidth,
-						buttonHeight = buttonHeight
-					)
-					//Spacer(Modifier.height(10.dp))
-
-					DirectionButton(
-						direction = DirectionsEnum.DOWN,
-						onPress = {
-							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
-
-							isPressed = true
-						},
-						onRelease = {
-							directionsPressed =
-								directionsPressed.toMutableSet().apply { remove(it) }
-
-							if (directionsPressed.isEmpty()) {
-								isPressed = false
-							}
-						},
-						buttonWidth = buttonWidth,
-						buttonHeight = buttonHeight
-					)
-				}
-
-				Row {
-					DirectionButton(
-						direction = DirectionsEnum.LEFT,
-						onPress = {
-							directionsPressed = directionsPressed.toMutableSet().apply { add(it) }
-
-							isPressed = true
-						},
-						onRelease = {
-							directionsPressed =
-								directionsPressed.toMutableSet().apply { remove(it) }
-
-							if (directionsPressed.isEmpty()) {
-								isPressed = false
-							}
-						},
-						buttonWidth = buttonWidth,
-						buttonHeight = buttonHeight
-					)
-					//Spacer(Modifier.width(10.dp))
 
 					DirectionButton(
 						direction = DirectionsEnum.RIGHT,

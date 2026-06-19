@@ -24,15 +24,6 @@ class BluetoothConnectionManager {
 	// * UUID estándar para comunicación SPP (Serial Port Profile). *
 	private val defaultUuid: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
-	// * Conjunto de dispositivos encontrados durante el escaneo. *
-	private val discoveredDevices = mutableSetOf<BluetoothDevice>()
-
-	// * Estado del escaneo. *
-	private var isScanning = false
-
-	// * BroadcastReceiver para el escaneo. *
-	private var discoveryReceiver: BroadcastReceiver? = null
-
 	/**
 	 * Intenta conectar con un dispositivo Bluetooth.
 	 *
@@ -101,115 +92,29 @@ class BluetoothConnectionManager {
 			}
 		}
 	}
-	/*
-	/**
-	 * Inicia el escaneo de dispositivos Bluetooth disponibles.
-	 *
-	 * @param context Contexto necesario para registrar el receiver y verificar permisos.
-	 * @param bluetoothAdapter Adaptador Bluetooth para iniciar el escaneo.
-	 * @throws BluetoothPermissionException Si no se tienen los permisos necesarios.
-	 */
-	@Throws(Exception::class)
-	fun startDeviceScan(
-		context: Context,
-		bluetoothAdapter: BluetoothAdapter
-	) {
-		val hasBluetoothPermission =
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-				ActivityCompat.checkSelfPermission(
-					context, Manifest.permission.BLUETOOTH_SCAN
-				) == PackageManager.PERMISSION_GRANTED
-			} else {
-				ActivityCompat.checkSelfPermission(
-					context, Manifest.permission.BLUETOOTH
-				) == PackageManager.PERMISSION_GRANTED
-			}
-
-		val hasLocationPermission = ActivityCompat.checkSelfPermission(
-			context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-
-		if (!hasBluetoothPermission || !hasLocationPermission) {
-			throw BluetoothPermissionException("Permisos de Bluetooth y ubicación requeridos")
-		}
-
-		if (isScanning) {
-			return
-		}
-		discoveredDevices.clear()
-
-		// Crear y registrar receiver
-		discoveryReceiver = object : BroadcastReceiver() {
-			override fun onReceive(context: Context, intent: Intent) {
-				when (intent.action) {
-					BluetoothDevice.ACTION_FOUND -> {
-						val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-						device?.let {
-							discoveredDevices.add(it)
-						}
-					}
-					BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-						isScanning = false
-					}
-				}
-			}
-		}
-
-		val filter = IntentFilter().apply {
-			addAction(BluetoothDevice.ACTION_FOUND)
-			addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-		}
-
-		context.registerReceiver(discoveryReceiver, filter)
-
-		// Iniciar escaneo
-		isScanning = true
-		bluetoothAdapter.startDiscovery()
-	}
 
 	/**
-	 * Detiene el escaneo de dispositivos Bluetooth.
+	 * Envia un mensaje como texto a todos los dispositivos Bluetooth conectados.
 	 *
-	 * @param context Contexto necesario para desregistrar el receiver.
-	 * @param bluetoothAdapter Adaptador Bluetooth para detener el escaneo.
+	 * @param text Mensaje a enviar.
+	 * @throws BluetoothDeviceNotFoundException Si no hay dispositivos conectados.
+	 * @throws BluetoothSendFailedException Si falla el envío de datos.
 	 */
-	fun stopDeviceScan(context: Context, bluetoothAdapter: BluetoothAdapter) {
-		if (isScanning) {
-			if (ActivityCompat.checkSelfPermission(
-					context,
-					Manifest.permission.BLUETOOTH_SCAN
-				) == PackageManager.PERMISSION_GRANTED
-			) {
-				return
-			}
-			bluetoothAdapter.cancelDiscovery()
-			isScanning = false
+	fun sendStringBluetooth(text: String) {
+		if (sockets.isEmpty()) {
+			throw BluetoothDeviceNotFoundException("No hay dispositivos Bluetooth conectados")
 		}
+		val iterator = sockets.iterator()
 
-		discoveryReceiver?.let {
+		while (iterator.hasNext()) {
+			val entry = iterator.next()
 			try {
-				context.unregisterReceiver(it)
-			} catch (_: IllegalArgumentException) {
-
+				entry.value.outputStream.write(text.toByteArray())
+			} catch (_: IOException) {
+				entry.value.close()
+				iterator.remove()
+				throw BluetoothSendFailedException("Error al enviar datos a ${entry.key}")
 			}
 		}
-		discoveryReceiver = null
-	}
-
-	/**
-	 * Obtiene el conjunto de dispositivos encontrados durante el último escaneo.
-	 *
-	 * @return Conjunto de dispositivos Bluetooth encontrados.
-	 */
-	fun getDiscoveredDevices(): Set<BluetoothDevice> {
-		return discoveredDevices.toSet()
-	}
-	*/
-	/**
-	 * Verifica si actualmente se está escaneando dispositivos.
-	 *
-	 * @return `true` si está escaneando, `false` en caso contrario.
-	 */
-	fun isScanning(): Boolean {
-		return isScanning
 	}
 }

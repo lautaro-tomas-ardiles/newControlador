@@ -134,15 +134,12 @@ private fun AllPrev() {
 					.fillMaxSize(),
 				verticalArrangement = Arrangement.Center,
 			) {
-				val movement = MovementButtons()
 				HeaderForPrev()
 
 				Spacer(Modifier.padding(20.dp))
 
-				JointSliders(true)
-				JointSliders(false)
-
-				movement.GridButtonA()
+				JointSliders(true) {}
+				JointSliders(false) {}
 			}
 		}
 	}
@@ -165,15 +162,12 @@ private fun AllTabletPrev() {
 					.fillMaxSize(),
 				verticalArrangement = Arrangement.Center,
 			) {
-				val movement = MovementButtons()
 				HeaderForPrev()
 
 				Spacer(Modifier.padding(20.dp))
 
-				JointSliders(true)
-				JointSliders(false)
-
-				movement.GridButtonA()
+				JointSliders(true) {}
+				JointSliders(false) {}
 			}
 		}
 	}

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -28,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
@@ -41,8 +39,15 @@ import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.ui.theme.NewControladorTheme
 import com.example.newcontrolador.connection.data.ButtonsEnum
 
+/**
+ * Despues deberia poner todo o la mayoria en una clase
+ */
 @Composable
-private fun Slider(isShoulder: Boolean, inverted: Boolean) {
+private fun Slider(
+	isShoulder: Boolean,
+	inverted: Boolean,
+	onSendText: (String) -> Unit
+) {
 	val density = LocalDensity.current
 
 	val screenHeightPx = with(density) {
@@ -60,6 +65,8 @@ private fun Slider(isShoulder: Boolean, inverted: Boolean) {
 	val valueRange = if (isShoulder) 0f..180f else 0f..90f
 	var value by remember { mutableFloatStateOf(0f) }
 
+	val valueForLabel = "%03d".format(value.toInt())
+
 	val (colorPrimary, colorSecondary) =
 		if (inverted) {
 			MaterialTheme.colorScheme.secondary to MaterialTheme.colorScheme.primary
@@ -72,7 +79,16 @@ private fun Slider(isShoulder: Boolean, inverted: Boolean) {
 	) {
 		Slider(
 			value = value,
-			onValueChange = { value = it },
+			onValueChange = {
+				val intValue = it.toInt()
+
+				if (intValue != value.toInt()) {
+					val prefix = if (isShoulder) 'H' else 'C'
+					val suffix = if (inverted) '1' else '2'
+					onSendText("+$prefix$suffix$valueForLabel")
+				}
+				value = it
+			},
 			valueRange = valueRange,
 			colors =
 				SliderDefaults.colors(
@@ -100,16 +116,12 @@ private fun Slider(isShoulder: Boolean, inverted: Boolean) {
 					}
 				}
 		)
-		val valueForLabel =
-			if (value.toInt() < 10) {
-				"00${value.toInt()}"
-			} else if (value.toInt() < 100) {
-				"0${value.toInt()}"
-			} else {
-				"${value.toInt()}"
-			}
+		//if (intValue < 10) "00$intValue" else if (intValue < 100) "0$intValue" else "$intValue"
+
 		Spacer(Modifier.padding(5.dp))
+
 		Label(valueForLabel, inverted)
+
 		Spacer(Modifier.padding(10.dp))
 	}
 }
@@ -119,14 +131,14 @@ private fun Slider(isShoulder: Boolean, inverted: Boolean) {
 private fun SliderPrev() {
 	NewControladorTheme {
 		Row {
-			Slider(isShoulder = true, inverted = false)
-			Slider(isShoulder = false, inverted = true)
+			Slider(isShoulder = true, inverted = false) {/*TODO: aca nunca va haber nada*/}
+			Slider(isShoulder = false, inverted = true) {/*TODO: aca nunca va haber nada*/}
 		}
 	}
 }
 
 @Composable
-fun JointSliders(isShoulder: Boolean) {
+fun JointSliders(isShoulder: Boolean, onSendText: (String) -> Unit) {
 	val text = if (isShoulder) "Hombros" else "Codos"
 
 	Row(
@@ -138,7 +150,8 @@ fun JointSliders(isShoulder: Boolean) {
 	) {
 		Slider(
 			isShoulder = isShoulder,
-			inverted = false
+			inverted = false,
+			onSendText = onSendText
 		)
 		Label(
 			text = text,
@@ -146,7 +159,8 @@ fun JointSliders(isShoulder: Boolean) {
 		)
 		Slider(
 			isShoulder = isShoulder,
-			inverted = true
+			inverted = true,
+			onSendText = onSendText
 		)
 	}
 }
@@ -165,9 +179,7 @@ class SliderForConfiguration {
 		val setps =
 			if (typeForReset == null) {
 				((valueRange.endInclusive - valueRange.start) / 5).toInt() - 1
-			} else {
-				0
-			}
+			} else { 0 }
 
 		Column(Modifier.padding(vertical = 5.dp)) {
 			Row(verticalAlignment = Alignment.CenterVertically) {

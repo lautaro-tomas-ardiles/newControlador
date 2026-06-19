@@ -23,13 +23,6 @@ class ConnectionViewModel(private val bluetoothConnectionManager: BluetoothConne
 	var message by mutableStateOf<String?>(null)
 		private set
 
-	var isScanning by mutableStateOf(false)
-		private set
-
-	//* Dispositivos encontrados *
-	var discoveredDevices by mutableStateOf<Set<BluetoothDevice>>(emptySet())
-		private set
-
 	/**
 	 * Conecta a un dispositivo Bluetooth.
 	 *
@@ -102,46 +95,24 @@ class ConnectionViewModel(private val bluetoothConnectionManager: BluetoothConne
 			}
 		}
 	}
-	/*
-	fun startBluetoothScan(context: Context, bluetoothAdapter: BluetoothAdapter) {
+
+	/**
+	 * Envia un string por Bluetooth al dispositivo conectado.
+	 *
+	 * @param string String a enviar.
+	 */
+	fun sendString(string: String) {
 		viewModelScope.launch(Dispatchers.IO) {
 			try {
-				bluetoothConnectionManager.startDeviceScan(context, bluetoothAdapter)
-				isScanning = true
-				showTempMessage("Escaneando dispositivos...")
-			} catch (e: BluetoothPermissionException) {
-				showTempMessage(e.message ?: "Permisos requeridos")
+				bluetoothConnectionManager.sendStringBluetooth(string)
+			} catch (_: BluetoothDeviceNotFoundException) {
+				//showTempMessage(e.message ?: "Error desconocido")
+			} catch (_: BluetoothSendFailedException) {
+				//showTempMessage(e.message ?: "Error desconocido")
 			} catch (_: Exception) {
-				showTempMessage("Error al iniciar escaneo")
+				showTempMessage("Error desconocido")
 			}
 		}
-	}
-
-	fun stopBluetoothScan(context: Context, bluetoothAdapter: BluetoothAdapter) {
-		viewModelScope.launch(Dispatchers.IO) {
-			bluetoothConnectionManager.stopDeviceScan(context, bluetoothAdapter)
-			isScanning = false
-			discoveredDevices = bluetoothConnectionManager.getDiscoveredDevices()
-			showTempMessage("Escaneo completado")
-		}
-	}
-
-	fun getDevices(): Set<BluetoothDevice> {
-		return bluetoothConnectionManager.getDiscoveredDevices()
-	}
-	*/
-	/**
-	 * Verifica si el conjunto de dispositivos Bluetooth disponibles no está vacío.
-	 *
-	 * @param setOfDevices Conjunto de dispositivos Bluetooth a verificar.
-	 * @return `true` si hay dispositivos disponibles, `false` en caso contrario.
-	 */
-	fun verifyBluetoothDevices(setOfDevices: Set<BluetoothDevice>): Boolean {
-		if (setOfDevices.isEmpty()) {
-			showTempMessage("No hay dispositivos Bluetooth disponibles")
-			return false
-		}
-		return true
 	}
 
 	// * General *
