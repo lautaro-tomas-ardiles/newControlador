@@ -1,4 +1,4 @@
-package com.example.newcontrolador.connection.data
+package com.example.newcontrolador.data.enums
 
 enum class ModesEnum(var char: Char) {
 	MANUAL('C'),

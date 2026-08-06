@@ -29,7 +29,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
-import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.storage.DataStoreViewModel
 import com.example.newcontrolador.utilitis.ButtonsUtils
 import com.example.newcontrolador.utilitis.SecondaryTopBar
 import com.example.newcontrolador.utilitis.SetOrientation

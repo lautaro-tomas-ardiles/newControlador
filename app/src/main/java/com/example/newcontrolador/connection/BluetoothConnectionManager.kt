@@ -7,8 +7,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
-import com.example.newcontrolador.connection.data.DirectionsConfig
-import com.example.newcontrolador.connection.data.DirectionsEnum
+import com.example.newcontrolador.data.configs.DirectionsConfig
+import com.example.newcontrolador.data.enums.DirectionsEnum
 import com.example.newcontrolador.exceptions.*
 import java.io.IOException
 import java.util.UUID

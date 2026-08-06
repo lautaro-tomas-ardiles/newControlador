@@ -1,4 +1,6 @@
-package com.example.newcontrolador.connection.data
+package com.example.newcontrolador.data.enums
+
+import com.example.newcontrolador.data.configs.DirectionsConfig
 
 enum class DirectionsEnum() {
 	UP,

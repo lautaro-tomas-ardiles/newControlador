@@ -1,4 +1,4 @@
-package com.example.newcontrolador.data
+package com.example.newcontrolador.storage
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
@@ -6,13 +6,13 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.newcontrolador.connection.data.ButtonsConfig
-import com.example.newcontrolador.connection.data.MovementConfig
-import com.example.newcontrolador.connection.data.DirectionsConfig
-import com.example.newcontrolador.connection.data.ModesConfig
-import com.example.newcontrolador.connection.data.DirectionsEnum
-import com.example.newcontrolador.connection.data.ModesEnum
-import com.example.newcontrolador.connection.data.VelocityConfig
+import com.example.newcontrolador.data.configs.ButtonsConfig
+import com.example.newcontrolador.data.configs.MovementConfig
+import com.example.newcontrolador.data.configs.DirectionsConfig
+import com.example.newcontrolador.data.configs.ModesConfig
+import com.example.newcontrolador.data.enums.DirectionsEnum
+import com.example.newcontrolador.data.enums.ModesEnum
+import com.example.newcontrolador.data.configs.VelocityConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

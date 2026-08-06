@@ -9,24 +9,32 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.newcontrolador.connection.data.DirectionsEnum
-import com.example.newcontrolador.connection.data.ModesEnum
-import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.data.enums.DirectionsEnum
+import com.example.newcontrolador.R
+import com.example.newcontrolador.data.enums.ModesEnum
+import com.example.newcontrolador.data.enums.SliderType
+import com.example.newcontrolador.storage.DataStoreViewModel
 import com.example.newcontrolador.utilitis.ButtonsUtils
 import com.example.newcontrolador.utilitis.LineAndText
 import com.example.newcontrolador.utilitis.SecondaryTopBar
 import com.example.newcontrolador.utilitis.SetOrientation
 import com.example.newcontrolador.utilitis.SettingsItemForDirections
 import com.example.newcontrolador.utilitis.SettingsItemForModes
+import com.example.newcontrolador.utilitis.Slider
 
 @Composable
 fun MainSettingsPage(
@@ -59,6 +67,10 @@ fun MainSettingsPageContent(
 	buttonsUtils: ButtonsUtils,
 	scroll: ScrollState
 ) {
+	val buttonConfig by viewModel.buttonsConfig.collectAsState()
+	var buttonSize by remember { mutableIntStateOf(buttonConfig.button) }
+	var buttonIcon by remember { mutableIntStateOf(buttonConfig.icon) }
+
 	val modes = listOf(
 		ModesEnum.AUTOMATA,
 		ModesEnum.MANUAL
@@ -95,6 +107,50 @@ fun MainSettingsPageContent(
 				.verticalScroll(scroll),
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
+			LineAndText("Configuración de botones")
+
+			Column() {
+				Text(
+					text = "Tamaño de los botones de utilidades",
+					color = MaterialTheme.colorScheme.secondary
+				)
+				Slider(
+					value = buttonSize.toFloat(),
+					onValueChange = {
+						buttonSize = it.toInt()
+						viewModel.setButtonSize(buttonSize)
+					},
+					valueRange = 0f..60f,
+					sliderType = SliderType.BUTTON,
+					ruta = painterResource(id = R.drawable.padding),
+					buttonsUtils = buttonsUtils
+				)
+				Spacer(Modifier.padding(5.dp))
+
+				Text(
+					text = "Tamaño del icon de los botones",
+					color = MaterialTheme.colorScheme.secondary
+				)
+				Slider(
+					value = buttonIcon.toFloat(),
+					onValueChange = {
+						buttonIcon = it.toInt()
+						viewModel.setIconSize(buttonIcon)
+					},
+					valueRange = 0f..60f,
+					sliderType = SliderType.ICON,
+					ruta = painterResource(id = R.drawable.padding),
+					buttonsUtils = buttonsUtils
+				)
+				Spacer(Modifier.padding(5.dp))
+			}
+
+			buttonsUtils.Painter(
+				onClick = { /*TODO: no accion nesesaria*/ },
+				border = true,
+				imageRes = R.drawable.height
+			)
+
 			LineAndText("Ajustes de modos")
 
 			buttonsUtils.Simple("resetear modos") {

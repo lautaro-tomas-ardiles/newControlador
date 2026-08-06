@@ -37,9 +37,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.data.DirectionsEnum
-import com.example.newcontrolador.connection.data.DirectionsConfig
-import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.data.enums.DirectionsEnum
+import com.example.newcontrolador.data.configs.DirectionsConfig
+import com.example.newcontrolador.storage.DataStoreViewModel
 import kotlinx.coroutines.delay
 import androidx.compose.ui.unit.coerceAtMost
 

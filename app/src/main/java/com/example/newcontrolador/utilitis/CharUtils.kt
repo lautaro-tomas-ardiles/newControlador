@@ -22,9 +22,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.newcontrolador.connection.data.DirectionsEnum
-import com.example.newcontrolador.connection.data.ModesEnum
-import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.data.enums.DirectionsEnum
+import com.example.newcontrolador.data.enums.ModesEnum
+import com.example.newcontrolador.storage.DataStoreViewModel
 
 /**
  * Tarjeta de configuración para un carácter asociado a una dirección o modo.

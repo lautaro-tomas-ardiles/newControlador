@@ -74,17 +74,16 @@ fun SettingsDropMenu(
 			buttonsUtils.Text("configuracion completa :") {
 				it.Painter(
 					onClick = { navController.navigate(AppScreen.SettingsPage.route) },
-					image = painterResource(R.drawable.external_link),
 					tintColor = MaterialTheme.colorScheme.background
 				)
 			}
 			listOfSliders.forEach { config ->
-				SliderForConfiguration(
+				Slider(
 					value = config.value,
 					onValueChange = config.onValueChange,
 					valueRange = config.valueRange,
 					ruta = config.ruta,
-					typeForReset = config.typeForReset,
+					sliderType = config.sliderType,
 					buttonsUtils = buttonsUtils
 				)
 			}

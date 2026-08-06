@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.newcontrolador.connection.data.ThemeType
+import com.example.newcontrolador.data.enums.ThemeType
 import com.example.newcontrolador.ui.theme.DarckDefault
 import com.example.newcontrolador.ui.theme.LightDefault
 

@@ -1,6 +1,6 @@
 package com.example.newcontrolador.utilitis
 
-import com.example.newcontrolador.connection.data.ThemeType
+import com.example.newcontrolador.data.enums.ThemeType
 
 data class ThemeConfig(
 	val isColorSelected: Boolean,

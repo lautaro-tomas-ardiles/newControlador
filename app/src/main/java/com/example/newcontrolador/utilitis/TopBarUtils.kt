@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -41,11 +40,11 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.data.MovementEnum
-import com.example.newcontrolador.connection.data.DirectionsConfig
-import com.example.newcontrolador.connection.data.ModesEnum
-import com.example.newcontrolador.connection.data.ThemeType
-import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.data.configs.DirectionsConfig
+import com.example.newcontrolador.data.enums.ModesEnum
+import com.example.newcontrolador.data.enums.SliderType
+import com.example.newcontrolador.data.enums.ThemeType
+import com.example.newcontrolador.storage.DataStoreViewModel
 import com.example.newcontrolador.navigation.AppScreen
 
 /**
@@ -236,7 +235,7 @@ class TopBarUtils(
 					dataStore.setVelocityChar(char)
 				},
 				valueRange = 0f..100f,
-				typeForReset = null,
+				sliderType = SliderType.VELOCITY,
 				ruta = painterResource(R.drawable.velocity)
 			),
 			SliderConfig(
@@ -246,6 +245,7 @@ class TopBarUtils(
 					dataStore.setButtonHeight(buttonHeight)
 				},
 				valueRange = 0f..1f,
+				sliderType = SliderType.HEIGHT,
 				ruta = painterResource(id = R.drawable.height)
 			),
 			SliderConfig(
@@ -255,7 +255,7 @@ class TopBarUtils(
 					dataStore.setButtonWidth(buttonWidth)
 				},
 				valueRange = 0f..1f,
-				typeForReset = MovementEnum.WIDTH,
+				sliderType = SliderType.WIDTH,
 				ruta = painterResource(id = R.drawable.width)
 			),
 			SliderConfig(
@@ -265,7 +265,7 @@ class TopBarUtils(
 					dataStore.setButtonPadding(paddings)
 				},
 				valueRange = 0f..50f,
-				typeForReset = MovementEnum.PADDING,
+				sliderType = SliderType.PADDING,
 				ruta = painterResource(id = R.drawable.padding)
 			)
 		)
@@ -294,9 +294,8 @@ class TopBarUtils(
 				buttonsUtils.Text("acerca de:") {
 					it.Painter(
 						onClick = { navController.navigate(AppScreen.AboutPage.route) },
-						image = painterResource(R.drawable.alert_circle),
-						border = true,
-						modifier = Modifier.size(50.dp)
+						imageRes = R.drawable.alert_circle,
+						border = true
 					)
 				}
 			}

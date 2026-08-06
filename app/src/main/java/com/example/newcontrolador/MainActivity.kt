@@ -13,13 +13,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import android.view.View
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
-import com.example.newcontrolador.data.DataStoreManager
-import com.example.newcontrolador.data.DataStoreViewModel
-import com.example.newcontrolador.data.DataStoreViewModelFactory
+import com.example.newcontrolador.storage.DataStoreManager
+import com.example.newcontrolador.storage.DataStoreViewModel
+import com.example.newcontrolador.storage.DataStoreViewModelFactory
 import com.example.newcontrolador.navigation.AppNavigation
 import com.example.newcontrolador.ui.theme.NewControladorTheme
 
@@ -58,16 +59,28 @@ class MainActivity : ComponentActivity() {
 		// Solicita el permission de Bluetooth
 		requestBluetoothPermission()
 
-		// Nueva forma de ocultar solo la barra de navegación
+		// Ocultar las barras de sistema según la versión de Android
 		WindowCompat.setDecorFitsSystemWindows(window, true)
 		val insetsController = WindowInsetsControllerCompat(window, window.decorView)
 
-		// Ocultar la barra de navegación
-		insetsController.hide(WindowInsetsCompat.Type.navigationBars() or WindowInsetsCompat.Type.statusBars())
-
-		// Permite que reaparezca con swipe
-		insetsController.systemBarsBehavior =
-			WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			insetsController.hide(
+				WindowInsetsCompat.Type.navigationBars()
+						or WindowInsetsCompat.Type.statusBars()
+			)
+			insetsController.systemBarsBehavior =
+				WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+		} else {
+			@Suppress("DEPRECATION")
+			window.decorView.systemUiVisibility = (
+				View.SYSTEM_UI_FLAG_FULLSCREEN
+					or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+					or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+					or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+					or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+					or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+			)
+		}
 
 		//enableEdgeToEdge()
 		val viewModel =

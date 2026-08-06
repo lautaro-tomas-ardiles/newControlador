@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.storage.DataStoreViewModel
 import com.example.newcontrolador.screen.MainAboutScreen
 import com.example.newcontrolador.screen.MainArduinoOneAndHC05Page
 import com.example.newcontrolador.screen.MainESP32Page

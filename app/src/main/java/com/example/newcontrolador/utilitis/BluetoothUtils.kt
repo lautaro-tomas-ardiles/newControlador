@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.ConnectionViewModel
-import com.example.newcontrolador.connection.data.DirectionsConfig
+import com.example.newcontrolador.data.configs.DirectionsConfig
 
 /**
  * Menú desplegable de dispositivos Bluetooth.

@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.example.newcontrolador.connection.*
-import com.example.newcontrolador.connection.data.ModesEnum
-import com.example.newcontrolador.data.DataStoreViewModel
+import com.example.newcontrolador.data.enums.ModesEnum
+import com.example.newcontrolador.storage.DataStoreViewModel
 import com.example.newcontrolador.utilitis.ButtonsUtils
 import com.example.newcontrolador.utilitis.CustomSnackbar
 import com.example.newcontrolador.utilitis.MovementUtils

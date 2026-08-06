@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newcontrolador.connection.data.DirectionsConfig
+import com.example.newcontrolador.data.configs.DirectionsConfig
 import com.example.newcontrolador.exceptions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

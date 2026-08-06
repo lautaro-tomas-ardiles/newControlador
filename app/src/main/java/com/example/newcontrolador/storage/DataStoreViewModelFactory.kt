@@ -1,4 +1,4 @@
-package com.example.newcontrolador.data
+package com.example.newcontrolador.storage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

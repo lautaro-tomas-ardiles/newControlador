@@ -1,4 +1,4 @@
-package com.example.newcontrolador.connection.data
+package com.example.newcontrolador.data.configs
 
 data class ModesConfig(
 	val modeManualChar: Char = 'C',

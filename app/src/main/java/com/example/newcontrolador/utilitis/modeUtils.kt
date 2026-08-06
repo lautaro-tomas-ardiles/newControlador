@@ -10,7 +10,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.newcontrolador.connection.data.ModesEnum
+import com.example.newcontrolador.data.enums.ModesEnum
 
 /**
  * Elemento individual de un menú desplegable para seleccionar un modo.

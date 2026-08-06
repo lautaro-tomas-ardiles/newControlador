@@ -1,5 +1,6 @@
 package com.example.newcontrolador.utilitis
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -52,17 +53,17 @@ class ButtonsUtils(
 	 * @param solid indica si tiene o no fondo sólido
 	 * @param border indica si tiene o no borde
 	 * @param tintColor color del ícono
-	 * @param image ícono a mostrar, por defecto es un ícono de enlace externo
+	 * @param imageRes ícono a mostrar, por defecto es un ícono de enlace externo
 	 */
 	@Composable
 	fun Painter(
 		onClick: () -> Unit,
-		modifier: Modifier = Modifier,
 		solid: Boolean = false,
 		border: Boolean = false,
 		tintColor: Color = MaterialTheme.colorScheme.tertiary,
-		image: Painter = painterResource(R.drawable.external_link)
+		@DrawableRes imageRes: Int = R.drawable.external_link
 	) {
+		val iconSize = if (imageRes == R.drawable.alert_circle) (sizeIcon + 30).dp else sizeIcon.dp
 		IconButton(
 			onClick = { onClick() },
 			colors = IconButtonDefaults.iconButtonColors(
@@ -77,10 +78,10 @@ class ButtonsUtils(
 				)
 		) {
 			Icon(
-				painter = image,
+				painter = painterResource(imageRes),
 				contentDescription = "Ícono de acción",
 				tint = tintColor,
-				modifier = modifier.size(sizeIcon.dp)
+				modifier = Modifier.size(iconSize)
 			)
 		}
 	}
@@ -143,7 +144,8 @@ class ButtonsUtils(
 			Icon(
 				painter = painterResource(R.drawable.bluetooth),
 				contentDescription = "Ícono de Bluetooth",
-				tint = MaterialTheme.colorScheme.background
+				tint = MaterialTheme.colorScheme.background,
+				modifier = Modifier.size(sizeIcon.dp)
 			)
 		}
 	}

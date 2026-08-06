@@ -1,15 +1,15 @@
-package com.example.newcontrolador.data
+package com.example.newcontrolador.storage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newcontrolador.connection.data.ButtonsConfig
-import com.example.newcontrolador.connection.data.MovementConfig
-import com.example.newcontrolador.connection.data.DirectionsConfig
-import com.example.newcontrolador.connection.data.ModesConfig
-import com.example.newcontrolador.connection.data.DirectionsEnum
-import com.example.newcontrolador.connection.data.ModesEnum
-import com.example.newcontrolador.connection.data.ThemeType
-import com.example.newcontrolador.connection.data.VelocityConfig
+import com.example.newcontrolador.data.configs.ButtonsConfig
+import com.example.newcontrolador.data.configs.MovementConfig
+import com.example.newcontrolador.data.configs.DirectionsConfig
+import com.example.newcontrolador.data.configs.ModesConfig
+import com.example.newcontrolador.data.enums.DirectionsEnum
+import com.example.newcontrolador.data.enums.ModesEnum
+import com.example.newcontrolador.data.enums.ThemeType
+import com.example.newcontrolador.data.configs.VelocityConfig
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map

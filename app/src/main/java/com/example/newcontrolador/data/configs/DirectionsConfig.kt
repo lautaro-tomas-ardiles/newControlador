@@ -1,4 +1,4 @@
-package com.example.newcontrolador.connection.data
+package com.example.newcontrolador.data.configs
 
 data class DirectionsConfig(
 	val upChar: Char = 'F',
