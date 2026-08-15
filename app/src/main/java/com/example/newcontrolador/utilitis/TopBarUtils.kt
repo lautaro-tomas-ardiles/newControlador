@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -294,7 +293,7 @@ class TopBarUtils(
 				buttonsUtils.Text("acerca de:") {
 					it.Painter(
 						onClick = { navController.navigate(AppScreen.AboutPage.route) },
-						imageRes = R.drawable.alert_circle,
+						imageRes = R.drawable.alerta,
 						border = true
 					)
 				}
@@ -303,9 +302,9 @@ class TopBarUtils(
 
 			Row(verticalAlignment = Alignment.CenterVertically) {
 				buttonsUtils.Text("modo :") {
-					it.ImageVector(
+					it.Painter(
 						onClick = { menuModeState = !menuModeState },
-						image = Icons.Default.MoreVert,
+						imageRes = R.drawable.vert_more,
 						border = true
 					)
 				}
@@ -325,9 +324,9 @@ class TopBarUtils(
 
 			Row(verticalAlignment = Alignment.CenterVertically) {
 				buttonsUtils.Text("digramas :") {
-					it.ImageVector(
+					it.Painter(
 						onClick = { menuDiagramasState = !menuDiagramasState },
-						image = Icons.Default.MoreVert,
+						imageRes = R.drawable.vert_more,
 						border = true
 					)
 				}
@@ -347,9 +346,9 @@ class TopBarUtils(
 			Spacer(Modifier.width(10.dp))
 
 			Row(verticalAlignment = Alignment.CenterVertically) {
-				buttonsUtils.ImageVector(
+				buttonsUtils.Painter(
 					onClick = { menuSettingState = !menuSettingState },
-					border = false
+					imageRes = R.drawable.settings
 				)
 				SettingsDropMenu(
 					state = menuSettingState,

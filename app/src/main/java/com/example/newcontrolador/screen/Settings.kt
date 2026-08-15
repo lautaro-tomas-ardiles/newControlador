@@ -122,8 +122,9 @@ fun MainSettingsPageContent(
 					},
 					valueRange = 0f..60f,
 					sliderType = SliderType.BUTTON,
-					ruta = painterResource(id = R.drawable.padding),
-					buttonsUtils = buttonsUtils
+					ruta = painterResource(id = R.drawable.tama_o),
+					buttonsUtils = buttonsUtils,
+					iconTint = MaterialTheme.colorScheme.secondary
 				)
 				Spacer(Modifier.padding(5.dp))
 
@@ -139,8 +140,9 @@ fun MainSettingsPageContent(
 					},
 					valueRange = 0f..60f,
 					sliderType = SliderType.ICON,
-					ruta = painterResource(id = R.drawable.padding),
-					buttonsUtils = buttonsUtils
+					ruta = painterResource(id = R.drawable.tama_o),
+					buttonsUtils = buttonsUtils,
+					iconTint = MaterialTheme.colorScheme.secondary
 				)
 				Spacer(Modifier.padding(5.dp))
 			}
