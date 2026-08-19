@@ -1,17 +1,16 @@
 package com.example.newcontrolador.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import com.example.newcontrolador.data.enums.ThemeType
+import com.example.newcontrolador.storage.DataStoreViewModel
 
-val DarckDefault = darkColorScheme(
+val defaultScheme = darkColorScheme(
 	primary = blue10,
 	secondary = yellow20,
 	tertiary = green20,
@@ -20,43 +19,53 @@ val DarckDefault = darkColorScheme(
 	background = black10,
 	onBackground = black20
 )
-val LightDefault = lightColorScheme(
+val lightScheme = lightColorScheme(
 	primary = blue20,
 	secondary = yellow30,
 	tertiary = green40,
 	onSecondary = yellow40,
 	onTertiary = green30,
 	background = white10,
-	onBackground = red10
+	onBackground = blue30
 )
-val Scheme = lightColorScheme(
-	primary = yellow30,
-	secondary = green40,
-	tertiary = yellow40,
-	onSecondary = green30,
-	onTertiary = red10,
-	background = white10,
-	onBackground = blue20
+fun customScheme(
+	primary: Long,
+	secondary: Long,
+	tertiary: Long,
+	background: Long,
+	onPrimary: Long,
+	onSecondary: Long,
+	onTertiary: Long,
+	onBackground: Long
+) = darkColorScheme(
+	primary = Color(primary),
+	secondary = Color(secondary),
+	tertiary = Color(tertiary),
+	background = Color(background),
+	onPrimary = Color(onPrimary),
+	onSecondary = Color(onSecondary),
+	onTertiary = Color(onTertiary),
+	onBackground = Color(onBackground)
 )
 
 @Composable
 fun NewControladorTheme(
 	themeType: ThemeType = ThemeType.DEFAULT,
-	darkTheme: Boolean = isSystemInDarkTheme(),
-	// Dynamic color is available on Android 12+
-	dynamicColor: Boolean = false,
+	viewModel: DataStoreViewModel,
 	content: @Composable () -> Unit
 ) {
-	val colorScheme = when {
-		dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-			val context = LocalContext.current
-			if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-		}
+	val colors by viewModel.colors.collectAsState()
 
-		themeType == ThemeType.DEFAULT -> DarckDefault
-		themeType == ThemeType.WHITE -> LightDefault
-		//themeType == ThemeType.WHITE_2 -> Scheme
-		else -> DarckDefault
+	val customColorSheme = customScheme(
+		primary = colors.primary, onPrimary = colors.onPrimary,
+		secondary = colors.secondary, onSecondary = colors.onSecondary,
+		tertiary = colors.tertiary, onTertiary = colors.onTertiary,
+		background = colors.background, onBackground = colors.onBackground
+	)
+	val colorScheme = when (themeType) {
+		ThemeType.DEFAULT -> defaultScheme
+		ThemeType.WHITE -> lightScheme
+		ThemeType.CUSTOM -> customColorSheme
 	}
 
 	MaterialTheme(

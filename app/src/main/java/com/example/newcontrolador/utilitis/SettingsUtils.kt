@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import com.example.newcontrolador.R
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.newcontrolador.data.configs.SliderConfig
+import com.example.newcontrolador.data.configs.ThemeConfig
 import com.example.newcontrolador.navigation.AppScreen
 
 /**

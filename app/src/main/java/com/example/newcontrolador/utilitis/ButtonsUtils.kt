@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -61,9 +60,8 @@ class ButtonsUtils(
 		solid: Boolean = false,
 		border: Boolean = false,
 		tintColor: Color = MaterialTheme.colorScheme.tertiary,
-		@DrawableRes imageRes: Int = R.drawable.external_link
+		@DrawableRes imageRes: Int
 	) {
-		val iconSize = if (imageRes == R.drawable.alert_circle) (sizeIcon + 30).dp else sizeIcon.dp
 		IconButton(
 			onClick = { onClick() },
 			colors = IconButtonDefaults.iconButtonColors(
@@ -81,7 +79,7 @@ class ButtonsUtils(
 				painter = painterResource(imageRes),
 				contentDescription = "Ícono de acción",
 				tint = tintColor,
-				modifier = Modifier.size(iconSize)
+				modifier = Modifier.size(sizeIcon.dp)
 			)
 		}
 	}
@@ -142,7 +140,7 @@ class ButtonsUtils(
 			modifier = Modifier.size(sizeButton.dp)
 		) {
 			Icon(
-				painter = painterResource(R.drawable.bluetooth),
+				painter = painterResource(R.drawable.bluetooth_b),
 				contentDescription = "Ícono de Bluetooth",
 				tint = MaterialTheme.colorScheme.background,
 				modifier = Modifier.size(sizeIcon.dp)

@@ -2,7 +2,6 @@ package com.example.newcontrolador.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// custom
 // default
 val blue10 = Color(0xFF008DD5)
 val black10 = Color(0xFF202C39)
@@ -19,4 +18,4 @@ val white10 = Color(0xFFF4F9E9)
 val yellow40 = Color(0xFFF4B94A)
 val green30 = Color(0xFF009F93)
 val green40 = Color(0xFF41DED3)
-val red10 = Color(0xFF008DD5) // ?
+val blue30 = Color(0xFF008DD5)

@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
 						or WindowInsetsCompat.Type.statusBars()
 			)
 			insetsController.systemBarsBehavior =
-				WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+				WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
 		} else {
 			@Suppress("DEPRECATION")
 			window.decorView.systemUiVisibility = (
@@ -92,7 +92,7 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			val theme by viewModel.theme.collectAsState()
 
-			NewControladorTheme(themeType = theme) {
+			NewControladorTheme(themeType = theme, viewModel = viewModel) {
 				AppNavigation(bluetoothAdapter, viewModel)
 			}
 		}

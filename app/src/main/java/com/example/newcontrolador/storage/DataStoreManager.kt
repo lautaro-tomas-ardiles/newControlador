@@ -4,15 +4,18 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.newcontrolador.data.configs.ButtonsConfig
+import com.example.newcontrolador.data.configs.ColorsConfig
 import com.example.newcontrolador.data.configs.MovementConfig
 import com.example.newcontrolador.data.configs.DirectionsConfig
 import com.example.newcontrolador.data.configs.ModesConfig
 import com.example.newcontrolador.data.enums.DirectionsEnum
 import com.example.newcontrolador.data.enums.ModesEnum
 import com.example.newcontrolador.data.configs.VelocityConfig
+import com.example.newcontrolador.data.enums.ColorsEnum
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -22,6 +25,20 @@ class DataStoreManager(private val context: Context) {
 	companion object {
 		// temas
 		val THEME_KEY = stringPreferencesKey("theme")
+
+		// colors
+		val PRIMARY_KEY = longPreferencesKey("primary")
+		val ON_PRIMARY_KEY = longPreferencesKey("onPrimary")
+
+		val SECONDARY_KEY = longPreferencesKey("secondary")
+		val ON_SECONDARY_KEY = longPreferencesKey("onSecondary")
+
+		val TERTIARY_KEY = longPreferencesKey("tertiary")
+		val ON_TERTIARY_KEY = longPreferencesKey("onTertiary")
+
+		val BACKGROUND_KEY = longPreferencesKey("background")
+		val ON_BACKGROUND_KEY = longPreferencesKey("onBackground")
+
 
 		// botones de movimiente
 		val HEIGHT_KEY = floatPreferencesKey("height")
@@ -51,7 +68,7 @@ class DataStoreManager(private val context: Context) {
 		val ICON_KEY = intPreferencesKey("icon")
 	}
 
-	//* guardar los datos de button */
+	//* guardar y cargar los datos de button */
 	suspend fun saveButtonHeight(height: Float) {
 		context.dataStore.edit { preferences ->
 			preferences[HEIGHT_KEY] = height
@@ -70,7 +87,6 @@ class DataStoreManager(private val context: Context) {
 		}
 	}
 
-	//* cargar los datos de button */
 	val loadMovementConfig: Flow<MovementConfig> = context.dataStore.data.map { prefs ->
 		MovementConfig(
 			width = prefs[WIDTH_KEY] ?: 0.8f,
@@ -159,6 +175,49 @@ class DataStoreManager(private val context: Context) {
 
 	val loadTheme: Flow<String> = context.dataStore.data.map { prefs ->
 		prefs[THEME_KEY] ?: "DEFAULT"
+	}
+
+	//* guardar y cargar los colores */
+	suspend fun saveColors(color: Long, key: ColorsEnum) {
+		when (key) {
+			ColorsEnum.PRIMARY -> context.dataStore.edit { preferences ->
+				preferences[PRIMARY_KEY] = color
+			}
+			ColorsEnum.ON_PRIMARY -> context.dataStore.edit { preferences ->
+				preferences[ON_PRIMARY_KEY] = color
+			}
+			ColorsEnum.SECONDARY -> context.dataStore.edit { preferences ->
+				preferences[SECONDARY_KEY] = color
+			}
+			ColorsEnum.ON_SECONDARY -> context.dataStore.edit { preferences ->
+				preferences[ON_SECONDARY_KEY] = color
+			}
+			ColorsEnum.TERTIARY -> context.dataStore.edit { preferences ->
+				preferences[TERTIARY_KEY] = color
+			}
+			ColorsEnum.ON_TERTIARY -> context.dataStore.edit { preferences ->
+				preferences[ON_TERTIARY_KEY] = color
+			}
+			ColorsEnum.BACKGROUND -> context.dataStore.edit { preferences ->
+				preferences[BACKGROUND_KEY] = color
+			}
+			ColorsEnum.ON_BACKGROUND -> context.dataStore.edit { preferences ->
+				preferences[ON_BACKGROUND_KEY] = color
+			}
+		}
+	}
+
+	val loadColors: Flow<ColorsConfig> = context.dataStore.data.map { prefs ->
+		ColorsConfig(
+			primary = prefs[PRIMARY_KEY] ?: 0xFF000000,
+			onPrimary = prefs[ON_PRIMARY_KEY] ?: 0xFF000000,
+			secondary = prefs[SECONDARY_KEY] ?: 0xFF000000,
+			onSecondary = prefs[ON_SECONDARY_KEY] ?: 0xFF000000,
+			tertiary = prefs[TERTIARY_KEY] ?: 0xFF000000,
+			onTertiary = prefs[ON_TERTIARY_KEY] ?: 0xFF000000,
+			background = prefs[BACKGROUND_KEY] ?: 0xFF000000,
+			onBackground = prefs[ON_BACKGROUND_KEY] ?: 0xFF000000
+		)
 	}
 
 	//* guardar y cargar el caracter de velocidad */

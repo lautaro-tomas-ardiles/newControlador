@@ -3,6 +3,7 @@ package com.example.newcontrolador.storage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newcontrolador.data.configs.ButtonsConfig
+import com.example.newcontrolador.data.configs.ColorsConfig
 import com.example.newcontrolador.data.configs.MovementConfig
 import com.example.newcontrolador.data.configs.DirectionsConfig
 import com.example.newcontrolador.data.configs.ModesConfig
@@ -10,6 +11,7 @@ import com.example.newcontrolador.data.enums.DirectionsEnum
 import com.example.newcontrolador.data.enums.ModesEnum
 import com.example.newcontrolador.data.enums.ThemeType
 import com.example.newcontrolador.data.configs.VelocityConfig
+import com.example.newcontrolador.data.enums.ColorsEnum
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -19,6 +21,17 @@ import kotlinx.coroutines.launch
 class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
 
 	object DefaultConfigs {
+		val colors = ColorsConfig(
+			primary = 0xFFFFFFFF,
+			onPrimary = 0xFFFFFFFF,
+			secondary = 0xFFFFFFFF,
+			onSecondary = 0xFFFFFFFF,
+			tertiary = 0xFFFFFFFF,
+			onTertiary = 0xFFFFFFFF,
+			background = 0xFFFFFFFF,
+			onBackground = 0xFFFFFFFF
+		)
+
 		val directions = DirectionsConfig(
 			upChar = 'F', downChar = 'B',
 			leftChar = 'L', rightChar = 'R',
@@ -79,6 +92,14 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 		dataStoreManager.saveButtonHeight(DefaultConfigs.movement.height)
 		dataStoreManager.saveButtonWidth(DefaultConfigs.movement.width)
 		dataStoreManager.saveButtonPadding(DefaultConfigs.movement.padding)
+	}
+
+	// colors
+	val colors: StateFlow<ColorsConfig> = dataStoreManager.loadColors
+		.stateIn(viewModelScope, SharingStarted.Eagerly, ColorsConfig())
+
+	fun setColors(color: Long, key: ColorsEnum) = viewModelScope.launch {
+		dataStoreManager.saveColors(color, key)
 	}
 
 	// DirectionsEnum

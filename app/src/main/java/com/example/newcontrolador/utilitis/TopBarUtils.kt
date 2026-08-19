@@ -3,6 +3,7 @@
 package com.example.newcontrolador.utilitis
 
 import android.Manifest
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.pm.PackageManager
@@ -40,6 +41,8 @@ import androidx.navigation.NavController
 import com.example.newcontrolador.R
 import com.example.newcontrolador.connection.ConnectionViewModel
 import com.example.newcontrolador.data.configs.DirectionsConfig
+import com.example.newcontrolador.data.configs.SliderConfig
+import com.example.newcontrolador.data.configs.ThemeConfig
 import com.example.newcontrolador.data.enums.ModesEnum
 import com.example.newcontrolador.data.enums.SliderType
 import com.example.newcontrolador.data.enums.ThemeType
@@ -199,6 +202,8 @@ class TopBarUtils(
 		val selectedTheme by dataStore.theme.collectAsState()
 		val configVelocity by dataStore.velocityChar.collectAsState()
 
+		val contex = LocalContext.current
+
 		val value = when (configVelocity.velocityChar) {
 			in '0'..'9' -> (configVelocity.velocityChar - '0') * 10f
 			'q' -> 100f
@@ -278,6 +283,11 @@ class TopBarUtils(
 				isColorSelected = (selectedTheme == ThemeType.WHITE),
 				onClick = { dataStore.setTheme(ThemeType.WHITE) },
 				theme = ThemeType.WHITE
+			),
+			ThemeConfig(
+				isColorSelected = (selectedTheme == ThemeType.CUSTOM),
+				onClick = { dataStore.setTheme(ThemeType.CUSTOM) },
+				theme = ThemeType.CUSTOM
 			)
 		)
 
@@ -289,6 +299,14 @@ class TopBarUtils(
 			verticalAlignment = Alignment.CenterVertically,
 			modifier = modifier.fillMaxWidth()
 		) {
+
+			buttonsUtils.Painter(
+				onClick = { (contex as? Activity)?.finish() },
+				imageRes = R.drawable.close,
+				border = true
+			)
+			Spacer(Modifier.width(10.dp))
+
 			Row(verticalAlignment = Alignment.CenterVertically) {
 				buttonsUtils.Text("acerca de:") {
 					it.Painter(

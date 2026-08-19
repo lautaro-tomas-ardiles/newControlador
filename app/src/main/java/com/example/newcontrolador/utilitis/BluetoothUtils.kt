@@ -153,7 +153,7 @@ fun BluetoothSwitch(
 		thumbContent = {
 			if (bluetooth) {
 				Icon(
-					painter = painterResource(R.drawable.bluetooth),
+					painter = painterResource(R.drawable.bluetooth_b),
 					contentDescription = "bluetooth icon",
 					modifier = Modifier.size(20.dp)
 				)

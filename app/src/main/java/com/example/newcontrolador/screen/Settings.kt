@@ -2,29 +2,38 @@ package com.example.newcontrolador.screen
 
 import android.content.pm.ActivityInfo
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.data.enums.DirectionsEnum
 import com.example.newcontrolador.R
+import com.example.newcontrolador.data.enums.ColorsEnum
 import com.example.newcontrolador.data.enums.ModesEnum
 import com.example.newcontrolador.data.enums.SliderType
 import com.example.newcontrolador.storage.DataStoreViewModel
@@ -71,6 +80,9 @@ fun MainSettingsPageContent(
 	var buttonSize by remember { mutableIntStateOf(buttonConfig.button) }
 	var buttonIcon by remember { mutableIntStateOf(buttonConfig.icon) }
 
+	val colors by viewModel.colors.collectAsState()
+	var colorPrimary by remember { mutableLongStateOf(colors.primary) }
+
 	val modes = listOf(
 		ModesEnum.AUTOMATA,
 		ModesEnum.MANUAL
@@ -109,7 +121,7 @@ fun MainSettingsPageContent(
 		) {
 			LineAndText("Configuración de botones")
 
-			Column() {
+			Column {
 				Text(
 					text = "Tamaño de los botones de utilidades",
 					color = MaterialTheme.colorScheme.secondary
@@ -153,6 +165,24 @@ fun MainSettingsPageContent(
 				imageRes = R.drawable.height
 			)
 
+			LineAndText("Tema Personalizado")
+
+			TextField(
+				value = colorPrimary.toString(16),
+				onValueChange = {
+					colorPrimary = it.toLongOrNull(16) ?: colorPrimary
+				},
+				label = { Text("Color primario (hexadecimal)") },
+				singleLine = true,
+			)
+
+			Acolor(
+				color = colorPrimary,
+				isSelected = true,
+				colorEnum = ColorsEnum.PRIMARY,
+				dataStoreViewModel = viewModel
+			)
+
 			LineAndText("Ajustes de modos")
 
 			buttonsUtils.Simple("resetear modos") {
@@ -174,4 +204,23 @@ fun MainSettingsPageContent(
 			}
 		}
 	}
+}
+
+@Composable
+fun Acolor(
+	color: Long,
+	isSelected: Boolean,
+	colorEnum: ColorsEnum,
+	dataStoreViewModel: DataStoreViewModel
+) {
+	Box(
+		modifier = Modifier
+			.size(30.dp)
+			.background(Color(color))
+			.border(
+				width = 2.dp,
+				color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+			)
+	)
+	dataStoreViewModel.setColors(color, colorEnum)
 }

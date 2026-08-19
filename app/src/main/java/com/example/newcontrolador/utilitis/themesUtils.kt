@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.newcontrolador.data.enums.ThemeType
-import com.example.newcontrolador.ui.theme.DarckDefault
-import com.example.newcontrolador.ui.theme.LightDefault
+import com.example.newcontrolador.ui.theme.defaultScheme
+import com.example.newcontrolador.ui.theme.lightScheme
 
 @Composable
 fun ThemeItem(
@@ -20,12 +20,14 @@ fun ThemeItem(
 	theme: ThemeType
 ) {
 	val backgroundColor = when (theme) {
-		ThemeType.DEFAULT -> DarckDefault.background
-		ThemeType.WHITE -> LightDefault.background
+		ThemeType.DEFAULT -> defaultScheme.background
+		ThemeType.WHITE -> lightScheme.background
+		ThemeType.CUSTOM -> defaultScheme.background
 	}
 	val borderColor = when (theme) {
-		ThemeType.DEFAULT -> DarckDefault.primary
-		ThemeType.WHITE -> LightDefault.primary
+		ThemeType.DEFAULT -> defaultScheme.primary
+		ThemeType.WHITE -> lightScheme.primary
+		ThemeType.CUSTOM -> defaultScheme.primary
 	}
 
 	Box(
@@ -37,6 +39,5 @@ fun ThemeItem(
 				width = 3.dp,
 				color = if (isColorSelected) borderColor else Color.Transparent
 			)
-
 	)
 }

@@ -1,4 +1,4 @@
-package com.example.newcontrolador.utilitis
+package com.example.newcontrolador.data.configs
 
 import androidx.compose.ui.graphics.painter.Painter
 import com.example.newcontrolador.data.enums.SliderType
