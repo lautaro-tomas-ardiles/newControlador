@@ -299,7 +299,6 @@ class TopBarUtils(
 			verticalAlignment = Alignment.CenterVertically,
 			modifier = modifier.fillMaxWidth()
 		) {
-
 			buttonsUtils.Painter(
 				onClick = { (contex as? Activity)?.finish() },
 				imageRes = R.drawable.close,

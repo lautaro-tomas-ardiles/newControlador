@@ -22,14 +22,13 @@ class DataStoreViewModel(private val dataStoreManager: DataStoreManager) : ViewM
 
 	object DefaultConfigs {
 		val colors = ColorsConfig(
-			primary = 0xFFFFFFFF,
-			onPrimary = 0xFFFFFFFF,
-			secondary = 0xFFFFFFFF,
-			onSecondary = 0xFFFFFFFF,
-			tertiary = 0xFFFFFFFF,
-			onTertiary = 0xFFFFFFFF,
-			background = 0xFFFFFFFF,
-			onBackground = 0xFFFFFFFF
+			primary = 0xFF008DD5,
+			secondary = 0xFFFBD552,
+			onSecondary = 0xFFDEB93B,
+			tertiary = 0xFF00ECBA,
+			onTertiary = 0xFF009071,
+			background = 0xFF202C39,
+			onBackground = 0xFF222222
 		)
 
 		val directions = DirectionsConfig(

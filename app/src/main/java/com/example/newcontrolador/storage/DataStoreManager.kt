@@ -183,9 +183,6 @@ class DataStoreManager(private val context: Context) {
 			ColorsEnum.PRIMARY -> context.dataStore.edit { preferences ->
 				preferences[PRIMARY_KEY] = color
 			}
-			ColorsEnum.ON_PRIMARY -> context.dataStore.edit { preferences ->
-				preferences[ON_PRIMARY_KEY] = color
-			}
 			ColorsEnum.SECONDARY -> context.dataStore.edit { preferences ->
 				preferences[SECONDARY_KEY] = color
 			}
@@ -209,14 +206,13 @@ class DataStoreManager(private val context: Context) {
 
 	val loadColors: Flow<ColorsConfig> = context.dataStore.data.map { prefs ->
 		ColorsConfig(
-			primary = prefs[PRIMARY_KEY] ?: 0xFF000000,
-			onPrimary = prefs[ON_PRIMARY_KEY] ?: 0xFF000000,
-			secondary = prefs[SECONDARY_KEY] ?: 0xFF000000,
-			onSecondary = prefs[ON_SECONDARY_KEY] ?: 0xFF000000,
-			tertiary = prefs[TERTIARY_KEY] ?: 0xFF000000,
-			onTertiary = prefs[ON_TERTIARY_KEY] ?: 0xFF000000,
-			background = prefs[BACKGROUND_KEY] ?: 0xFF000000,
-			onBackground = prefs[ON_BACKGROUND_KEY] ?: 0xFF000000
+			primary = prefs[PRIMARY_KEY] ?: 0xFF008DD5,
+			secondary = prefs[SECONDARY_KEY] ?: 0xFFFBD552,
+			onSecondary = prefs[ON_SECONDARY_KEY] ?: 0xFFDEB93B,
+			tertiary = prefs[TERTIARY_KEY] ?: 0xFF00ECBA,
+			onTertiary = prefs[ON_TERTIARY_KEY] ?: 0xFF009071,
+			background = prefs[BACKGROUND_KEY] ?: 0xFF202C39,
+			onBackground = prefs[ON_BACKGROUND_KEY] ?: 0xFF222222
 		)
 	}
 

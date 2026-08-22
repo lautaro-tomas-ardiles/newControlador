@@ -33,7 +33,6 @@ fun customScheme(
 	secondary: Long,
 	tertiary: Long,
 	background: Long,
-	onPrimary: Long,
 	onSecondary: Long,
 	onTertiary: Long,
 	onBackground: Long
@@ -42,7 +41,6 @@ fun customScheme(
 	secondary = Color(secondary),
 	tertiary = Color(tertiary),
 	background = Color(background),
-	onPrimary = Color(onPrimary),
 	onSecondary = Color(onSecondary),
 	onTertiary = Color(onTertiary),
 	onBackground = Color(onBackground)
@@ -57,7 +55,7 @@ fun NewControladorTheme(
 	val colors by viewModel.colors.collectAsState()
 
 	val customColorSheme = customScheme(
-		primary = colors.primary, onPrimary = colors.onPrimary,
+		primary = colors.primary,
 		secondary = colors.secondary, onSecondary = colors.onSecondary,
 		tertiary = colors.tertiary, onTertiary = colors.onTertiary,
 		background = colors.background, onBackground = colors.onBackground

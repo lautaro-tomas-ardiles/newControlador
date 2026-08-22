@@ -54,7 +54,8 @@ fun SettingsDropMenu(
 		Column(
 			modifier = Modifier.padding(
 				horizontal = 10.dp,
-				vertical = 5.dp)
+				vertical = 5.dp
+			)
 		) {
 			Row(
 				modifier = Modifier
