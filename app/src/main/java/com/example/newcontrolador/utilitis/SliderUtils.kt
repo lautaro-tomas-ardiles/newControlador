@@ -21,6 +21,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +65,7 @@ private fun Slider(
 
 	val valueRange = if (isShoulder) 0f..180f else 0f..90f
 	var value by remember { mutableFloatStateOf(0f) }
+	//var previousValue by remember { mutableFloatStateOf(0f) }
 
 	val valueForLabel = "%03d".format(value.toInt())
 
@@ -73,6 +75,20 @@ private fun Slider(
 		} else {
 			MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.secondary
 		}
+	/*
+	LaunchedEffect(value) {
+		val increasing = value > previousValue
+
+		val letter = when {
+    		isShoulder && inverted -> if (increasing) "X" else "x"
+    		isShoulder -> if (increasing) "Y" else "y"
+    		inverted -> if (increasing) "Z" else "z"
+    		else -> if (increasing) "W" else "w"
+		}
+		onSendText(letter)
+		previousValue = value
+	}
+	*/
 	Column (
 		horizontalAlignment = Alignment.CenterHorizontally,
 		modifier = Modifier.height(usableHeightDp / 4)
@@ -85,7 +101,7 @@ private fun Slider(
 				if (intValue != value.toInt()) {
 					val prefix = if (isShoulder) 'H' else 'C'
 					val suffix = if (inverted) '1' else '2'
-					onSendText("+$prefix$suffix$valueForLabel")
+					onSendText("$prefix$suffix$valueForLabel")
 				}
 				value = it
 			},

@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +35,7 @@ fun Header(connectionViewModel: ConnectionViewModel, bluetoothAdapter: Bluetooth
 	val button = Buttons()
 	var isPressedLeftClamp by remember { mutableStateOf(false) }
 	var isPressedRightClamp by remember { mutableStateOf(false) }
+	var soundsState by remember { mutableStateOf(false) }
 
 	Row(
 		verticalAlignment = Alignment.CenterVertically,
@@ -56,11 +60,30 @@ fun Header(connectionViewModel: ConnectionViewModel, bluetoothAdapter: Bluetooth
 			connectionManager = connectionViewModel
 		)
 		button.ImageVector(
-			onClick = { /*TODO*/ },
+			onClick = { soundsState = !soundsState },
 			imageVector = Icons.AutoMirrored.Filled.VolumeUp,
 			inverted = true,
 			contentDescription = "sonido"
 		)
+		DropdownMenu(
+			expanded = soundsState,
+			onDismissRequest = { soundsState = false },
+			containerColor = MaterialTheme.colorScheme.tertiary,
+		) {
+			DropdownMenuItem(
+				text = { Label(text = "Sonido 1", inverted = true) },
+				onClick = { connectionViewModel.sendString("sonido_1") }
+			)
+			DropdownMenuItem(
+				text = { Label(text = "Sonido 2", inverted = true) },
+				onClick = { connectionViewModel.sendString("sonido_2") }
+			)
+			DropdownMenuItem(
+				text = { Label(text = "Sonido 3", inverted = true) },
+				onClick = { connectionViewModel.sendString("sonido_3") }
+			)
+		}
+
 		button.Toggle(
 			onClick = { /*TODO: cerrar pinza*/ },
 			onSecondClick = { /*TODO: lo que se manda para abrrir pinza*/ },

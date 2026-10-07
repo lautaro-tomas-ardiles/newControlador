@@ -3,7 +3,6 @@ package com.example.newcontrolador.connection
 import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -84,7 +83,8 @@ class BluetoothConnectionManager {
 		while (iterator.hasNext()) {
 			val entry = iterator.next()
 			try {
-				entry.value.outputStream.write(char.code)
+				entry.value.outputStream.write("$char\n".toByteArray())
+				//entry.value.outputStream.write(char.code)
 			} catch (_: IOException) {
 				entry.value.close()
 				iterator.remove()
@@ -109,7 +109,7 @@ class BluetoothConnectionManager {
 		while (iterator.hasNext()) {
 			val entry = iterator.next()
 			try {
-				entry.value.outputStream.write(text.toByteArray())
+				entry.value.outputStream.write("$text\n".toByteArray())
 			} catch (_: IOException) {
 				entry.value.close()
 				iterator.remove()
