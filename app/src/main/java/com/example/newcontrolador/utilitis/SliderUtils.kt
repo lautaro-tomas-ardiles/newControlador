@@ -46,7 +46,10 @@ fun Slider(
 	valueRange: ClosedFloatingPointRange<Float>,
 	ruta: Painter,
 	buttonsUtils: ButtonsUtils,
-	iconTint: Color = MaterialTheme.colorScheme.background
+	iconTint: Color = MaterialTheme.colorScheme.background,
+	activeTrackColor: Color = MaterialTheme.colorScheme.primary,
+	activeTickColor: Color = MaterialTheme.colorScheme.background,
+	thumbColor: Color = MaterialTheme.colorScheme.primary
 ) {
 	val rangoReal = valueRange.endInclusive - valueRange.start
 
@@ -79,8 +82,9 @@ fun Slider(
 				onValueChange = { onValueChange(it) },
 				valueRange = valueRange,
 				colors = SliderDefaults.colors(
-					thumbColor = MaterialTheme.colorScheme.primary,
-					activeTrackColor = MaterialTheme.colorScheme.primary,
+					thumbColor = thumbColor,
+					activeTrackColor = activeTrackColor,
+					activeTickColor = activeTickColor,
 					inactiveTrackColor = MaterialTheme.colorScheme.secondary
 				),
 				modifier = Modifier.weight(1f)
@@ -125,14 +129,16 @@ fun Slider(
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Spacer(Modifier.width(5.dp))
 
-			buttonsUtils.Simple(textForReset) {
-				when (sliderType) {
-					SliderType.WIDTH -> onValueChange(0.8f)
-					SliderType.HEIGHT -> onValueChange(0.9f)
-					SliderType.PADDING -> onValueChange(0f)
-					SliderType.VELOCITY -> onValueChange(50f)
-					SliderType.ICON -> onValueChange(30f)
-					SliderType.BUTTON -> onValueChange(45f)
+			if (sliderType != SliderType.VELOCITY) {
+				buttonsUtils.Simple(textForReset) {
+					when (sliderType) {
+						SliderType.WIDTH -> onValueChange(0.8f)
+						SliderType.HEIGHT -> onValueChange(0.9f)
+						SliderType.PADDING -> onValueChange(0f)
+						SliderType.VELOCITY -> onValueChange(50f)
+						SliderType.ICON -> onValueChange(30f)
+						SliderType.BUTTON -> onValueChange(45f)
+					}
 				}
 			}
 		}

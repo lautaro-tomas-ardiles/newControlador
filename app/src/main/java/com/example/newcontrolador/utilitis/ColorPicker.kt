@@ -47,6 +47,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -277,13 +278,12 @@ class ColorPicker {
 					width = 3.dp,
 					color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
 				)
-				.clickable(onClick = { onClick(colorEnum) })
+				.clickable(
+					onClick = {
+						onClick(colorEnum)
+					}
+				)
 		)
-		Toast.makeText(
-			LocalContext.current,
-			"Color ${colorEnum.name}",
-			Toast.LENGTH_SHORT
-		).show()
 	}
 
 	@Composable
@@ -311,16 +311,17 @@ class ColorPicker {
 	@Composable
 	fun ColorPicker(viewModel: DataStoreViewModel) {
 		var colorSelected by remember { mutableStateOf(ColorsEnum.PRIMARY) }
+		val colorsData by viewModel.colors.collectAsState()
 		var colors by remember {
 			mutableStateOf(
 				mapOf(
-					ColorsEnum.PRIMARY to 0xFF008DD5,
-					ColorsEnum.SECONDARY to 0xFFFBD552,
-					ColorsEnum.TERTIARY to 0xFF00ECBA,
-					ColorsEnum.BACKGROUND to 0xFF202C39,
-					ColorsEnum.ON_SECONDARY to 0xFFDEB93B,
-					ColorsEnum.ON_TERTIARY to 0xFF009071,
-					ColorsEnum.ON_BACKGROUND to 0xFF222222
+					ColorsEnum.PRIMARY to colorsData.primary,
+					ColorsEnum.SECONDARY to colorsData.secondary,
+					ColorsEnum.TERTIARY to colorsData.tertiary,
+					ColorsEnum.BACKGROUND to colorsData.background,
+					ColorsEnum.ON_SECONDARY to colorsData.onSecondary,
+					ColorsEnum.ON_TERTIARY to colorsData.onTertiary,
+					ColorsEnum.ON_BACKGROUND to colorsData.onBackground
 				)
 			)
 		}
@@ -330,11 +331,6 @@ class ColorPicker {
 			colorToHSV(colors[ColorsEnum.PRIMARY]!!.toInt(), hsvArray)
 			mutableStateOf(Triple(hsvArray[0], hsvArray[1], hsvArray[2]))
 		}
-
-		val selectedColor = HSVToColor(
-			floatArrayOf(hsv.value.first, hsv.value.second, hsv.value.third)
-		).toLong()
-
 		Column(
 			modifier = Modifier
 				.fillMaxSize()

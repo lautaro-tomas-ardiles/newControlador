@@ -216,32 +216,9 @@ class TopBarUtils(
 
 		var velocity by remember { mutableFloatStateOf(value) }
 
-		var menuModeState by remember { mutableStateOf(false) }
-		var modeSelect by remember { mutableStateOf(ModesEnum.MANUAL) }
-
-		var menuDiagramasState by remember { mutableStateOf(false) }
 		var menuSettingState by remember { mutableStateOf(false) }
 
-		val modes = setOf(
-			ModesEnum.AUTOMATA,
-			ModesEnum.MANUAL
-		)
 		val slidersList = listOf(
-			SliderConfig(
-				value = velocity,
-				onValueChange = {
-					velocity = it
-					val char = when {
-						velocity < 100f -> ('0' + (it / 10).toInt())
-						velocity == 100f -> 'q'
-						else -> '0'
-					}
-					dataStore.setVelocityChar(char)
-				},
-				valueRange = 0f..100f,
-				sliderType = SliderType.VELOCITY,
-				ruta = painterResource(R.drawable.velocity)
-			),
 			SliderConfig(
 				value = buttonHeight,
 				onValueChange = {
@@ -306,58 +283,25 @@ class TopBarUtils(
 			)
 			Spacer(Modifier.width(10.dp))
 
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				buttonsUtils.Text("acerca de:") {
-					it.Painter(
-						onClick = { navController.navigate(AppScreen.AboutPage.route) },
-						imageRes = R.drawable.alerta,
-						border = true
-					)
-				}
-			}
-			Spacer(Modifier.width(10.dp))
-
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				buttonsUtils.Text("modo :") {
-					it.Painter(
-						onClick = { menuModeState = !menuModeState },
-						imageRes = R.drawable.vert_more,
-						border = true
-					)
-				}
-				ModeDropMenu(
-					state = menuModeState,
-					onStateChange = { menuModeState = it },
-					setOfModes = modes,
-					onClick = { mode ->
-						modeSelect = mode
-						menuModeState = false
-						modeSelected(mode)
+			Box (Modifier.width(300.dp)) {
+				Slider(
+					value = velocity,
+					onValueChange = {
+						velocity = it
+						val char = when {
+							velocity < 100f -> ('0' + (it / 10).toInt())
+							velocity == 100f -> 'q'
+							else -> '0'
+						}
+						dataStore.setVelocityChar(char)
 					},
-					modeSelect = modeSelect
-				)
-			}
-			Spacer(Modifier.width(10.dp))
-
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				buttonsUtils.Text("digramas :") {
-					it.Painter(
-						onClick = { menuDiagramasState = !menuDiagramasState },
-						imageRes = R.drawable.vert_more,
-						border = true
-					)
-				}
-				DiagramaDropMenu(
-					state = menuDiagramasState,
-					onStateChange = { menuDiagramasState = it },
-					content = {
-						DiagramaItem("ESP 32") {
-							navController.navigate(AppScreen.ESP32Page.route)
-						}
-						DiagramaItem("Ardiuno y hc-05") {
-							navController.navigate(AppScreen.ArduinoOneAndHC05Page.route)
-						}
-					}
+					valueRange = 0f..100f,
+					sliderType = SliderType.VELOCITY,
+					ruta = painterResource(R.drawable.velocity),
+					buttonsUtils = buttonsUtils,
+					activeTrackColor = MaterialTheme.colorScheme.tertiary,
+					activeTickColor = MaterialTheme.colorScheme.primary,
+					thumbColor = MaterialTheme.colorScheme.tertiary
 				)
 			}
 			Spacer(Modifier.width(10.dp))
@@ -373,7 +317,8 @@ class TopBarUtils(
 					listOfSliders = slidersList,
 					listOfThemes = themesList,
 					navController = navController,
-					buttonsUtils = buttonsUtils
+					buttonsUtils = buttonsUtils,
+					modeSelected = { modeSelected(it) }
 				)
 			}
 			Spacer(Modifier.width(10.dp))

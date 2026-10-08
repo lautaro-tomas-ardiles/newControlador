@@ -2,9 +2,12 @@ package com.example.newcontrolador.utilitis
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -12,6 +15,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.newcontrolador.R
@@ -19,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.newcontrolador.data.configs.SliderConfig
 import com.example.newcontrolador.data.configs.ThemeConfig
+import com.example.newcontrolador.data.enums.ModesEnum
 import com.example.newcontrolador.navigation.AppScreen
 
 /**
@@ -37,12 +45,22 @@ fun SettingsDropMenu(
 	state: Boolean,
 	navController: NavController,
 	onStateChange: (Boolean) -> Unit,
+	modeSelected: (ModesEnum) -> Unit,
 	listOfSliders: List<SliderConfig>,
 	listOfThemes: List<ThemeConfig>,
 	buttonsUtils: ButtonsUtils
 ) {
 	val scroll = rememberScrollState()
 
+	var menuModeState by remember { mutableStateOf(false) }
+	var modeSelect by remember { mutableStateOf(ModesEnum.MANUAL) }
+
+	var menuDiagramasState by remember { mutableStateOf(false) }
+
+	val modes = setOf(
+		ModesEnum.AUTOMATA,
+		ModesEnum.MANUAL
+	)
 	DropdownMenu(
 		expanded = state,
 		onDismissRequest = { onStateChange(false) },
@@ -72,6 +90,65 @@ fun SettingsDropMenu(
 					Spacer(Modifier.width(5.dp))
 				}
 			}
+			Spacer(Modifier.width(10.dp))
+
+			Column(
+				modifier = Modifier.fillMaxWidth(),
+				verticalArrangement = Arrangement.Center
+			) {
+				buttonsUtils.Text("acerca de:") {
+					it.Painter(
+						onClick = { navController.navigate(AppScreen.AboutPage.route) },
+						imageRes = R.drawable.alerta,
+						border = true,
+						tintColor = MaterialTheme.colorScheme.primary
+					)
+				}
+				Spacer(Modifier.height(15.dp))
+
+				buttonsUtils.Text("modo :") {
+					it.Painter(
+						onClick = { menuModeState = !menuModeState },
+						imageRes = R.drawable.vert_more,
+						border = true,
+						tintColor = MaterialTheme.colorScheme.primary
+					)
+				}
+				ModeDropMenu(
+					state = menuModeState,
+					onStateChange = { menuModeState = it },
+					setOfModes = modes,
+					onClick = { mode ->
+						modeSelect = mode
+						menuModeState = false
+						modeSelected(mode)
+					},
+					modeSelect = modeSelect
+				)
+				Spacer(Modifier.height(15.dp))
+
+				buttonsUtils.Text("digramas :") {
+					it.Painter(
+						onClick = { menuDiagramasState = !menuDiagramasState },
+						imageRes = R.drawable.vert_more,
+						border = true,
+						tintColor = MaterialTheme.colorScheme.primary
+					)
+				}
+				DiagramaDropMenu(
+					state = menuDiagramasState,
+					onStateChange = { menuDiagramasState = it },
+					content = {
+						DiagramaItem("ESP 32") {
+							navController.navigate(AppScreen.ESP32Page.route)
+						}
+						DiagramaItem("Ardiuno y hc-05") {
+							navController.navigate(AppScreen.ArduinoOneAndHC05Page.route)
+						}
+					}
+				)
+			}
+			Spacer(Modifier.width(10.dp))
 
 			buttonsUtils.Text("configuracion completa :") {
 				it.Painter(
